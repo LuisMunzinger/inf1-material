@@ -1,5 +1,5 @@
 package GuessingGame
 
-func NumberGood(guess int) bool {
-	return  guess == 4 
+func NumberGood(guess, c int) bool {
+	return  guess == c
 }
