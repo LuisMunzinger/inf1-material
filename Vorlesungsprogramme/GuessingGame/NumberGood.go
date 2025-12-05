@@ -1,5 +1,5 @@
 package GuessingGame
 
 func NumberGood(guess int) bool {
-	return true
+	return  guess == 4 
 }

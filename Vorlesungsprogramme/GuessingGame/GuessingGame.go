@@ -9,6 +9,6 @@ func GuessingGame() {
 			fmt.Println("Richtig geraten! :-)")
 			return
 		} 
-		fmt.Println("Zu viele falsche Zahlen! :-(")
 	}
+	fmt.Println("Zu viele falsche Zahlen! :-(")
 }
