@@ -6,11 +6,13 @@ func umwandeln(Zahl, R int) {
 	result := []int{}
 	for Zahl != 0 {
 		if Zahl%R == 0 {
-			result = append([]int{0}, result...)
+			Z := Zahl / R
+			result = append([]int{Z}, result...)
 			Zahl = Zahl / R
 		}
 		if Zahl%R != 0 {
-			result = append([]int{1}, result...)
+			Z := Zahl / R
+			result = append([]int{Z}, result...)
 			Zahl = (Zahl - 1) / R
 		}
 	}
