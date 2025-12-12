@@ -8,3 +8,10 @@ func Factorial(n int) int {
 	}
 	return result
 }
+
+func Factorial_v2(n int) int {
+	if n == 1 {
+		return 1
+	}
+	return n * Factorial_v2(n-1)
+}
