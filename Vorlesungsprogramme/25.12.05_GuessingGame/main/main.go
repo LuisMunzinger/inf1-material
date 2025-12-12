@@ -1,6 +1,6 @@
 package main
 
-import GuessingGame "inf1-material/Vorlesungsprogramme/GuessingGame05.12"
+import GuessingGame "inf1-material/Vorlesungsprogramme/25.12.05_GuessingGame"
 
 func main() {
 	GuessingGame.GuessingGame()
