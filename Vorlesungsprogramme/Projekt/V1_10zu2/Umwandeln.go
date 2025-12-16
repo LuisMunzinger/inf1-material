@@ -2,10 +2,6 @@ package main
 
 import "fmt"
 
-func umwandeln(Zahl, R int) {
-
-}
-
 func main() {
 	var Zahl int
 	result := []int{}
