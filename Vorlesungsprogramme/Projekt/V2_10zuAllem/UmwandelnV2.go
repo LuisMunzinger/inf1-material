@@ -8,7 +8,9 @@ import (
 //import "math"
 
 func umwandeln(Zahl, Systeme int64) {
+	println("")
 	fmt.Println("Ihre zahl ist:  ", strconv.FormatInt(Zahl, int(Systeme)))
+	println("")
 }
 
 func main() {
