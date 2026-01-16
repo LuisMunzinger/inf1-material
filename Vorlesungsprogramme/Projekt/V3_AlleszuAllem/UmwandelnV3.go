@@ -5,16 +5,15 @@ import (
 	"strconv"
 )
 
-func umwandeln(zZahl, vonSysteme, zuSysteme int64) {
-	s := "1010"
-	Zahl, _ := strconv.ParseInt(s, int(vonSysteme), 64)
-	println("")
+func umwandeln(zZahl string, vonSysteme, zuSysteme int64) {
+	Zahl, _ := strconv.ParseInt(zZahl, int(vonSysteme), 64)
+	println("", Zahl)
 	fmt.Println("Ihre zahl ist:  ", strconv.FormatInt(Zahl, int(zuSysteme)))
 	println("")
 }
 
 func main() {
-	var zZahl int64
+	var zZahl string
 	var zuSysteme int64
 	var vonSysteme int64
 	fmt.Print("Wählen sie eine Systeme aus dem sie umwandeln wollen:  ")
