@@ -9,7 +9,7 @@ import (
 
 func main() {
 	a := app.New()
-	w := a.NewWindow("GUI V1")
+	w := a.NewWindow("GUI V2")
 
 	content := container.NewGridWrap(
 		fyne.NewSize(150, 50),
@@ -17,6 +17,7 @@ func main() {
 		widget.NewButton("Nein", func() { println("Nein") }),
 		widget.NewButton("Abbruch", func() { w.Close() }),
 	)
-	w.SetContent(content)
+	label := widget.NewLabel("HI")
+	w.SetContent(container.NewVBox(label, content))
 	w.ShowAndRun()
 }
