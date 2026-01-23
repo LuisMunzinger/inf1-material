@@ -1,8 +1,8 @@
 package dict
 
 import (
-	"Dictionary/entry"
 	"fmt"
+	"inf1-material/Vorlesungsprogramme/26.01.23/Dictionary/entry"
 )
 
 func ExampleNew() {
