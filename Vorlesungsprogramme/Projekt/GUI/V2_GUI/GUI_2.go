@@ -38,8 +38,8 @@ func main() {
 			zuSysteme, _ := strconv.Atoi(Zwischen2)
 
 			Zahl, _ := strconv.ParseInt(zZahl, int(vonSysteme), 64)
-			a, _ := (strconv.FormatInt(Zahl, int(zuSysteme)))
-			label4.SetText("", a)
+			a := (strconv.FormatInt(Zahl, int(zuSysteme)))
+			label4.SetText(a)
 		},
 	)
 

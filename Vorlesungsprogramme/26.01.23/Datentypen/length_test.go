@@ -4,7 +4,7 @@ import "fmt"
 
 type Length int
 
-func Centimeters(l Length) int {
+func (l Length) Centimeters() int {
 	return int(l)
 }
 
@@ -23,8 +23,8 @@ func Example() {
 	fmt.Println(a)
 	a.Scale(b)
 
-	fmt.println(a.Centimeters())
-	fmt.println(a.Meters())
+	println(a.Centimeters())
+	println(a.Meters())
 
 	//Output:
 	// 1000000
