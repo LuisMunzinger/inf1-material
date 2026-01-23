@@ -18,35 +18,36 @@ func main() {
 	entry1 := widget.NewEntry()
 	entry1.SetPlaceHolder("Systeme eingeben...")
 
-	label2 := widget.NewLabel("Wählen sie eine Zahl zum umwandeln:  ")
+	label2 := widget.NewLabel("Wählen sie ein System in das sie umrechnen wollen:  ")
 	entry2 := widget.NewEntry()
 	entry2.SetPlaceHolder("Zahl eingeben...")
 
-	label3 := widget.NewLabel("Wählen sie ein System in das sie umrechnen wollen:  ")
+	label3 := widget.NewLabel("Wählen sie eine Zahl zum umwandeln:  ")
 	entry3 := widget.NewEntry()
 	entry3.SetPlaceHolder("Zahl eingeben...")
 
-	label4 := widget.NewLabel("")
+	label4 := widget.NewLabel("Ergebnis:")
+	label5 := widget.NewLabel("")
 
 	button1 := widget.NewButton("Fertig",
 		func() {
 			Zwischen1 := entry1.Text
-			zZahl := entry2.Text
-			Zwischen2 := entry3.Text
+			Zwischen2 := entry2.Text
+			zZahl := entry3.Text
 
 			vonSysteme, _ := strconv.Atoi(Zwischen1)
 			zuSysteme, _ := strconv.Atoi(Zwischen2)
 
 			Zahl, _ := strconv.ParseInt(zZahl, int(vonSysteme), 64)
 			a := (strconv.FormatInt(Zahl, int(zuSysteme)))
-			label4.SetText(a)
+			label5.SetText(a)
 		},
 	)
-
-	head := container.NewVBox(label1, entry1, label2, entry2, label3, entry3, label4, button1)
+	zwischen := container.NewHBox(label4, label5)
+	head := container.NewVBox(label1, entry1, label2, entry2, label3, entry3, zwischen, button1)
 	//---------------------------------------------------------------------------------------------------
 	bottom := container.NewHBox(
-		layout.NewSpacer(),
+		layout.NewSpacer(), // Nach rechts verschoben
 		widget.NewButton("Schließen", func() { w.Close() }),
 	)
 	//---------------------------------------------------------------------------------------------------
@@ -60,6 +61,6 @@ func main() {
 		),
 	)
 
-	w.Resize(fyne.NewSize(600, 400))
+	w.Resize(fyne.NewSize(500, 400)) // Fenster Größe X Y
 	w.ShowAndRun()
 }
