@@ -24,6 +24,11 @@ func (d Dict) Size() int {
 // GetDe gibt den Eintrag mit dem deutschen Wort de zurück.
 // Wenn kein Eintrag gefunden wird, wird ein leerer Eintrag zurückgegeben.
 func (d Dict) GetDe(de string) entry.Entry {
+	for _, el := range d.entries {
+		if el.De() == de {
+			return el
+		}
+	}
 	return entry.Empty()
 }
 
@@ -31,8 +36,7 @@ func (d Dict) GetDe(de string) entry.Entry {
 // Wenn ein Eintrag gefunden wird, wird der entsprechende englische string geliefert.
 // Wenn kein Eintrag gefunden wird, wird ein leerer string zurückgegeben.
 func (d Dict) Lookup(de string) string {
-	// TODO
-	return ""
+	return d.GetDe(de).En()
 }
 
 // GetAllDe gibt alle Einträge zurück, die das deutsche Wort de enthalten.
