@@ -11,8 +11,13 @@ import (
 func main() {
 	a := app.New()
 	w := a.NewWindow("GUI V2")
+	fragen := []string{
+		"Was ist die Hauptstadt von Deutschland?",
+		"Wie viele Planeten hat unser Sonnensystem?",
+		"Was ist 5 + 7?",
+	}
 	//---------------------------------------------------------------------------------------------------
-	label1 := widget.NewLabel("Wie heißt du?")
+	label1 := widget.NewLabel("" + fragen[0])
 	label2 := widget.NewLabel("")
 
 	entry := widget.NewEntry()
@@ -21,8 +26,7 @@ func main() {
 	button := widget.NewButton("Fertig", func() { label2.SetText("Hallo " + entry.Text) })
 
 	head := container.NewVBox(
-		label1, label2, entry, button,
-	)
+		label1, label2, entry, button)
 	//---------------------------------------------------------------------------------------------------
 	bottom := container.NewHBox(
 		layout.NewSpacer(),
