@@ -1,6 +1,6 @@
 package tennis
 
-import "inf1-material/Vorlesungsprogramme/26.01.30/game"
+import game "inf1-material/Vorlesungsprogramme/26.01.30/1game"
 
 type Set struct {
 	games []game.Game

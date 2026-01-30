@@ -2,7 +2,7 @@ package tennis
 
 import (
 	"fmt"
-	"inf1-material/Vorlesungsprogramme/26.01.30/game"
+	game "inf1-material/Vorlesungsprogramme/26.01.30/1game"
 )
 
 func ExampleSet_CurrentGameNo() {
