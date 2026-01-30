@@ -30,7 +30,7 @@ func createWindow(a fyne.App) fyne.Window {
 	label5 := widget.NewLabel("")
 
 	// ------------------ Button ------------------
-	button1 := widget.NewButton("Fertig", func() {
+	button1 := widget.NewButton("Rechnen", func() {
 		vonSysteme, _ := strconv.Atoi(entry1.Text)
 		zuSysteme, _ := strconv.Atoi(entry2.Text)
 
