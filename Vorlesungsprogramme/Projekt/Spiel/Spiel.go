@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"image/color"
-	"math"
 	"sync"
 	"time"
 
@@ -11,7 +10,6 @@ import (
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -19,6 +17,8 @@ import (
 /* ===================== TYPEN & KONSTANTEN ===================== */
 type Resource string
 type Pickaxe string
+type Sword string
+type Armor string
 
 const (
 	Stone    Resource = "Stein"
@@ -33,6 +33,20 @@ const (
 	GoldPickaxe     Pickaxe = "Goldspitzhacke"
 	PlatinumPickaxe Pickaxe = "Platinspitzhacke"
 	DiamondPickaxe  Pickaxe = "Diamantspitzhacke"
+
+	WoodSword     Sword = "Holzschwert"
+	StoneSword    Sword = "Steinschwert"
+	IronSword     Sword = "Eisenschwert"
+	GoldSword     Sword = "Goldschwert"
+	PlatinumSword Sword = "Platinschwert"
+	DiamondSword  Sword = "Diamantschwert"
+
+	WoodArmor     Armor = "Holzrüstung"
+	StoneArmor    Armor = "Steinrüstung"
+	IronArmor     Armor = "Eisenrüstung"
+	GoldArmor     Armor = "Goldrüstung"
+	PlatinumArmor Armor = "Platinrüstung"
+	DiamondArmor  Armor = "Diamantrüstung"
 )
 
 const (
@@ -45,6 +59,7 @@ const (
 	interactionDist = 80
 	borderWidth     = 4
 	MaxMineUpgrade  = 9
+	mineUpgradeRate = 1
 )
 
 /* ===================== UPGRADE-DATEN ===================== */
@@ -58,13 +73,63 @@ var pickaxeUpgrade = map[Pickaxe]Pickaxe{
 
 var pickaxeResourceCost = map[Pickaxe]map[Resource]int{
 	WoodPickaxe:     {Stone: 50},
+	StonePickaxe:    {Stone: 50},
 	IronPickaxe:     {Iron: 50},
 	GoldPickaxe:     {Gold: 50},
 	PlatinumPickaxe: {Platinum: 50},
 }
 
+var swordAttack = map[Sword]int{
+	WoodSword:     5,
+	StoneSword:    10,
+	IronSword:     20,
+	GoldSword:     30,
+	PlatinumSword: 40,
+	DiamondSword:  50,
+}
+
+var armorDefense = map[Armor]int{
+	WoodArmor:     2,
+	StoneArmor:    5,
+	IronArmor:     10,
+	GoldArmor:     15,
+	PlatinumArmor: 20,
+	DiamondArmor:  30,
+}
+
+var swordUpgrade = map[Sword]Sword{
+	WoodSword:     StoneSword,
+	StoneSword:    IronSword,
+	IronSword:     GoldSword,
+	GoldSword:     PlatinumSword,
+	PlatinumSword: DiamondSword,
+}
+
+var armorUpgrade = map[Armor]Armor{
+	WoodArmor:     StoneArmor,
+	StoneArmor:    IronArmor,
+	IronArmor:     GoldArmor,
+	GoldArmor:     PlatinumArmor,
+	PlatinumArmor: DiamondArmor,
+}
+
+var swordUpgradeCost = map[Sword]map[Resource]int{
+	WoodSword:     {Stone: 20},
+	StoneSword:    {Iron: 20},
+	IronSword:     {Gold: 20},
+	GoldSword:     {Platinum: 20},
+	PlatinumSword: {Diamond: 20},
+}
+
+var armorUpgradeCost = map[Armor]map[Resource]int{
+	WoodArmor:     {Stone: 20},
+	StoneArmor:    {Iron: 20},
+	IronArmor:     {Gold: 20},
+	GoldArmor:     {Platinum: 20},
+	PlatinumArmor: {Diamond: 20},
+}
+
 var mineUpgradeResources = []Resource{Stone, Iron, Gold, Platinum, Diamond}
-var mineUpgradeRateIncrease = 1
 
 /* ===================== STRUKTUREN ===================== */
 type Mine struct {
@@ -84,12 +149,16 @@ type Inventory struct {
 	sync.Mutex
 	Resources map[Resource]int
 	Pickaxe   Pickaxe
+	Sword     Sword
+	Armor     Armor
 	Money     int
 }
 
 /* ===================== HELPER ===================== */
-func dist(a, b fyne.Position) float64 {
-	return math.Hypot(float64(a.X-b.X), float64(a.Y-b.Y))
+func dist2(a, b fyne.Position) float32 {
+	dx := a.X - b.X
+	dy := a.Y - b.Y
+	return dx*dx + dy*dy
 }
 
 func clamp(v, min, max float32) float32 {
@@ -114,7 +183,7 @@ func getMineUpgradeCost(m *Mine) (money int, resources map[Resource]int, ok bool
 	return money, resources, true
 }
 
-/* ===================== MAIN ===================== */
+/* ===================== SPIEL ===================== */
 func main() {
 	a := app.New()
 	w := a.NewWindow("Mining Game")
@@ -123,6 +192,8 @@ func main() {
 	inv := &Inventory{
 		Resources: make(map[Resource]int),
 		Pickaxe:   WoodPickaxe,
+		Sword:     WoodSword,
+		Armor:     WoodArmor,
 		Money:     200,
 	}
 
@@ -131,6 +202,7 @@ func main() {
 	x, y := float32(50), float32(50)
 	player.Move(fyne.NewPos(x, y))
 
+	// Minen erstellen
 	mines := []*Mine{
 		{"Steinmine", fyne.NewPos(100, 200), Stone, 100, 1, WoodPickaxe, false, 0, nil, nil},
 		{"Eisenmine", fyne.NewPos(300, 200), Iron, 250, 1, StonePickaxe, false, 0, nil, nil},
@@ -170,8 +242,10 @@ func main() {
 	objects = append(objects, shop, smith)
 	w.SetContent(container.NewWithoutLayout(objects...))
 
+	// Zentraler Tick
 	go func() {
 		ticker := time.NewTicker(time.Second)
+		defer ticker.Stop()
 		for range ticker.C {
 			inv.Lock()
 			for _, m := range mines {
@@ -196,14 +270,14 @@ func main() {
 		case fyne.KeyReturn:
 			p := fyne.NewPos(x, y)
 			for _, m := range mines {
-				if dist(p, m.Pos) < interactionDist {
+				if dist2(p, m.Pos) < interactionDist*interactionDist {
 					openMineShop(a, m, inv)
 					return
 				}
 			}
-			if dist(p, shopPos) < interactionDist {
+			if dist2(p, shopPos) < interactionDist*interactionDist {
 				openShop(a, inv)
-			} else if dist(p, smithPos) < interactionDist {
+			} else if dist2(p, smithPos) < interactionDist*interactionDist {
 				openSmith(a, inv)
 			}
 		case fyne.KeySpace:
@@ -215,10 +289,10 @@ func main() {
 		player.Move(fyne.NewPos(x, y))
 
 		for _, m := range mines {
-			d := dist(fyne.NewPos(x, y), m.Pos)
+			d := dist2(fyne.NewPos(x, y), m.Pos)
 			if m.Owned {
 				m.Icon.FillColor = color.RGBA{0, 255, 0, 255}
-			} else if d < interactionDist {
+			} else if d < interactionDist*interactionDist {
 				m.Icon.FillColor = color.RGBA{255, 255, 0, 255}
 			} else {
 				m.Icon.FillColor = color.Gray{Y: 180}
@@ -236,7 +310,7 @@ func openMineShop(a fyne.App, m *Mine, inv *Inventory) {
 	w.Resize(fyne.NewSize(400, 350))
 
 	label := widget.NewLabel("")
-	var actionBtn *widget.Button
+	actionBtn := widget.NewButton("", nil)
 
 	updateLabel := func() {
 		text := fmt.Sprintf("%s\nRate: %d/sec\nUpgrade-Level: %d/%d", m.Name, m.Rate, m.UpgradeLevel, MaxMineUpgrade)
@@ -257,7 +331,7 @@ func openMineShop(a fyne.App, m *Mine, inv *Inventory) {
 		label.SetText(text)
 	}
 
-	actionBtn = widget.NewButton("", func() {
+	actionBtn.OnTapped = func() {
 		inv.Lock()
 		defer inv.Unlock()
 
@@ -288,6 +362,7 @@ func openMineShop(a fyne.App, m *Mine, inv *Inventory) {
 		if !ok {
 			return
 		}
+
 		for r, amt := range resCosts {
 			if inv.Resources[r] < amt {
 				return
@@ -301,13 +376,13 @@ func openMineShop(a fyne.App, m *Mine, inv *Inventory) {
 		for r, amt := range resCosts {
 			inv.Resources[r] -= amt
 		}
-		m.Rate += mineUpgradeRateIncrease
+		m.Rate += mineUpgradeRate
 		m.UpgradeLevel++
 		updateLabel()
 		if m.UpgradeLevel >= MaxMineUpgrade {
 			actionBtn.Disable()
 		}
-	})
+	}
 
 	if m.Owned {
 		actionBtn.SetText("Upgrade Mine")
@@ -333,7 +408,6 @@ func openShop(a fyne.App, inv *Inventory) {
 
 	w := a.NewWindow("Shop")
 	box := container.NewVBox(widget.NewLabel("Ressourcen verkaufen"))
-
 	labels := make(map[Resource]*widget.Label)
 	sellAmounts := []int{1, 10, 100}
 
@@ -383,79 +457,165 @@ func openShop(a fyne.App, inv *Inventory) {
 /* ===================== SCHMIED ===================== */
 func openSmith(a fyne.App, inv *Inventory) {
 	w := a.NewWindow("Schmied")
-	w.Resize(fyne.NewSize(320, 220))
+	w.Resize(fyne.NewSize(400, 500))
+
 	info := widget.NewLabel("")
-	btn := widget.NewButton("Upgrade kaufen", func() {
-		inv.Lock()
-		defer inv.Unlock()
-		next, ok := pickaxeUpgrade[inv.Pickaxe]
-		if !ok {
-			return
-		}
-		costs := pickaxeResourceCost[inv.Pickaxe]
-		for res, amount := range costs {
-			if inv.Resources[res] < amount {
-				return
-			}
-		}
-		for res, amount := range costs {
-			inv.Resources[res] -= amount
-		}
-		inv.Pickaxe = next
-		w.Close()
-	})
+	msgLabel := widget.NewLabel("") // Für Fehler- oder Statusmeldungen
+
+	pickaxeCostLabel := widget.NewLabel("")
+	swordCostLabel := widget.NewLabel("")
+	armorCostLabel := widget.NewLabel("")
 
 	updateUI := func() {
 		inv.Lock()
 		defer inv.Unlock()
-		next, ok := pickaxeUpgrade[inv.Pickaxe]
-		if !ok {
-			info.SetText("Spitzhacke: " + string(inv.Pickaxe) + "\n(Maximales Level)")
-			btn.Disable()
-			return
-		}
-		costText := ""
-		for res, amount := range pickaxeResourceCost[inv.Pickaxe] {
-			costText += fmt.Sprintf("%s: %d ", res, amount)
-		}
+
 		info.SetText(fmt.Sprintf(
-			"Aktuell: %s\nNächste: %s\nBenötigte Ressourcen: %s",
-			inv.Pickaxe, next, costText,
+			"Geld: %d\nSpitzhacke: %s\nSchwert: %s (Attack: %d)\nRüstung: %s (Verteidigung: %d)",
+			inv.Money,
+			inv.Pickaxe,
+			inv.Sword, swordAttack[inv.Sword],
+			inv.Armor, armorDefense[inv.Armor],
 		))
-		btn.Enable()
+
+		updateLabel := func(current interface{}, upgradeMap interface{}, costMap interface{}, label *widget.Label, itemType string) {
+			switch c := current.(type) {
+			case Pickaxe:
+				if next, ok := pickaxeUpgrade[c]; ok {
+					text := fmt.Sprintf("Für Upgrade auf %s benötigst du:\n", next)
+					for r, amt := range pickaxeResourceCost[c] {
+						text += fmt.Sprintf("%s: %d (Du hast: %d)\n", r, amt, inv.Resources[r])
+					}
+					label.SetText(text)
+				} else {
+					label.SetText(itemType + " ist max. Level")
+				}
+			case Sword:
+				if next, ok := swordUpgrade[c]; ok {
+					text := fmt.Sprintf("Für Upgrade auf %s benötigst du:\n", next)
+					for r, amt := range swordUpgradeCost[c] {
+						text += fmt.Sprintf("%s: %d (Du hast: %d)\n", r, amt, inv.Resources[r])
+					}
+					label.SetText(text)
+				} else {
+					label.SetText(itemType + " ist max. Level")
+				}
+			case Armor:
+				if next, ok := armorUpgrade[c]; ok {
+					text := fmt.Sprintf("Für Upgrade auf %s benötigst du:\n", next)
+					for r, amt := range armorUpgradeCost[c] {
+						text += fmt.Sprintf("%s: %d (Du hast: %d)\n", r, amt, inv.Resources[r])
+					}
+					label.SetText(text)
+				} else {
+					label.SetText(itemType + " ist max. Level")
+				}
+			}
+		}
+
+		updateLabel(inv.Pickaxe, pickaxeUpgrade, pickaxeResourceCost, pickaxeCostLabel, "Spitzhacke")
+		updateLabel(inv.Sword, swordUpgrade, swordUpgradeCost, swordCostLabel, "Schwert")
+		updateLabel(inv.Armor, armorUpgrade, armorUpgradeCost, armorCostLabel, "Rüstung")
 	}
 
+	tryUpgrade := func(current interface{}, upgradeMap interface{}, costMap interface{}) string {
+		inv.Lock()
+		defer inv.Unlock()
+
+		switch c := current.(type) {
+		case Pickaxe:
+			next, ok := pickaxeUpgrade[c]
+			if !ok {
+				return "Spitzhacke ist max. Level!"
+			}
+			for r, amt := range pickaxeResourceCost[c] {
+				if inv.Resources[r] < amt {
+					return "Nicht genügend Ressourcen für Spitzhacke!"
+				}
+			}
+			for r, amt := range pickaxeResourceCost[c] {
+				inv.Resources[r] -= amt
+			}
+			inv.Pickaxe = next
+			return "Spitzhacke erfolgreich upgegradet!"
+		case Sword:
+			next, ok := swordUpgrade[c]
+			if !ok {
+				return "Schwert ist max. Level!"
+			}
+			for r, amt := range swordUpgradeCost[c] {
+				if inv.Resources[r] < amt {
+					return "Nicht genügend Ressourcen für Schwert!"
+				}
+			}
+			for r, amt := range swordUpgradeCost[c] {
+				inv.Resources[r] -= amt
+			}
+			inv.Sword = next
+			return "Schwert erfolgreich upgegradet!"
+		case Armor:
+			next, ok := armorUpgrade[c]
+			if !ok {
+				return "Rüstung ist max. Level!"
+			}
+			for r, amt := range armorUpgradeCost[c] {
+				if inv.Resources[r] < amt {
+					return "Nicht genügend Ressourcen für Rüstung!"
+				}
+			}
+			for r, amt := range armorUpgradeCost[c] {
+				inv.Resources[r] -= amt
+			}
+			inv.Armor = next
+			return "Rüstung erfolgreich upgegradet!"
+		}
+		return "Upgrade fehlgeschlagen"
+	}
+
+	pickaxeBtn := widget.NewButton("Upgrade Spitzhacke", func() {
+		msgLabel.SetText(tryUpgrade(inv.Pickaxe, pickaxeUpgrade, pickaxeResourceCost))
+		updateUI()
+	})
+
+	swordBtn := widget.NewButton("Upgrade Schwert", func() {
+		msgLabel.SetText(tryUpgrade(inv.Sword, swordUpgrade, swordUpgradeCost))
+		updateUI()
+	})
+
+	armorBtn := widget.NewButton("Upgrade Rüstung", func() {
+		msgLabel.SetText(tryUpgrade(inv.Armor, armorUpgrade, armorUpgradeCost))
+		updateUI()
+	})
+
+	box := container.NewVBox(info, msgLabel, pickaxeCostLabel, pickaxeBtn, swordCostLabel, swordBtn, armorCostLabel, armorBtn)
+	w.SetContent(container.NewVScroll(box))
 	updateUI()
-	w.SetContent(container.NewVBox(info, btn))
 	w.Show()
 }
 
 /* ===================== INVENTAR ===================== */
 func openInventory(a fyne.App, inv *Inventory) {
 	w := a.NewWindow("Inventar")
-	str := binding.NewString()
-	label := widget.NewLabelWithData(str)
+	w.Resize(fyne.NewSize(300, 400))
+	box := container.NewVBox()
 
-	go func() {
-		ticker := time.NewTicker(time.Second)
-		defer ticker.Stop()
-		for range ticker.C {
-			inv.Lock()
-			value := fmt.Sprintf(
-				"Geld: %d\nSpitzhacke: %s\n\nStein: %d\nEisen: %d\nGold: %d\nPlatin: %d\nDiamant: %d",
-				inv.Money, inv.Pickaxe,
-				inv.Resources[Stone],
-				inv.Resources[Iron],
-				inv.Resources[Gold],
-				inv.Resources[Platinum],
-				inv.Resources[Diamond],
-			)
-			inv.Unlock()
-			_ = str.Set(value)
-		}
-	}()
+	inv.Lock()
+	defer inv.Unlock()
 
-	w.SetContent(label)
-	w.Resize(fyne.NewSize(260, 300))
+	// Zeige Geld
+	box.Add(widget.NewLabel(fmt.Sprintf("Geld: %d", inv.Money)))
+
+	// Zeige Ausrüstung
+	box.Add(widget.NewLabel(fmt.Sprintf("Spitzhacke: %s", inv.Pickaxe)))
+	box.Add(widget.NewLabel(fmt.Sprintf("Schwert: %s (Attack: %d)", inv.Sword, swordAttack[inv.Sword])))
+	box.Add(widget.NewLabel(fmt.Sprintf("Rüstung: %s (Verteidigung: %d)", inv.Armor, armorDefense[inv.Armor])))
+
+	// Zeige Ressourcen
+	box.Add(widget.NewLabel("--- Ressourcen ---"))
+	for _, r := range []Resource{Stone, Iron, Gold, Platinum, Diamond} {
+		box.Add(widget.NewLabel(fmt.Sprintf("%s: %d", r, inv.Resources[r])))
+	}
+
+	w.SetContent(container.NewVScroll(box))
 	w.Show()
 }
