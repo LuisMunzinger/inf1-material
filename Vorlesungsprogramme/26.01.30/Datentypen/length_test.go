@@ -4,6 +4,14 @@ import "fmt"
 
 type Length int
 
+func FromCentimeters(m int) Length {
+	return Length(m)
+}
+
+func FromMeters(m int) Length {
+	return Length(m * 100)
+}
+
 func (l Length) Centimeters() int {
 	return int(l)
 }

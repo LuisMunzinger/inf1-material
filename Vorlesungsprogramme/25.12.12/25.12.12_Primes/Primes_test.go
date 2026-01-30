@@ -21,6 +21,8 @@ func ExampleIsPrime() {
 	// true
 	// false
 	// true
+	// false
+	// false
 }
 
 func ExamplePrimes() {
