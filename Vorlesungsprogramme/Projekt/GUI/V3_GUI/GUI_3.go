@@ -108,7 +108,6 @@ func TaschenrechnerWindow(a fyne.App) fyne.Window {
 	label5 := widget.NewLabel("")
 
 	button := widget.NewButton("Rechnen", func() {
-		// Zahlen aus entry2 und entry3 nehmen
 		zahl1, _ := strconv.Atoi(entry2.Text)
 		zahl2, _ := strconv.Atoi(entry3.Text)
 
