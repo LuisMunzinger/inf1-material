@@ -1,6 +1,8 @@
 package Duration
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type Duration uint
 
