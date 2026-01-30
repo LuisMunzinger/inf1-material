@@ -15,10 +15,10 @@ func ExamplePrint() {
 	s1.Score(1)
 	s1.Print()
 
-	s1.Score(2)
+	s1.Score(1)
 	s1.Print()
 
-	s1.Score(1)
+	s1.NewGame()
 	s1.Print()
 
 	// Output:

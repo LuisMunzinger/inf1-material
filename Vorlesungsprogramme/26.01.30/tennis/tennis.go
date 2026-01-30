@@ -25,7 +25,19 @@ func (s *Set) NewGame() {
 }
 
 func (s *Set) Print() {
+	p1 := 0
+	p2 := 0
 	current_game := len(s.games) - 1
+
+	for _, g := range s.games[:current_game] {
+		if g.p1 > g.p2 {
+			p1++
+		} else {
+			p2++
+		}
+	}
+	fmt.Printf("%d:%d\n", p1, p2)
+
 	g := s.games[current_game]
 	fmt.Printf("%d : %d\n", g.p1, g.p2)
 }
