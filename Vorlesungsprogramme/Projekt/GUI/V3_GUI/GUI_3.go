@@ -101,16 +101,25 @@ func TaschenrechnerWindow(a fyne.App) fyne.Window {
 	label2 := widget.NewLabel("Geben Sie die erste Zahl ein:")
 	entry2 := widget.NewEntry()
 
+	label3 := widget.NewLabel("Geben Sie die zweite Zahl ein:")
+	entry3 := widget.NewEntry()
+
 	label4 := widget.NewLabel("Ergebnis:")
 	label5 := widget.NewLabel("")
 
 	button := widget.NewButton("Rechnen", func() {
-		label5.SetText("...")
+		// Zahlen aus entry2 und entry3 nehmen
+		zahl1, _ := strconv.Atoi(entry2.Text)
+		zahl2, _ := strconv.Atoi(entry3.Text)
+
+		ergebnis := zahl1 + zahl2
+		label5.SetText(strconv.Itoa(ergebnis))
 	})
 
 	content := container.NewVBox(
 		label1, entry1,
 		label2, entry2,
+		label3, entry3,
 		container.NewHBox(label4, label5),
 		button,
 	)
