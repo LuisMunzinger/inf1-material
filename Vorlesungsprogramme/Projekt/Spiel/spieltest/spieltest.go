@@ -145,6 +145,13 @@ type Mine struct {
 	Label        *canvas.Text
 }
 
+type Dungeon struct {
+	Name  string
+	Pos   fyne.Position
+	Icon  *canvas.Rectangle
+	Label *canvas.Text
+}
+
 type Inventory struct {
 	sync.Mutex
 	Resources map[Resource]int
@@ -229,6 +236,25 @@ func main() {
 		objects = append(objects, icon, label)
 	}
 
+	// Dungeon erstellen
+	dungeonPos := fyne.NewPos(1100, 500)
+	dungeon := &Dungeon{
+		Name: "Dungeon",
+		Pos:  dungeonPos,
+	}
+	dungeon.Icon = canvas.NewRectangle(color.RGBA{200, 0, 0, 255})
+	dungeon.Icon.Resize(fyne.NewSize(iconSize, iconSize))
+	dungeon.Icon.Move(dungeon.Pos)
+	dungeon.Icon.StrokeColor = color.Black
+	dungeon.Icon.StrokeWidth = borderWidth
+
+	dungeon.Label = canvas.NewText(dungeon.Name, color.Black)
+	dungeon.Label.TextSize = 12
+	dungeon.Label.Move(fyne.NewPos(dungeon.Pos.X, dungeon.Pos.Y+45))
+
+	objects = append(objects, dungeon.Icon, dungeon.Label)
+
+	// Shop & Schmied
 	shopPos := fyne.NewPos(200, 20)
 	shop := widget.NewButtonWithIcon("Shop", theme.InfoIcon(), func() { openShop(a, inv) })
 	shop.Move(shopPos)
@@ -277,8 +303,15 @@ func main() {
 			}
 			if dist2(p, shopPos) < interactionDist*interactionDist {
 				openShop(a, inv)
-			} else if dist2(p, smithPos) < interactionDist*interactionDist {
+				return
+			}
+			if dist2(p, smithPos) < interactionDist*interactionDist {
 				openSmith(a, inv)
+				return
+			}
+			if dist2(p, dungeon.Pos) < interactionDist*interactionDist {
+				openDungeon(a)
+				return
 			}
 		case fyne.KeySpace:
 			openInventory(a, inv)
@@ -299,6 +332,14 @@ func main() {
 			}
 			m.Icon.Refresh()
 		}
+
+		// Dungeon hervorheben, wenn nah
+		if dist2(fyne.NewPos(x, y), dungeon.Pos) < interactionDist*interactionDist {
+			dungeon.Icon.FillColor = color.RGBA{255, 255, 0, 255}
+		} else {
+			dungeon.Icon.FillColor = color.RGBA{200, 0, 0, 255}
+		}
+		dungeon.Icon.Refresh()
 	})
 
 	w.ShowAndRun()
@@ -460,13 +501,14 @@ func openSmith(a fyne.App, inv *Inventory) {
 	w.Resize(fyne.NewSize(400, 500))
 
 	info := widget.NewLabel("")
-	msgLabel := widget.NewLabel("") // Für Fehler- oder Statusmeldungen
+	msgLabel := widget.NewLabel("") // Nur für Upgrade-Meldungen
 
 	pickaxeCostLabel := widget.NewLabel("")
 	swordCostLabel := widget.NewLabel("")
 	armorCostLabel := widget.NewLabel("")
 
-	updateUI := func() {
+	// Update nur der Ressourcen / Kosten Labels
+	updateCosts := func() {
 		inv.Lock()
 		defer inv.Unlock()
 
@@ -478,7 +520,7 @@ func openSmith(a fyne.App, inv *Inventory) {
 			inv.Armor, armorDefense[inv.Armor],
 		))
 
-		updateLabel := func(current interface{}, upgradeMap interface{}, costMap interface{}, label *widget.Label, itemType string) {
+		updateLabel := func(current interface{}, label *widget.Label, itemType string) {
 			switch c := current.(type) {
 			case Pickaxe:
 				if next, ok := pickaxeUpgrade[c]; ok {
@@ -513,12 +555,12 @@ func openSmith(a fyne.App, inv *Inventory) {
 			}
 		}
 
-		updateLabel(inv.Pickaxe, pickaxeUpgrade, pickaxeResourceCost, pickaxeCostLabel, "Spitzhacke")
-		updateLabel(inv.Sword, swordUpgrade, swordUpgradeCost, swordCostLabel, "Schwert")
-		updateLabel(inv.Armor, armorUpgrade, armorUpgradeCost, armorCostLabel, "Rüstung")
+		updateLabel(inv.Pickaxe, pickaxeCostLabel, "Spitzhacke")
+		updateLabel(inv.Sword, swordCostLabel, "Schwert")
+		updateLabel(inv.Armor, armorCostLabel, "Rüstung")
 	}
 
-	tryUpgrade := func(current interface{}, upgradeMap interface{}, costMap interface{}) string {
+	tryUpgrade := func(current interface{}) string {
 		inv.Lock()
 		defer inv.Unlock()
 
@@ -573,24 +615,33 @@ func openSmith(a fyne.App, inv *Inventory) {
 	}
 
 	pickaxeBtn := widget.NewButton("Upgrade Spitzhacke", func() {
-		msgLabel.SetText(tryUpgrade(inv.Pickaxe, pickaxeUpgrade, pickaxeResourceCost))
-		updateUI()
+		msgLabel.SetText(tryUpgrade(inv.Pickaxe))
+		updateCosts() // nur die Ressourcen Labels neu zeichnen
 	})
 
 	swordBtn := widget.NewButton("Upgrade Schwert", func() {
-		msgLabel.SetText(tryUpgrade(inv.Sword, swordUpgrade, swordUpgradeCost))
-		updateUI()
+		msgLabel.SetText(tryUpgrade(inv.Sword))
+		updateCosts()
 	})
 
 	armorBtn := widget.NewButton("Upgrade Rüstung", func() {
-		msgLabel.SetText(tryUpgrade(inv.Armor, armorUpgrade, armorUpgradeCost))
-		updateUI()
+		msgLabel.SetText(tryUpgrade(inv.Armor))
+		updateCosts()
 	})
 
 	box := container.NewVBox(info, msgLabel, pickaxeCostLabel, pickaxeBtn, swordCostLabel, swordBtn, armorCostLabel, armorBtn)
 	w.SetContent(container.NewVScroll(box))
-	updateUI()
+	updateCosts()
 	w.Show()
+
+	// Live-Update nur für die Ressourcen, msgLabel bleibt unberührt
+	go func() {
+		ticker := time.NewTicker(500 * time.Millisecond)
+		defer ticker.Stop()
+		for range ticker.C {
+			updateCosts()
+		}
+	}()
 }
 
 /* ===================== INVENTAR ===================== */
@@ -600,22 +651,56 @@ func openInventory(a fyne.App, inv *Inventory) {
 	box := container.NewVBox()
 
 	inv.Lock()
-	defer inv.Unlock()
+	// Labels für Geld und Ausrüstung
+	moneyLabel := widget.NewLabel(fmt.Sprintf("Geld: %d", inv.Money))
+	pickaxeLabel := widget.NewLabel(fmt.Sprintf("Spitzhacke: %s", inv.Pickaxe))
+	swordLabel := widget.NewLabel(fmt.Sprintf("Schwert: %s (Attack: %d)", inv.Sword, swordAttack[inv.Sword]))
+	armorLabel := widget.NewLabel(fmt.Sprintf("Rüstung: %s (Verteidigung: %d)", inv.Armor, armorDefense[inv.Armor]))
 
-	// Zeige Geld
-	box.Add(widget.NewLabel(fmt.Sprintf("Geld: %d", inv.Money)))
+	box.Add(moneyLabel)
+	box.Add(pickaxeLabel)
+	box.Add(swordLabel)
+	box.Add(armorLabel)
 
-	// Zeige Ausrüstung
-	box.Add(widget.NewLabel(fmt.Sprintf("Spitzhacke: %s", inv.Pickaxe)))
-	box.Add(widget.NewLabel(fmt.Sprintf("Schwert: %s (Attack: %d)", inv.Sword, swordAttack[inv.Sword])))
-	box.Add(widget.NewLabel(fmt.Sprintf("Rüstung: %s (Verteidigung: %d)", inv.Armor, armorDefense[inv.Armor])))
-
-	// Zeige Ressourcen
+	// Ressourcen-Labels
 	box.Add(widget.NewLabel("--- Ressourcen ---"))
+	resourceLabels := make(map[Resource]*widget.Label)
 	for _, r := range []Resource{Stone, Iron, Gold, Platinum, Diamond} {
-		box.Add(widget.NewLabel(fmt.Sprintf("%s: %d", r, inv.Resources[r])))
+		label := widget.NewLabel(fmt.Sprintf("%s: %d", r, inv.Resources[r]))
+		resourceLabels[r] = label
+		box.Add(label)
 	}
+	inv.Unlock()
 
 	w.SetContent(container.NewVScroll(box))
+	w.Show()
+
+	// Live-Update
+	go func() {
+		ticker := time.NewTicker(500 * time.Millisecond)
+		defer ticker.Stop()
+		for range ticker.C {
+			inv.Lock()
+			moneyLabel.SetText(fmt.Sprintf("Geld: %d", inv.Money))
+			pickaxeLabel.SetText(fmt.Sprintf("Spitzhacke: %s", inv.Pickaxe))
+			swordLabel.SetText(fmt.Sprintf("Schwert: %s (Attack: %d)", inv.Sword, swordAttack[inv.Sword]))
+			armorLabel.SetText(fmt.Sprintf("Rüstung: %s (Verteidigung: %d)", inv.Armor, armorDefense[inv.Armor]))
+			for r, label := range resourceLabels {
+				label.SetText(fmt.Sprintf("%s: %d", r, inv.Resources[r]))
+			}
+			inv.Unlock()
+		}
+	}()
+}
+
+/* ===================== DUNGEON ===================== */
+func openDungeon(a fyne.App) {
+	w := a.NewWindow("Dungeon")
+	w.Resize(fyne.NewSize(400, 300))
+
+	label := widget.NewLabel("Willkommen im Dungeon!\nHier kannst du Abenteuer erleben.")
+	w.SetContent(container.NewVBox(label,
+		widget.NewButton("Schließen", func() { w.Close() }),
+	))
 	w.Show()
 }
