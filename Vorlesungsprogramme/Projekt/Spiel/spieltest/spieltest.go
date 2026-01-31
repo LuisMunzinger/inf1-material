@@ -51,8 +51,8 @@ const (
 )
 
 const (
-	windowWidth     = 1200
-	windowHeight    = 700
+	windowWidth     = 1470
+	windowHeight    = 765
 	playerW         = 20
 	playerH         = 40
 	speed           = 20
@@ -280,12 +280,17 @@ func main() {
 	shop.Move(shopPos)
 	shop.Resize(fyne.NewSize(80, 40))
 
-	smithPos := fyne.NewPos(400, 20)
+	smithPos := fyne.NewPos(500, 20)
 	smith := widget.NewButtonWithIcon("Schmied", theme.InfoIcon(), func() { openSmith(a, inv) })
 	smith.Move(smithPos)
 	smith.Resize(fyne.NewSize(110, 40))
 
-	objects = append(objects, shop, smith)
+	cristalShopPos := fyne.NewPos(800, 20)
+	cristal := widget.NewButtonWithIcon("Cristal Shop", theme.InfoIcon(), func() { openCristallShop(a, inv) })
+	cristal.Move(cristalShopPos)
+	cristal.Resize(fyne.NewSize(110, 40))
+
+	objects = append(objects, shop, smith, cristal)
 	w.SetContent(container.NewWithoutLayout(objects...))
 
 	// Zentraler Tick
@@ -327,6 +332,10 @@ func main() {
 			}
 			if dist2(p, smithPos) < interactionDist*interactionDist {
 				openSmith(a, inv)
+				return
+			}
+			if dist2(p, cristalShopPos) < interactionDist*interactionDist {
+				openCristallShop(a, inv)
 				return
 			}
 			if dist2(p, dungeon.Pos) < interactionDist*interactionDist {
@@ -459,6 +468,63 @@ func openMineShop(a fyne.App, m *Mine, inv *Inventory) {
 
 	w.SetContent(container.NewVBox(label, actionBtn))
 	updateLabel()
+	w.Show()
+}
+
+/*====================== Cristal Shop ==================*/
+func openCristallShop(a fyne.App, inv *Inventory) {
+	w := a.NewWindow("Cristal Shop")
+	enableBackspaceClose(w)
+
+	prices := map[Resource]int{
+		Stone:    1,
+		Iron:     5,
+		Gold:     10,
+		Platinum: 20,
+		Diamond:  50,
+	}
+	resourceOrder := []Resource{Stone, Iron, Gold, Platinum, Diamond}
+
+	moneyLabel := widget.NewLabel(fmt.Sprintf("Geld: %d", inv.Money))
+	moneyLabel.TextStyle = fyne.TextStyle{Bold: true}
+	box := container.NewVBox(
+		moneyLabel,
+		widget.NewSeparator(),
+		widget.NewLabel("Ressourcen verkaufen"),
+	)
+	labels := make(map[Resource]*widget.Label)
+	sellAmounts := []int{1, 10, 100}
+
+	for _, r := range resourceOrder {
+		p := prices[r]
+		resBox := container.NewVBox()
+		label := widget.NewLabel(fmt.Sprintf("%s: %d", r, inv.Resources[r]))
+		labels[r] = label
+		resBox.Add(label)
+		for _, amt := range sellAmounts {
+			amount := amt
+			btn := widget.NewButton(fmt.Sprintf("Verkaufen %d", amount), func() {
+				inv.Lock()
+				defer inv.Unlock()
+				sell := amount
+				if inv.Resources[r] < sell {
+					sell = inv.Resources[r]
+				}
+				if sell > 0 {
+					inv.Resources[r] -= sell
+					inv.Money += sell * p
+				}
+				label.SetText(fmt.Sprintf("%s: %d", r, inv.Resources[r]))
+				moneyLabel.SetText(fmt.Sprintf("Geld: %d", inv.Money))
+
+			})
+			resBox.Add(btn)
+		}
+		box.Add(resBox)
+	}
+
+	w.SetContent(container.NewVScroll(box))
+	w.Resize(fyne.NewSize(300, 400))
 	w.Show()
 }
 
@@ -743,6 +809,12 @@ func openDungeon(a fyne.App, mainWindow fyne.Window, inv *Inventory) {
 	w := a.NewWindow("Dungeon")
 	w.Resize(fyne.NewSize(400, 300))
 
+	// Funktion zum Schließen des Dungeon-Fensters
+	closeDungeon := func() {
+		w.Close()
+		mainWindow.Show() // Hauptfenster wieder anzeigen
+	}
+
 	// Lebenspunkte des Spielers
 	var playerHealth int = 100
 	playerHealth = playerHealth / 10 * armorDefense[inv.Armor]
@@ -789,7 +861,7 @@ func openDungeon(a fyne.App, mainWindow fyne.Window, inv *Inventory) {
 			e.Rect.Move(fyne.NewPos(e.X, e.Y))
 
 			// Health Bar für den Gegner erstellen
-			e.HealthBar = canvas.NewRectangle(color.RGBA{255, 0, 0, 255})           // gelb
+			e.HealthBar = canvas.NewRectangle(color.RGBA{255, 0, 0, 255})           // rot
 			e.HealthBar.Resize(fyne.NewSize(float32(e.Health)/10, healthBarHeight)) // Skalierung des HealthBars
 			e.HealthBar.Move(fyne.NewPos(e.X-5, e.Y-e.HealthBar.Size().Height-2))   // Position über dem Gegner
 
@@ -816,7 +888,7 @@ func openDungeon(a fyne.App, mainWindow fyne.Window, inv *Inventory) {
 				x += speed
 			case fyne.KeyEscape, fyne.KeyBackspace: // Dungeon zurück
 				w2.Close()
-				w.Show()
+				w.Show() // Hauptfenster wieder anzeigen
 				return
 			}
 
@@ -857,10 +929,10 @@ func openDungeon(a fyne.App, mainWindow fyne.Window, inv *Inventory) {
 				if healthBarWidth == 0 {
 					healthLabel.SetText("Du bist gestorben!")
 					ticker.Stop() // Stoppe den Ticker, wenn der Spieler gestorben ist
-					// Dungeon zurück und Hauptfenster anzeigen
+					// Hauptfenster anzeigen und Dungeon-Fenster schließen
 					time.Sleep(2 * time.Second)
 					w2.Close() // Dungeon-Fenster schließen
-					w.Show()   // Hauptfenster anzeigen
+					closeDungeon()
 					return
 				}
 
@@ -870,9 +942,9 @@ func openDungeon(a fyne.App, mainWindow fyne.Window, inv *Inventory) {
 		}()
 
 		// Gegner bewegen und Schaden nehmen, wenn der Spieler in der Nähe ist
-		// Gegner bewegen und Schaden nehmen, wenn der Spieler in der Nähe ist
 		go func() {
 			for {
+				allEnemiesDead := true // Flag, um zu prüfen, ob alle Gegner tot sind
 				for _, e := range enemies {
 					// Berechne die Distanz zwischen dem Spieler und dem Gegner
 					distance := math.Sqrt(float64((x-e.X)*(x-e.X) + (y-e.Y)*(y-e.Y)))
@@ -891,7 +963,21 @@ func openDungeon(a fyne.App, mainWindow fyne.Window, inv *Inventory) {
 					// Wenn der Gegner keine Lebenspunkte mehr hat
 					if e.Health <= 0 {
 						e.Rect.FillColor = color.Gray{Y: 200} // Gegner "sterben"
+					} else {
+						// Wenn der Gegner noch lebt, setzen wir das Flag auf false
+						allEnemiesDead = false
 					}
+				}
+
+				// Wenn alle Gegner tot sind, schließen wir das Dungeon-Fenster
+				if allEnemiesDead {
+					healthLabel.SetText("Du hast Gewonnen!")
+					ticker.Stop() // Stoppe den Ticker
+					inv.Cristalle += 1
+					time.Sleep(2 * time.Second) // Kurze Pause, damit der Spieler den Tod der Gegner sehen kann
+					w2.Close()                  // Dungeon-Fenster schließen
+					closeDungeon()
+					return
 				}
 
 				// Alle 1 Sekunde Schaden zugefügt werden
@@ -901,12 +987,6 @@ func openDungeon(a fyne.App, mainWindow fyne.Window, inv *Inventory) {
 
 		w2.Show()
 	})
-
-	// Funktion zum Schließen des Dungeon-Fensters
-	closeDungeon := func() {
-		w.Close()
-		mainWindow.Show() // Hauptfenster wieder anzeigen
-	}
 
 	w.SetContent(container.NewVBox(
 		adventureBtn,
