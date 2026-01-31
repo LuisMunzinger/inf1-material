@@ -23,32 +23,52 @@ type Sword string
 type Armor string
 
 const (
-	Stone    Resource = "Stein"
-	Iron     Resource = "Eisen"
-	Gold     Resource = "Gold"
-	Platinum Resource = "Platin"
-	Diamond  Resource = "Diamant"
+	Kohle        Resource = "Kohle" //------
+	Stone        Resource = "Stein"
+	Kupfer       Resource = "Kupfer"
+	Iron         Resource = "Eisen"
+	Stahl        Resource = "Stahl"
+	Silver       Resource = "Silber" //-----
+	Gold         Resource = "Gold"
+	Platinum     Resource = "Platin"
+	Rubin        Resource = "Rubin" //-------
+	Diamond      Resource = "Diamant"
+	Mythril      Resource = "Mythril"
+	Blutkristall Resource = "Blutkristall" //-----
+	Adamantium   Resource = "Adamantium"
 
-	WoodPickaxe     Pickaxe = "Holzspitzhacke"
-	StonePickaxe    Pickaxe = "Steinspitzhacke"
-	IronPickaxe     Pickaxe = "Eisenspitzhacke"
-	GoldPickaxe     Pickaxe = "Goldspitzhacke"
-	PlatinumPickaxe Pickaxe = "Platinspitzhacke"
-	DiamondPickaxe  Pickaxe = "Diamantspitzhacke"
+	WoodPickaxe      Pickaxe = "Holzspitzhacke"
+	StonePickaxe     Pickaxe = "Steinspitzhacke"
+	KupferPickaxe    Pickaxe = "Kupferspitzhacke"
+	IronPickaxe      Pickaxe = "Eisenspitzhacke"
+	StahlPickaxe     Pickaxe = "Stahlspitzhacke"
+	GoldPickaxe      Pickaxe = "Goldspitzhacke"
+	PlatinumPickaxe  Pickaxe = "Platinspitzhacke"
+	DiamondPickaxe   Pickaxe = "Diamantspitzhacke"
+	MythrilPickax    Pickaxe = "Mythrilspitzhacke"
+	AdamantiumPickax Pickaxe = "Adamantiumspitzhacke"
 
-	WoodSword     Sword = "Holzschwert"
-	StoneSword    Sword = "Steinschwert"
-	IronSword     Sword = "Eisenschwert"
-	GoldSword     Sword = "Goldschwert"
-	PlatinumSword Sword = "Platinschwert"
-	DiamondSword  Sword = "Diamantschwert"
+	WoodSword       Sword = "Holzschwert"
+	StoneSword      Sword = "Steinschwert"
+	KupferSword     Sword = "Kupferschwert"
+	IronSword       Sword = "Eisenschwert"
+	StahlSword      Sword = "Stahlschwert"
+	GoldSword       Sword = "Goldschwert"
+	PlatinumSword   Sword = "Platinschwert"
+	DiamondSword    Sword = "Diamantschwert"
+	MythrilSword    Sword = "Mythrilschwert"
+	AdamantiumSword Sword = "Adamantiumschwert"
 
-	WoodArmor     Armor = "Holzrüstung"
-	StoneArmor    Armor = "Steinrüstung"
-	IronArmor     Armor = "Eisenrüstung"
-	GoldArmor     Armor = "Goldrüstung"
-	PlatinumArmor Armor = "Platinrüstung"
-	DiamondArmor  Armor = "Diamantrüstung"
+	WoodArmor       Armor = "Holzrüstung"
+	StoneArmor      Armor = "Steinrüstung"
+	KupferArmor     Armor = "Kupferrüstung"
+	IronArmor       Armor = "Eisenrüstung"
+	StahlArmor      Armor = "Stahlrüstung"
+	GoldArmor       Armor = "Goldrüstung"
+	PlatinumArmor   Armor = "Platinrüstung"
+	DiamondArmor    Armor = "Diamantrüstung"
+	MythrilArmor    Armor = "Mythrilrüstung"
+	AdamantiumArmor Armor = "Adamantiumrüstung"
 )
 
 const (
@@ -67,72 +87,107 @@ const (
 /* ===================== UPGRADE-DATEN ===================== */
 
 var pickaxeResourceCost = map[Pickaxe]map[Resource]int{
-	WoodPickaxe:     {Stone: 50},
-	StonePickaxe:    {Stone: 50},
-	IronPickaxe:     {Iron: 50},
-	GoldPickaxe:     {Gold: 50},
-	PlatinumPickaxe: {Platinum: 50},
+	WoodPickaxe:      {Stone: 50},
+	StonePickaxe:     {Stone: 50},
+	KupferPickaxe:    {Kupfer: 50},
+	IronPickaxe:      {Iron: 50},
+	StahlPickaxe:     {Stahl: 50},
+	GoldPickaxe:      {Gold: 50},
+	PlatinumPickaxe:  {Platinum: 50},
+	DiamondPickaxe:   {Diamond: 50},
+	MythrilPickax:    {Mythril: 50},
+	AdamantiumPickax: {Adamantium: 50},
 }
 
 var swordUpgradeCost = map[Sword]map[Resource]int{
-	WoodSword:     {Stone: 20},
-	StoneSword:    {Iron: 20},
-	IronSword:     {Gold: 20},
-	GoldSword:     {Platinum: 20},
-	PlatinumSword: {Diamond: 20},
+	WoodSword:       {Stone: 20},
+	StoneSword:      {Kupfer: 20},
+	KupferSword:     {Iron: 20},
+	IronSword:       {Stahl: 20},
+	StahlSword:      {Gold: 20},
+	GoldSword:       {Platinum: 20},
+	PlatinumSword:   {Diamond: 20},
+	DiamondSword:    {Mythril: 20},
+	MythrilSword:    {Adamantium: 20},
+	AdamantiumSword: {Adamantium: 100},
 }
 
 var armorUpgradeCost = map[Armor]map[Resource]int{
-	WoodArmor:     {Stone: 20},
-	StoneArmor:    {Iron: 20},
-	IronArmor:     {Gold: 20},
-	GoldArmor:     {Platinum: 20},
-	PlatinumArmor: {Diamond: 20},
+	WoodArmor:       {Stone: 20},
+	StoneArmor:      {Kupfer: 20},
+	KupferArmor:     {Iron: 20},
+	IronArmor:       {Stahl: 20},
+	StahlArmor:      {Gold: 20},
+	GoldArmor:       {Platinum: 20},
+	PlatinumArmor:   {Diamond: 20},
+	DiamondArmor:    {Mythril: 20},
+	MythrilArmor:    {Adamantium: 20},
+	AdamantiumArmor: {Adamantium: 100},
 }
 
 var swordAttack = map[Sword]int{
-	WoodSword:     1,
-	StoneSword:    3,
-	IronSword:     5,
-	GoldSword:     8,
-	PlatinumSword: 10,
-	DiamondSword:  13,
+	WoodSword:       1,
+	StoneSword:      3,
+	KupferSword:     5,
+	IronSword:       7,
+	StahlSword:      10,
+	GoldSword:       12,
+	PlatinumSword:   15,
+	DiamondSword:    18,
+	MythrilSword:    21,
+	AdamantiumSword: 25,
 }
 
 var armorDefense = map[Armor]int{
-	WoodArmor:     1,
-	StoneArmor:    3,
-	IronArmor:     5,
-	GoldArmor:     8,
-	PlatinumArmor: 10,
-	DiamondArmor:  13,
+	WoodArmor:       1,
+	StoneArmor:      3,
+	KupferArmor:     5,
+	IronArmor:       7,
+	StahlArmor:      10,
+	GoldArmor:       12,
+	PlatinumArmor:   15,
+	DiamondArmor:    18,
+	MythrilArmor:    21,
+	AdamantiumArmor: 25,
 }
 
 var pickaxeUpgrade = map[Pickaxe]Pickaxe{
 	WoodPickaxe:     StonePickaxe,
-	StonePickaxe:    IronPickaxe,
-	IronPickaxe:     GoldPickaxe,
+	StonePickaxe:    KupferPickaxe,
+	KupferPickaxe:   IronPickaxe,
+	IronPickaxe:     StahlPickaxe,
+	StahlPickaxe:    GoldPickaxe,
 	GoldPickaxe:     PlatinumPickaxe,
 	PlatinumPickaxe: DiamondPickaxe,
+	DiamondPickaxe:  MythrilPickax,
+	MythrilPickax:   AdamantiumPickax,
 }
 
 var swordUpgrade = map[Sword]Sword{
 	WoodSword:     StoneSword,
-	StoneSword:    IronSword,
-	IronSword:     GoldSword,
+	StoneSword:    KupferSword,
+	KupferSword:   IronSword,
+	IronSword:     StahlSword,
+	StahlSword:    GoldSword,
 	GoldSword:     PlatinumSword,
 	PlatinumSword: DiamondSword,
+	DiamondSword:  MythrilSword,
+	MythrilSword:  AdamantiumSword,
 }
 
 var armorUpgrade = map[Armor]Armor{
 	WoodArmor:     StoneArmor,
-	StoneArmor:    IronArmor,
-	IronArmor:     GoldArmor,
+	StoneArmor:    KupferArmor,
+	KupferArmor:   IronArmor,
+	IronArmor:     StahlArmor,
+	StahlArmor:    GoldArmor,
 	GoldArmor:     PlatinumArmor,
 	PlatinumArmor: DiamondArmor,
+	DiamondArmor:  MythrilArmor,
+	MythrilArmor:  AdamantiumArmor,
 }
 
-var mineUpgradeResources = []Resource{Stone, Iron, Gold, Platinum, Diamond}
+var mineUpgradeResources = []Resource{Kohle, Stone, Kupfer, Iron, Stahl, Silver, Gold, Platinum, Rubin, Diamond, Mythril, Blutkristall, Adamantium}
 
 /* ===================== STRUKTUREN ===================== */
 type Mine struct {
@@ -213,8 +268,8 @@ func main() {
 		Pickaxe:   WoodPickaxe,
 		Sword:     WoodSword,
 		Armor:     WoodArmor,
-		Money:     200,
-		Kristalle: 200,
+		Money:     0,
+		Kristalle: 0,
 	}
 
 	player := canvas.NewRectangle(color.RGBA{0, 200, 100, 255})
@@ -235,11 +290,18 @@ func main() {
 
 	// Minen erstellen
 	mines := []*Mine{
-		{"Steinmine", fyne.NewPos(100, 200), Stone, 100, 1, WoodPickaxe, false, 0, nil, nil},
-		{"Eisenmine", fyne.NewPos(300, 200), Iron, 250, 1, StonePickaxe, false, 0, nil, nil},
-		{"Goldmine", fyne.NewPos(500, 200), Gold, 500, 1, IronPickaxe, false, 0, nil, nil},
-		{"Platinmine", fyne.NewPos(700, 200), Platinum, 1000, 1, GoldPickaxe, false, 0, nil, nil},
-		{"Diamantmine", fyne.NewPos(900, 200), Diamond, 2000, 1, PlatinumPickaxe, false, 0, nil, nil},
+		{"Kohlemine", fyne.NewPos(100, 200), Kohle, 0, 1, WoodPickaxe, false, 0, nil, nil},
+		{"Steinmine", fyne.NewPos(300, 200), Stone, 100, 1, WoodPickaxe, false, 0, nil, nil},
+		{"Kupfermine", fyne.NewPos(500, 200), Kupfer, 200, 1, StonePickaxe, false, 0, nil, nil},
+		{"Eisenmine", fyne.NewPos(700, 200), Iron, 250, 1, KupferPickaxe, false, 0, nil, nil},
+		{"Silbernmine", fyne.NewPos(900, 200), Silver, 500, 1, IronPickaxe, false, 0, nil, nil},
+		{"Goldmine", fyne.NewPos(1100, 200), Gold, 500, 1, IronPickaxe, false, 0, nil, nil},
+		{"Platinmine", fyne.NewPos(100, 400), Platinum, 1000, 1, GoldPickaxe, false, 0, nil, nil},
+		{"Rubinnmine", fyne.NewPos(300, 400), Rubin, 2000, 1, PlatinumPickaxe, false, 0, nil, nil},
+		{"Diamantmine", fyne.NewPos(500, 400), Diamond, 3000, 1, PlatinumPickaxe, false, 0, nil, nil},
+		{"Mythrilmine", fyne.NewPos(700, 400), Mythril, 5000, 1, DiamondPickaxe, false, 0, nil, nil},
+		{"Blutkristallmine", fyne.NewPos(900, 400), Blutkristall, 10000, 1, DiamondPickaxe, false, 0, nil, nil},
+		{"Adamantiummine", fyne.NewPos(1100, 400), Adamantium, 100000, 1, MythrilPickax, false, 0, nil, nil},
 	}
 
 	for _, m := range mines {
@@ -259,7 +321,7 @@ func main() {
 	}
 
 	// Dungeon erstellen
-	dungeonPos := fyne.NewPos(1100, 500)
+	dungeonPos := fyne.NewPos(700, 600)
 	dungeon := &Dungeon{
 		Name: "Dungeon",
 		Pos:  dungeonPos,
@@ -277,17 +339,17 @@ func main() {
 	objects = append(objects, dungeon.Icon, dungeon.Label)
 
 	// Shop & Schmied
-	shopPos := fyne.NewPos(200, 20)
+	shopPos := fyne.NewPos(100, 20)
 	shop := widget.NewButtonWithIcon("Shop", theme.InfoIcon(), func() { openShop(a, inv) })
 	shop.Move(shopPos)
 	shop.Resize(fyne.NewSize(80, 40))
 
-	smithPos := fyne.NewPos(500, 20)
+	smithPos := fyne.NewPos(400, 20)
 	smith := widget.NewButtonWithIcon("Schmiede", theme.InfoIcon(), func() { openSmith(a, inv) })
 	smith.Move(smithPos)
 	smith.Resize(fyne.NewSize(110, 40))
 
-	kristallShopPos := fyne.NewPos(800, 20)
+	kristallShopPos := fyne.NewPos(700, 20)
 	kristall := widget.NewButtonWithIcon("Kristall Shop", theme.InfoIcon(), func() { openKristallShop(a, inv) })
 	kristall.Move(kristallShopPos)
 	kristall.Resize(fyne.NewSize(110, 40))
@@ -414,12 +476,16 @@ func openMineShop(a fyne.App, m *Mine, inv *Inventory) {
 		defer inv.Unlock()
 
 		pickaxeLevels := map[Pickaxe]int{
-			WoodPickaxe:     1,
-			StonePickaxe:    2,
-			IronPickaxe:     3,
-			GoldPickaxe:     4,
-			PlatinumPickaxe: 5,
-			DiamondPickaxe:  6,
+			WoodPickaxe:      1,
+			StonePickaxe:     2,
+			KupferPickaxe:    3,
+			IronPickaxe:      4,
+			StahlPickaxe:     5,
+			GoldPickaxe:      6,
+			PlatinumPickaxe:  7,
+			DiamondPickaxe:   8,
+			MythrilPickax:    9,
+			AdamantiumPickax: 10,
 		}
 		if pickaxeLevels[inv.Pickaxe] < pickaxeLevels[m.Required] {
 			label.SetText(label.Text + "\nDu benötigst eine bessere Spitzhacke!")
@@ -617,13 +683,21 @@ func handleSkillUnlock(skill string, levels map[int]int, currentLevel *int, inv 
 func openShop(a fyne.App, inv *Inventory) {
 
 	prices := map[Resource]int{
-		Stone:    1,
-		Iron:     5,
-		Gold:     10,
-		Platinum: 20,
-		Diamond:  50,
+		Kohle:        1,
+		Stone:        1,
+		Kupfer:       2,
+		Iron:         5,
+		Stahl:        5,
+		Silver:       10,
+		Gold:         10,
+		Platinum:     20,
+		Rubin:        30,
+		Diamond:      50,
+		Mythril:      100,
+		Blutkristall: 200,
+		Adamantium:   1000,
 	}
-	resourceOrder := []Resource{Stone, Iron, Gold, Platinum, Diamond}
+	resourceOrder := []Resource{Kohle, Stone, Kupfer, Iron, Stahl, Silver, Gold, Platinum, Rubin, Diamond, Mythril, Blutkristall, Adamantium}
 
 	w := a.NewWindow("Shop")
 	enableBackspaceClose(w)
@@ -749,7 +823,7 @@ func openSmith(a fyne.App, inv *Inventory) {
 		updateLabel(inv.Armor, armorCostLabel, "Rüstung")
 	}
 
-	tryUpgrade := func(current interface{}) string {
+	tryUpgrade := func(current interface{}) {
 		inv.Lock()
 		defer inv.Unlock()
 
@@ -757,70 +831,81 @@ func openSmith(a fyne.App, inv *Inventory) {
 		case Pickaxe:
 			next, ok := pickaxeUpgrade[c]
 			if !ok {
-				return "Spitzhacke ist max. Level!"
+				dialog.ShowInformation("Spitzhacke ist max. Level!", "Deine Spitzhacke ist schon auf dem maximalen Level", w)
+				return
 			}
 			for r, amt := range pickaxeResourceCost[c] {
 				if inv.Resources[r] < amt {
-					return "Nicht genügend Ressourcen für Spitzhacke!"
+					dialog.ShowInformation("Nicht genügend Ressourcen für die Spitzhacke!", "Dir fehlen Ressourcen für das Spitzhacke-Upgraden", w)
+					return
 				}
 			}
 			for r, amt := range pickaxeResourceCost[c] {
 				inv.Resources[r] -= amt
 			}
 			inv.Pickaxe = next
-			return "Spitzhacke erfolgreich upgegradet!"
+			dialog.ShowInformation("", "Spitzhacke erfolgreich geupgradet", w)
+
 		case Sword:
 			next, ok := swordUpgrade[c]
 			if !ok {
-				return "Schwert ist max. Level!"
+				dialog.ShowInformation("Schwert ist max. Level!", "Deine Schwert ist schon auf dem maximalen Level", w)
+				return
 			}
 			for r, amt := range swordUpgradeCost[c] {
 				if inv.Resources[r] < amt {
-					return "Nicht genügend Ressourcen für Schwert!"
+					dialog.ShowInformation("Nicht genügend Ressourcen für das Schwert!", "Dir fehlen Ressourcen für das Schwert upzugraden", w)
+					return
 				}
 			}
 			for r, amt := range swordUpgradeCost[c] {
 				inv.Resources[r] -= amt
 			}
 			inv.Sword = next
-			return "Schwert erfolgreich upgegradet!"
+			dialog.ShowInformation("", "Schwert erfolgreich geupgradet", w)
+
 		case Armor:
 			next, ok := armorUpgrade[c]
 			if !ok {
-				return "Rüstung ist max. Level!"
+				dialog.ShowInformation("Rüstung ist max. Level!", "Deine Rüstung ist schon auf dem maximalen Level", w)
+				return
 			}
 			for r, amt := range armorUpgradeCost[c] {
 				if inv.Resources[r] < amt {
-					return "Nicht genügend Ressourcen für Rüstung!"
+					dialog.ShowInformation("Nicht genügend Ressourcen für Rüstung!", "Dir fehlen Ressourcen für das Rüstungs-Upgrade", w)
+					return
 				}
 			}
 			for r, amt := range armorUpgradeCost[c] {
 				inv.Resources[r] -= amt
 			}
 			inv.Armor = next
-			return "Rüstung erfolgreich upgegradet!"
-		}
-		return "Upgrade fehlgeschlagen"
-	}
+			dialog.ShowInformation("", "Rüstung erfolgreich geupgradet", w)
 
+		default:
+			dialog.ShowInformation("Fehler", "Unbekannter Gegenstand zum Upgraden", w)
+		}
+		updateCosts() // Hier rufst du die Funktion zur Aktualisierung der Ressourcen auf
+	}
 	pickaxeBtn := widget.NewButton("Upgrade Spitzhacke", func() {
-		msgLabel.SetText(tryUpgrade(inv.Pickaxe))
-		updateCosts() // nur die Ressourcen Labels neu zeichnen
+		tryUpgrade(inv.Pickaxe) // Nur die Funktion aufrufen, ohne msgLabel.SetText
 	})
 
 	swordBtn := widget.NewButton("Upgrade Schwert", func() {
-		msgLabel.SetText(tryUpgrade(inv.Sword))
-		updateCosts()
+		tryUpgrade(inv.Sword)
 	})
 
 	armorBtn := widget.NewButton("Upgrade Rüstung", func() {
-		msgLabel.SetText(tryUpgrade(inv.Armor))
-		updateCosts()
+		tryUpgrade(inv.Armor)
 	})
-
-	box := container.NewVBox(info, msgLabel, pickaxeCostLabel, pickaxeBtn, swordCostLabel, swordBtn, armorCostLabel, armorBtn)
+	box := container.NewVBox(
+		info, msgLabel,
+		pickaxeCostLabel, pickaxeBtn,
+		swordCostLabel, swordBtn,
+		armorCostLabel, armorBtn,
+	)
 	w.SetContent(container.NewVScroll(box))
-	updateCosts()
+	updateCosts() // Initiale Ressourcen-Updates, falls erforderlich
 	w.Show()
 
 	// Live-Update nur für die Ressourcen, msgLabel bleibt unberührt
@@ -857,7 +942,7 @@ func openInventory(a fyne.App, inv *Inventory) {
 	// Ressourcen-Labels
 	box.Add(widget.NewLabel("--- Ressourcen ---"))
 	resourceLabels := make(map[Resource]*widget.Label)
-	for _, r := range []Resource{Stone, Iron, Gold, Platinum, Diamond} {
+	for _, r := range []Resource{Kohle, Stone, Kupfer, Iron, Stahl, Silver, Gold, Platinum, Rubin, Diamond, Mythril, Blutkristall, Adamantium} {
 		label := widget.NewLabel(fmt.Sprintf("%s: %d", r, inv.Resources[r]))
 		resourceLabels[r] = label
 		box.Add(label)
