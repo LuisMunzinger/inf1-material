@@ -11,6 +11,7 @@ import (
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -64,13 +65,6 @@ const (
 )
 
 /* ===================== UPGRADE-DATEN ===================== */
-var pickaxeUpgrade = map[Pickaxe]Pickaxe{
-	WoodPickaxe:     StonePickaxe,
-	StonePickaxe:    IronPickaxe,
-	IronPickaxe:     GoldPickaxe,
-	GoldPickaxe:     PlatinumPickaxe,
-	PlatinumPickaxe: DiamondPickaxe,
-}
 
 var pickaxeResourceCost = map[Pickaxe]map[Resource]int{
 	WoodPickaxe:     {Stone: 50},
@@ -78,6 +72,22 @@ var pickaxeResourceCost = map[Pickaxe]map[Resource]int{
 	IronPickaxe:     {Iron: 50},
 	GoldPickaxe:     {Gold: 50},
 	PlatinumPickaxe: {Platinum: 50},
+}
+
+var swordUpgradeCost = map[Sword]map[Resource]int{
+	WoodSword:     {Stone: 20},
+	StoneSword:    {Iron: 20},
+	IronSword:     {Gold: 20},
+	GoldSword:     {Platinum: 20},
+	PlatinumSword: {Diamond: 20},
+}
+
+var armorUpgradeCost = map[Armor]map[Resource]int{
+	WoodArmor:     {Stone: 20},
+	StoneArmor:    {Iron: 20},
+	IronArmor:     {Gold: 20},
+	GoldArmor:     {Platinum: 20},
+	PlatinumArmor: {Diamond: 20},
 }
 
 var swordAttack = map[Sword]int{
@@ -98,6 +108,14 @@ var armorDefense = map[Armor]int{
 	DiamondArmor:  13,
 }
 
+var pickaxeUpgrade = map[Pickaxe]Pickaxe{
+	WoodPickaxe:     StonePickaxe,
+	StonePickaxe:    IronPickaxe,
+	IronPickaxe:     GoldPickaxe,
+	GoldPickaxe:     PlatinumPickaxe,
+	PlatinumPickaxe: DiamondPickaxe,
+}
+
 var swordUpgrade = map[Sword]Sword{
 	WoodSword:     StoneSword,
 	StoneSword:    IronSword,
@@ -112,22 +130,6 @@ var armorUpgrade = map[Armor]Armor{
 	IronArmor:     GoldArmor,
 	GoldArmor:     PlatinumArmor,
 	PlatinumArmor: DiamondArmor,
-}
-
-var swordUpgradeCost = map[Sword]map[Resource]int{
-	WoodSword:     {Stone: 20},
-	StoneSword:    {Iron: 20},
-	IronSword:     {Gold: 20},
-	GoldSword:     {Platinum: 20},
-	PlatinumSword: {Diamond: 20},
-}
-
-var armorUpgradeCost = map[Armor]map[Resource]int{
-	WoodArmor:     {Stone: 20},
-	StoneArmor:    {Iron: 20},
-	IronArmor:     {Gold: 20},
-	GoldArmor:     {Platinum: 20},
-	PlatinumArmor: {Diamond: 20},
 }
 
 var mineUpgradeResources = []Resource{Stone, Iron, Gold, Platinum, Diamond}
@@ -160,7 +162,7 @@ type Inventory struct {
 	Sword     Sword
 	Armor     Armor
 	Money     int
-	Cristalle int
+	Kristalle int
 }
 
 /* ===================== HELPER ===================== */
@@ -212,7 +214,7 @@ func main() {
 		Sword:     WoodSword,
 		Armor:     WoodArmor,
 		Money:     200,
-		Cristalle: 0,
+		Kristalle: 200,
 	}
 
 	player := canvas.NewRectangle(color.RGBA{0, 200, 100, 255})
@@ -281,16 +283,16 @@ func main() {
 	shop.Resize(fyne.NewSize(80, 40))
 
 	smithPos := fyne.NewPos(500, 20)
-	smith := widget.NewButtonWithIcon("Schmied", theme.InfoIcon(), func() { openSmith(a, inv) })
+	smith := widget.NewButtonWithIcon("Schmiede", theme.InfoIcon(), func() { openSmith(a, inv) })
 	smith.Move(smithPos)
 	smith.Resize(fyne.NewSize(110, 40))
 
-	cristalShopPos := fyne.NewPos(800, 20)
-	cristal := widget.NewButtonWithIcon("Cristal Shop", theme.InfoIcon(), func() { openCristallShop(a, inv) })
-	cristal.Move(cristalShopPos)
-	cristal.Resize(fyne.NewSize(110, 40))
+	kristallShopPos := fyne.NewPos(800, 20)
+	kristall := widget.NewButtonWithIcon("Kristall Shop", theme.InfoIcon(), func() { openKristallShop(a, inv) })
+	kristall.Move(kristallShopPos)
+	kristall.Resize(fyne.NewSize(110, 40))
 
-	objects = append(objects, shop, smith, cristal)
+	objects = append(objects, shop, smith, kristall)
 	w.SetContent(container.NewWithoutLayout(objects...))
 
 	// Zentraler Tick
@@ -334,8 +336,8 @@ func main() {
 				openSmith(a, inv)
 				return
 			}
-			if dist2(p, cristalShopPos) < interactionDist*interactionDist {
-				openCristallShop(a, inv)
+			if dist2(p, kristallShopPos) < interactionDist*interactionDist {
+				openKristallShop(a, inv)
 				return
 			}
 			if dist2(p, dungeon.Pos) < interactionDist*interactionDist {
@@ -472,63 +474,131 @@ func openMineShop(a fyne.App, m *Mine, inv *Inventory) {
 }
 
 /*====================== Cristal Shop ==================*/
-func openCristallShop(a fyne.App, inv *Inventory) {
-	w := a.NewWindow("Cristal Shop")
+func openKristallShop(a fyne.App, inv *Inventory) {
+	// Preis für jede Fähigkeit (in Kristallen)
+	skills := map[string]map[int]int{
+		"Steinminen Multiplier":  {1: 10, 2: 25, 3: 50},
+		"Eisenminen Multiplier":  {1: 15, 2: 35, 3: 70},
+		"Goldminen Multiplier":   {1: 20, 2: 45, 3: 90},
+		"Platinmine Multiplier":  {1: 10, 2: 25, 3: 50},
+		"Diamantmine Multiplier": {1: 15, 2: 35, 3: 70},
+	}
+
+	// Level-Up-Funktionen für Skills
+	levelUpFunctions := map[string]map[int]func(){
+		"Steinminen Multiplier": {
+			1: func() { fmt.Println("Steinminen Level 1 aktiviert - Mehr Ressourcen sammeln!") },
+			2: func() { fmt.Println("Steinminen Level 2 aktiviert - Kristallgewinn erhöht!") },
+			3: func() { fmt.Println("Steinminen Level 3 aktiviert - Maximale Ressourcengewinnung!") },
+		},
+		"Eisenminen Multiplier": {
+			1: func() { fmt.Println("Eisenminen Level 1 aktiviert - Eisenproduktion startet.") },
+			2: func() { fmt.Println("Eisenminen Level 2 aktiviert - Eisenproduktion verbessert.") },
+			3: func() { fmt.Println("Eisenminen Level 3 aktiviert - Maximale Eisenproduktion.") },
+		},
+		"Goldminen Multiplier": {
+			1: func() { fmt.Println("Goldminen Level 1 aktiviert - Goldproduktion startet.") },
+			2: func() { fmt.Println("Goldminen Level 2 aktiviert - Goldproduktion optimiert.") },
+			3: func() { fmt.Println("Goldminen Level 3 aktiviert - Maximale Goldproduktion.") },
+		},
+		"Platinmine Multiplier": {
+			1: func() { fmt.Println("Platinminen Level 1 aktiviert - Platinproduktion startet.") },
+			2: func() { fmt.Println("Platinminen Level 2 aktiviert - Platinproduktion verbessert.") },
+			3: func() { fmt.Println("Platinminen Level 3 aktiviert - Maximale Platinproduktion.") },
+		},
+		"Diamantmine Multiplier": {
+			1: func() { fmt.Println("Diamantminen Level 1 aktiviert - Diamantproduktion startet.") },
+			2: func() { fmt.Println("Diamantminen Level 2 aktiviert - Diamantproduktion optimiert.") },
+			3: func() { fmt.Println("Diamantminen Level 3 aktiviert - Maximale Diamantproduktion.") },
+		},
+	}
+
+	// Fenster erstellen
+	w := a.NewWindow("Skill Tree Shop")
 	enableBackspaceClose(w)
 
-	prices := map[Resource]int{
-		Stone:    1,
-		Iron:     5,
-		Gold:     10,
-		Platinum: 20,
-		Diamond:  50,
-	}
-	resourceOrder := []Resource{Stone, Iron, Gold, Platinum, Diamond}
+	// Kristallanzeige
+	kristallLabel := createKristallLabel(inv)
 
-	moneyLabel := widget.NewLabel(fmt.Sprintf("Geld: %d", inv.Money))
-	moneyLabel.TextStyle = fyne.TextStyle{Bold: true}
+	// Shop-Layout
 	box := container.NewVBox(
-		moneyLabel,
+		kristallLabel,
 		widget.NewSeparator(),
-		widget.NewLabel("Ressourcen verkaufen"),
+		widget.NewLabel("Fähigkeiten freischalten"),
 	)
-	labels := make(map[Resource]*widget.Label)
-	sellAmounts := []int{1, 10, 100}
 
-	for _, r := range resourceOrder {
-		p := prices[r]
-		resBox := container.NewVBox()
-		label := widget.NewLabel(fmt.Sprintf("%s: %d", r, inv.Resources[r]))
-		labels[r] = label
-		resBox.Add(label)
-		for _, amt := range sellAmounts {
-			amount := amt
-			btn := widget.NewButton(fmt.Sprintf("Verkaufen %d", amount), func() {
-				inv.Lock()
-				defer inv.Unlock()
-				sell := amount
-				if inv.Resources[r] < sell {
-					sell = inv.Resources[r]
-				}
-				if sell > 0 {
-					inv.Resources[r] -= sell
-					inv.Money += sell * p
-				}
-				label.SetText(fmt.Sprintf("%s: %d", r, inv.Resources[r]))
-				moneyLabel.SetText(fmt.Sprintf("Geld: %d", inv.Money))
-
-			})
-			resBox.Add(btn)
-		}
-		box.Add(resBox)
+	// Buttons für alle Fähigkeiten
+	for skill, levels := range skills {
+		createSkillButton(skill, levels, inv, kristallLabel, levelUpFunctions, w, box)
 	}
 
-	w.SetContent(container.NewVScroll(box))
-	w.Resize(fyne.NewSize(300, 400))
+	// Fenster anzeigen
+	w.SetContent(box)
+	w.Resize(fyne.NewSize(400, 600))
 	w.Show()
 }
 
+// Hilfsfunktion für die Kristallanzeige
+func createKristallLabel(inv *Inventory) *widget.Label {
+	label := widget.NewLabel(fmt.Sprintf("Kristalle: %d", inv.Kristalle))
+	label.TextStyle = fyne.TextStyle{Bold: true}
+	return label
+}
+
+// Hilfsfunktion für die Erstellung von Buttons
+func createSkillButton(skill string, levels map[int]int, inv *Inventory, kristallLabel *widget.Label, levelUpFunctions map[string]map[int]func(), w fyne.Window, box *fyne.Container) {
+	skillBox := container.NewVBox()
+	skillLabel := widget.NewLabel(fmt.Sprintf("%s", skill))
+	skillBox.Add(skillLabel)
+
+	currentLevel := 0
+
+	// Button erstellen
+	btn := widget.NewButton(fmt.Sprintf("%s Level %d (Kosten: %d Kristalle)", skill, currentLevel+1, levels[currentLevel+1]), nil)
+
+	// Button-Event
+	btn.OnTapped = func() {
+		handleSkillUnlock(skill, levels, &currentLevel, inv, kristallLabel, levelUpFunctions, btn, skillLabel, w)
+	}
+
+	// Button hinzufügen
+	skillBox.Add(btn)
+
+	// SkillBox zur Hauptbox hinzufügen
+	box.Add(skillBox)
+}
+
+// Funktion für das Freischalten des Skills
+func handleSkillUnlock(skill string, levels map[int]int, currentLevel *int, inv *Inventory, kristallLabel *widget.Label, levelUpFunctions map[string]map[int]func(), btn *widget.Button, skillLabel *widget.Label, w fyne.Window) {
+	inv.Lock()
+	defer inv.Unlock()
+
+	// Prüfen, ob genügend Kristalle und Level verfügbar sind
+	if *currentLevel < len(levels) && inv.Kristalle >= levels[*currentLevel+1] {
+		// Kristalle abziehen und Text aktualisieren
+		inv.Kristalle -= levels[*currentLevel+1]
+		kristallLabel.SetText(fmt.Sprintf("Kristalle: %d", inv.Kristalle))
+
+		// Level erhöhen und Button-Text anpassen
+		*currentLevel++
+		btn.SetText(fmt.Sprintf("%s Level %d (Kosten: %d Kristalle)", skill, *currentLevel+1, levels[*currentLevel+1]))
+
+		// Skilllabel aktualisieren
+		skillLabel.SetText(fmt.Sprintf("%s (Level %d freigeschaltet)", skill, *currentLevel+1))
+
+		// Level-Up-Funktion ausführen
+		levelUpFunctions[skill][*currentLevel]()
+	} else if *currentLevel < len(levels) {
+		// Fehlermeldung, wenn nicht genügend Kristalle
+		dialog.ShowInformation("Nicht genug Kristalle", "Du hast nicht genügend Kristalle, um dieses Level freizuschalten.", w)
+	} else {
+		// Maximales Level erreicht
+		dialog.ShowInformation("Maximales Level erreicht", "Du hast bereits das höchste Level für dieses Skill freigeschaltet.", w)
+	}
+}
+
 /* ===================== SHOP ===================== */
+
 func openShop(a fyne.App, inv *Inventory) {
 
 	prices := map[Resource]int{
@@ -758,7 +828,7 @@ func openInventory(a fyne.App, inv *Inventory) {
 	inv.Lock()
 	// Labels für Geld und Ausrüstung
 	moneyLabel := widget.NewLabel(fmt.Sprintf("Geld: %d", inv.Money))
-	cristalleLabel := widget.NewLabel(fmt.Sprintf("Cristalle: %d", inv.Cristalle))
+	cristalleLabel := widget.NewLabel(fmt.Sprintf("Cristalle: %d", inv.Kristalle))
 	pickaxeLabel := widget.NewLabel(fmt.Sprintf("Spitzhacke: %s", inv.Pickaxe))
 	swordLabel := widget.NewLabel(fmt.Sprintf("Schwert: %s (Attack: %d)", inv.Sword, swordAttack[inv.Sword]))
 	armorLabel := widget.NewLabel(fmt.Sprintf("Rüstung: %s (Verteidigung: %d)", inv.Armor, armorDefense[inv.Armor]))
@@ -789,7 +859,7 @@ func openInventory(a fyne.App, inv *Inventory) {
 		for range ticker.C {
 			inv.Lock()
 			moneyLabel.SetText(fmt.Sprintf("Geld: %d", inv.Money))
-			cristalleLabel.SetText(fmt.Sprintf("Cristalle: %d", inv.Cristalle))
+			cristalleLabel.SetText(fmt.Sprintf("Cristalle: %d", inv.Kristalle))
 			pickaxeLabel.SetText(fmt.Sprintf("Spitzhacke: %s", inv.Pickaxe))
 			swordLabel.SetText(fmt.Sprintf("Schwert: %s (Attack: %d)", inv.Sword, swordAttack[inv.Sword]))
 			armorLabel.SetText(fmt.Sprintf("Rüstung: %s (Verteidigung: %d)", inv.Armor, armorDefense[inv.Armor]))
@@ -973,7 +1043,7 @@ func openDungeon(a fyne.App, mainWindow fyne.Window, inv *Inventory) {
 				if allEnemiesDead {
 					healthLabel.SetText("Du hast Gewonnen!")
 					ticker.Stop() // Stoppe den Ticker
-					inv.Cristalle += 1
+					inv.Kristalle += 1
 					time.Sleep(2 * time.Second) // Kurze Pause, damit der Spieler den Tod der Gegner sehen kann
 					w2.Close()                  // Dungeon-Fenster schließen
 					closeDungeon()
