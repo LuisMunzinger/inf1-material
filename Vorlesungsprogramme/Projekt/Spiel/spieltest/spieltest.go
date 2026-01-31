@@ -474,6 +474,9 @@ func openMineShop(a fyne.App, m *Mine, inv *Inventory) {
 }
 
 /*====================== Cristal Shop ==================*/
+// Globale Map für die gespeicherten Levels
+var currentLevels = make(map[string]int)
+
 func openKristallShop(a fyne.App, inv *Inventory) {
 	// Preis für jede Fähigkeit (in Kristallen)
 	skills := map[string]map[int]int{
@@ -529,7 +532,11 @@ func openKristallShop(a fyne.App, inv *Inventory) {
 
 	// Buttons für alle Fähigkeiten
 	for skill, levels := range skills {
-		createSkillButton(skill, levels, inv, kristallLabel, levelUpFunctions, w, box)
+		// Lade das aktuelle Level aus der globalen Map
+		currentLevel := currentLevels[skill]
+
+		// Button und Anzeige für jedes Skill erstellen
+		createSkillButton(skill, levels, currentLevel, inv, kristallLabel, levelUpFunctions, w, box)
 	}
 
 	// Fenster anzeigen
@@ -546,12 +553,10 @@ func createKristallLabel(inv *Inventory) *widget.Label {
 }
 
 // Hilfsfunktion für die Erstellung von Buttons
-func createSkillButton(skill string, levels map[int]int, inv *Inventory, kristallLabel *widget.Label, levelUpFunctions map[string]map[int]func(), w fyne.Window, box *fyne.Container) {
+func createSkillButton(skill string, levels map[int]int, currentLevel int, inv *Inventory, kristallLabel *widget.Label, levelUpFunctions map[string]map[int]func(), w fyne.Window, box *fyne.Container) {
 	skillBox := container.NewVBox()
 	skillLabel := widget.NewLabel(fmt.Sprintf("%s", skill))
 	skillBox.Add(skillLabel)
-
-	currentLevel := 0
 
 	// Button erstellen
 	btn := widget.NewButton(fmt.Sprintf("%s Level %d (Kosten: %d Kristalle)", skill, currentLevel+1, levels[currentLevel+1]), nil)
@@ -566,6 +571,16 @@ func createSkillButton(skill string, levels map[int]int, inv *Inventory, kristal
 
 	// SkillBox zur Hauptbox hinzufügen
 	box.Add(skillBox)
+
+	// Anzeige des Levels aktualisieren
+	updateSkillDisplay(skill, currentLevel, levels, btn, skillLabel)
+}
+
+// Funktion zur Aktualisierung der Anzeige für den Skill
+func updateSkillDisplay(skill string, currentLevel int, levels map[int]int, btn *widget.Button, skillLabel *widget.Label) {
+	// Button und Label mit den aktuellen Level-Informationen aktualisieren
+	btn.SetText(fmt.Sprintf("%s Level %d (Kosten: %d Kristalle)", skill, currentLevel+1, levels[currentLevel+1]))
+	skillLabel.SetText(fmt.Sprintf("%s (Level %d freigeschaltet)", skill, currentLevel+1))
 }
 
 // Funktion für das Freischalten des Skills
@@ -581,13 +596,13 @@ func handleSkillUnlock(skill string, levels map[int]int, currentLevel *int, inv 
 
 		// Level erhöhen und Button-Text anpassen
 		*currentLevel++
-		btn.SetText(fmt.Sprintf("%s Level %d (Kosten: %d Kristalle)", skill, *currentLevel+1, levels[*currentLevel+1]))
-
-		// Skilllabel aktualisieren
-		skillLabel.SetText(fmt.Sprintf("%s (Level %d freigeschaltet)", skill, *currentLevel+1))
+		updateSkillDisplay(skill, *currentLevel, levels, btn, skillLabel)
 
 		// Level-Up-Funktion ausführen
 		levelUpFunctions[skill][*currentLevel]()
+
+		// Aktuelles Level in der globalen Map speichern
+		currentLevels[skill] = *currentLevel
 	} else if *currentLevel < len(levels) {
 		// Fehlermeldung, wenn nicht genügend Kristalle
 		dialog.ShowInformation("Nicht genug Kristalle", "Du hast nicht genügend Kristalle, um dieses Level freizuschalten.", w)
