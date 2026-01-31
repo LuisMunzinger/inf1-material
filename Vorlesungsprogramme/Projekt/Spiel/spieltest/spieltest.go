@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"image/color"
+	"math"
 	"sync"
 	"time"
 
@@ -218,9 +219,8 @@ func main() {
 	player.Move(fyne.NewPos(x, y))
 
 	// Spieler-Lebensanzeige
-	//maxHealth := 100
-	//currentHealth := 100
-	healthBarWidth := float32(30)
+	playerHealth := 100
+	healthBarWidth := float32(playerHealth) / 10
 	healthBarHeight := float32(5)
 
 	healthBar := canvas.NewRectangle(color.RGBA{255, 0, 0, 255}) // rot
@@ -341,7 +341,7 @@ func main() {
 		player.Move(fyne.NewPos(x, y))
 
 		// Health Bar über dem Spieler aktualisieren
-		healthBar.Move(fyne.NewPos(x, y-healthBarHeight-2))
+		healthBar.Move(fyne.NewPos(x-5, y-healthBarHeight-2))
 		healthBar.Refresh()
 
 		for _, m := range mines {
@@ -738,45 +738,133 @@ func openDungeon(a fyne.App, mainWindow fyne.Window, inv *Inventory) {
 	w := a.NewWindow("Dungeon")
 	w.Resize(fyne.NewSize(400, 300))
 
-	// Dungeon-Buttons
+	// Lebenspunkte des Spielers
+	var playerHealth int = 100
+	healthLabel := widget.NewLabel(fmt.Sprintf("%d", playerHealth))
+
 	adventureBtn := widget.NewButton("Ebene 1", func() {
 		w.Hide()
-		w2 := a.NewWindow("Abenteuer")
+		w2 := a.NewWindow("Ebene 1")
 		w2.Resize(fyne.NewSize(400, 300))
-		w2.SetContent(container.NewVBox(
-			widget.NewButton("Zurück zum Dungeon", func() {
-				w2.Close()
-				w.Show() // Dungeon-Fenster wieder anzeigen
-			}),
-		))
-		w2.Show()
-	})
 
-	adventureBtn2 := widget.NewButton("Ebene 2", func() {
-		w.Hide()
-		w2 := a.NewWindow("Abenteuer")
-		w2.Resize(fyne.NewSize(400, 300))
-		w2.SetContent(container.NewVBox(
-			widget.NewLabel("Hier beginnt dein Abenteuer2!"),
-			widget.NewButton("Zurück zum Dungeon", func() {
-				w2.Close()
-				w.Show() // Dungeon-Fenster wieder anzeigen
-			}),
-		))
-		w2.Show()
-	})
+		// Spieler erstellen
+		player := canvas.NewRectangle(color.RGBA{0, 200, 100, 255})
+		player.Resize(fyne.NewSize(playerW, playerH))
+		x, y := float32(50), float32(50)
+		player.Move(fyne.NewPos(x, y))
 
-	adventureBtn3 := widget.NewButton("Ebene 3", func() {
-		w.Hide()
-		w2 := a.NewWindow("Abenteuer")
-		w2.Resize(fyne.NewSize(400, 300))
-		w2.SetContent(container.NewVBox(
-			widget.NewLabel("Hier beginnt dein Abenteuer3!"),
-			widget.NewButton("Zurück zum Dungeon", func() {
+		// Health Bar erstellen
+		healthBarWidth := float32(playerHealth) / 10 // Berechnung des Health Bar mit Skalierung
+		healthBarHeight := float32(5)
+
+		healthBar := canvas.NewRectangle(color.RGBA{255, 0, 0, 255}) // rot
+		healthBar.Resize(fyne.NewSize(healthBarWidth, healthBarHeight))
+		healthBar.Move(fyne.NewPos(x-5, y-healthBarHeight-2)) // über dem Spieler
+
+		objects := []fyne.CanvasObject{player}
+
+		// Gegner (rote Blöcke) erstellen
+		type Enemy struct {
+			Rect  *canvas.Rectangle
+			X, Y  float32
+			Speed float32
+		}
+
+		enemies := []*Enemy{
+			{Rect: canvas.NewRectangle(color.RGBA{255, 0, 0, 255}), X: 300, Y: 50, Speed: 2},
+			{Rect: canvas.NewRectangle(color.RGBA{255, 0, 0, 255}), X: 200, Y: 200, Speed: 1.5},
+		}
+
+		for _, e := range enemies {
+			e.Rect.Resize(fyne.NewSize(20, 20))
+			e.Rect.Move(fyne.NewPos(e.X, e.Y))
+		}
+
+		objects = append(objects, healthBar)
+		for _, e := range enemies {
+			objects = append(objects, e.Rect)
+		}
+
+		w2.SetContent(container.NewWithoutLayout(objects...))
+
+		// Spielerbewegung
+		w2.Canvas().SetOnTypedKey(func(k *fyne.KeyEvent) {
+			speed := float32(10)
+			switch k.Name {
+			case fyne.KeyUp:
+				y -= speed
+			case fyne.KeyDown:
+				y += speed
+			case fyne.KeyLeft:
+				x -= speed
+			case fyne.KeyRight:
+				x += speed
+			case fyne.KeyEscape, fyne.KeyBackspace: // Dungeon zurück
 				w2.Close()
-				w.Show() // Dungeon-Fenster wieder anzeigen
-			}),
-		))
+				w.Show()
+				return
+			}
+
+			// Health Bar über dem Spieler aktualisieren
+			healthBar.Move(fyne.NewPos(x-5, y-healthBarHeight-2))
+			healthBar.Refresh()
+
+			// Position begrenzen
+			x = clamp(x, 0, 400-playerW)
+			y = clamp(y, 0, 300-playerH)
+			player.Move(fyne.NewPos(x, y))
+			player.Refresh()
+
+			// Kollisionsüberprüfung mit den Gegnern
+			for _, e := range enemies {
+				dx := x - e.X
+				dy := y - e.Y
+				dist := float32(math.Sqrt(float64(dx*dx + dy*dy)))
+
+				// Wenn der Spieler mit einem Gegner kollidiert (Abstand < 20px)
+				if dist < 20 {
+					// Lebenspunkte abziehen
+					if healthBarWidth > 0 {
+						healthBarWidth -= 5 // Verringere den Wert auf 5, damit die Lebenspunkte langsamer sinken
+
+						// Health Bar anpassen
+						healthBar.Resize(fyne.NewSize(healthBarWidth, healthBarHeight)) // Breite anpassen
+						healthBar.Refresh()
+
+						// Lebenspunkte anzeigen
+						healthLabel.SetText(fmt.Sprintf("%d", int(healthBarWidth*10))) // Update health label
+
+						// Wenn die Lebenspunkte 0 erreichen, kann der Spieler sterben
+						if healthBarWidth <= 0 {
+							healthLabel.SetText("Du bist gestorben!")
+							// Hier könnte der Spieler z.B. zum Hauptmenü zurückkehren oder das Spiel beenden
+							return
+						}
+					}
+				}
+			}
+		})
+
+		// Gegner-Bewegung (auf Spieler zu)
+		go func() {
+			ticker := time.NewTicker(time.Millisecond * 50)
+			defer ticker.Stop()
+			for range ticker.C {
+				for _, e := range enemies {
+					// Richtung zum Spieler berechnen
+					dx := x - e.X
+					dy := y - e.Y
+					dist := float32(math.Sqrt(float64(dx*dx + dy*dy)))
+					if dist > 0 {
+						e.X += e.Speed * dx / dist
+						e.Y += e.Speed * dy / dist
+					}
+					e.Rect.Move(fyne.NewPos(e.X, e.Y))
+					e.Rect.Refresh()
+				}
+			}
+		}()
+
 		w2.Show()
 	})
 
@@ -787,7 +875,7 @@ func openDungeon(a fyne.App, mainWindow fyne.Window, inv *Inventory) {
 	}
 
 	w.SetContent(container.NewVBox(
-		adventureBtn, adventureBtn2, adventureBtn3,
+		adventureBtn,
 		widget.NewButton("Dungeon verlassen", closeDungeon),
 	))
 
