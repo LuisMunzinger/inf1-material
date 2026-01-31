@@ -160,6 +160,7 @@ type Inventory struct {
 	Sword     Sword
 	Armor     Armor
 	Money     int
+	Cristalle int
 }
 
 /* ===================== HELPER ===================== */
@@ -211,6 +212,7 @@ func main() {
 		Sword:     WoodSword,
 		Armor:     WoodArmor,
 		Money:     200,
+		Cristalle: 0,
 	}
 
 	player := canvas.NewRectangle(color.RGBA{0, 200, 100, 255})
@@ -690,11 +692,13 @@ func openInventory(a fyne.App, inv *Inventory) {
 	inv.Lock()
 	// Labels für Geld und Ausrüstung
 	moneyLabel := widget.NewLabel(fmt.Sprintf("Geld: %d", inv.Money))
+	cristalleLabel := widget.NewLabel(fmt.Sprintf("Cristalle: %d", inv.Cristalle))
 	pickaxeLabel := widget.NewLabel(fmt.Sprintf("Spitzhacke: %s", inv.Pickaxe))
 	swordLabel := widget.NewLabel(fmt.Sprintf("Schwert: %s (Attack: %d)", inv.Sword, swordAttack[inv.Sword]))
 	armorLabel := widget.NewLabel(fmt.Sprintf("Rüstung: %s (Verteidigung: %d)", inv.Armor, armorDefense[inv.Armor]))
 
 	box.Add(moneyLabel)
+	box.Add(cristalleLabel)
 	box.Add(pickaxeLabel)
 	box.Add(swordLabel)
 	box.Add(armorLabel)
@@ -719,6 +723,7 @@ func openInventory(a fyne.App, inv *Inventory) {
 		for range ticker.C {
 			inv.Lock()
 			moneyLabel.SetText(fmt.Sprintf("Geld: %d", inv.Money))
+			cristalleLabel.SetText(fmt.Sprintf("Cristalle: %d", inv.Cristalle))
 			pickaxeLabel.SetText(fmt.Sprintf("Spitzhacke: %s", inv.Pickaxe))
 			swordLabel.SetText(fmt.Sprintf("Schwert: %s (Attack: %d)", inv.Sword, swordAttack[inv.Sword]))
 			armorLabel.SetText(fmt.Sprintf("Rüstung: %s (Verteidigung: %d)", inv.Armor, armorDefense[inv.Armor]))
@@ -740,7 +745,7 @@ func openDungeon(a fyne.App, mainWindow fyne.Window, inv *Inventory) {
 
 	// Lebenspunkte des Spielers
 	var playerHealth int = 100
-	playerHealth = playerHealth / 10
+	playerHealth = playerHealth / 10 * armorDefense[inv.Armor]
 	healthLabel := widget.NewLabel(fmt.Sprintf("%d", playerHealth))
 
 	adventureBtn := widget.NewButton("Ebene 1", func() {
@@ -876,7 +881,7 @@ func openDungeon(a fyne.App, mainWindow fyne.Window, inv *Inventory) {
 					if distance < 50 {
 						// Gegner verliert Lebenspunkte jede Sekunde
 						if e.Health > 0 {
-							e.Health -= 10
+							e.Health -= 10 * swordAttack[inv.Sword]
 							// Health Bar des Gegners aktualisieren
 							e.HealthBar.Resize(fyne.NewSize(float32(e.Health)/10, healthBarHeight)) // Health Bar anpassen
 							e.HealthBar.Refresh()                                                   // Health Bar aktualisieren
