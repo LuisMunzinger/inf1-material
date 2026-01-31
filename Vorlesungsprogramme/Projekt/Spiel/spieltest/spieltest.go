@@ -54,7 +54,7 @@ const (
 	windowHeight    = 700
 	playerW         = 20
 	playerH         = 40
-	speed           = 10
+	speed           = 20
 	iconSize        = 40
 	interactionDist = 80
 	borderWidth     = 4
@@ -190,6 +190,14 @@ func getMineUpgradeCost(m *Mine) (money int, resources map[Resource]int, ok bool
 	return money, resources, true
 }
 
+func enableBackspaceClose(w fyne.Window) {
+	w.Canvas().SetOnTypedKey(func(k *fyne.KeyEvent) {
+		if k.Name == fyne.KeyBackspace || k.Name == fyne.KeyEscape {
+			w.Close()
+		}
+	})
+}
+
 /* ===================== SPIEL ===================== */
 func main() {
 	a := app.New()
@@ -209,6 +217,18 @@ func main() {
 	x, y := float32(50), float32(50)
 	player.Move(fyne.NewPos(x, y))
 
+	// Spieler-Lebensanzeige
+	//maxHealth := 100
+	//currentHealth := 100
+	healthBarWidth := float32(30)
+	healthBarHeight := float32(5)
+
+	healthBar := canvas.NewRectangle(color.RGBA{255, 0, 0, 255}) // rot
+	healthBar.Resize(fyne.NewSize(healthBarWidth, healthBarHeight))
+	healthBar.Move(fyne.NewPos(x-5, y-healthBarHeight-2)) // über dem Spieler
+
+	objects := []fyne.CanvasObject{healthBar, player}
+
 	// Minen erstellen
 	mines := []*Mine{
 		{"Steinmine", fyne.NewPos(100, 200), Stone, 100, 1, WoodPickaxe, false, 0, nil, nil},
@@ -217,8 +237,6 @@ func main() {
 		{"Platinmine", fyne.NewPos(700, 200), Platinum, 1000, 1, GoldPickaxe, false, 0, nil, nil},
 		{"Diamantmine", fyne.NewPos(900, 200), Diamond, 2000, 1, PlatinumPickaxe, false, 0, nil, nil},
 	}
-
-	objects := []fyne.CanvasObject{player}
 
 	for _, m := range mines {
 		icon := canvas.NewRectangle(color.Gray{Y: 180})
@@ -310,9 +328,10 @@ func main() {
 				return
 			}
 			if dist2(p, dungeon.Pos) < interactionDist*interactionDist {
-				openDungeon(a)
+				openDungeon(a, w, inv) // hier übergeben wir das Hauptfenster
 				return
 			}
+
 		case fyne.KeySpace:
 			openInventory(a, inv)
 		}
@@ -320,6 +339,10 @@ func main() {
 		x = clamp(x, 0, windowWidth-playerW)
 		y = clamp(y, 0, windowHeight-playerH)
 		player.Move(fyne.NewPos(x, y))
+
+		// Health Bar über dem Spieler aktualisieren
+		healthBar.Move(fyne.NewPos(x, y-healthBarHeight-2))
+		healthBar.Refresh()
 
 		for _, m := range mines {
 			d := dist2(fyne.NewPos(x, y), m.Pos)
@@ -348,6 +371,7 @@ func main() {
 /* ===================== MINE SHOP ===================== */
 func openMineShop(a fyne.App, m *Mine, inv *Inventory) {
 	w := a.NewWindow(m.Name)
+	enableBackspaceClose(w)
 	w.Resize(fyne.NewSize(400, 350))
 
 	label := widget.NewLabel("")
@@ -438,6 +462,7 @@ func openMineShop(a fyne.App, m *Mine, inv *Inventory) {
 
 /* ===================== SHOP ===================== */
 func openShop(a fyne.App, inv *Inventory) {
+
 	prices := map[Resource]int{
 		Stone:    1,
 		Iron:     5,
@@ -448,7 +473,14 @@ func openShop(a fyne.App, inv *Inventory) {
 	resourceOrder := []Resource{Stone, Iron, Gold, Platinum, Diamond}
 
 	w := a.NewWindow("Shop")
-	box := container.NewVBox(widget.NewLabel("Ressourcen verkaufen"))
+	enableBackspaceClose(w)
+	moneyLabel := widget.NewLabel(fmt.Sprintf("Geld: %d", inv.Money))
+	moneyLabel.TextStyle = fyne.TextStyle{Bold: true}
+	box := container.NewVBox(
+		moneyLabel,
+		widget.NewSeparator(),
+		widget.NewLabel("Ressourcen verkaufen"),
+	)
 	labels := make(map[Resource]*widget.Label)
 	sellAmounts := []int{1, 10, 100}
 
@@ -472,6 +504,8 @@ func openShop(a fyne.App, inv *Inventory) {
 					inv.Money += sell * p
 				}
 				label.SetText(fmt.Sprintf("%s: %d", r, inv.Resources[r]))
+				moneyLabel.SetText(fmt.Sprintf("Geld: %d", inv.Money))
+
 			})
 			resBox.Add(btn)
 		}
@@ -483,6 +517,7 @@ func openShop(a fyne.App, inv *Inventory) {
 		defer ticker.Stop()
 		for range ticker.C {
 			inv.Lock()
+			moneyLabel.SetText(fmt.Sprintf("Geld: %d", inv.Money))
 			for r, label := range labels {
 				label.SetText(fmt.Sprintf("%s: %d", r, inv.Resources[r]))
 			}
@@ -498,7 +533,8 @@ func openShop(a fyne.App, inv *Inventory) {
 /* ===================== SCHMIED ===================== */
 func openSmith(a fyne.App, inv *Inventory) {
 	w := a.NewWindow("Schmied")
-	w.Resize(fyne.NewSize(400, 500))
+	enableBackspaceClose(w)
+	w.Resize(fyne.NewSize(600, 500))
 
 	info := widget.NewLabel("")
 	msgLabel := widget.NewLabel("") // Nur für Upgrade-Meldungen
@@ -647,6 +683,7 @@ func openSmith(a fyne.App, inv *Inventory) {
 /* ===================== INVENTAR ===================== */
 func openInventory(a fyne.App, inv *Inventory) {
 	w := a.NewWindow("Inventar")
+	enableBackspaceClose(w)
 	w.Resize(fyne.NewSize(300, 400))
 	box := container.NewVBox()
 
@@ -694,13 +731,72 @@ func openInventory(a fyne.App, inv *Inventory) {
 }
 
 /* ===================== DUNGEON ===================== */
-func openDungeon(a fyne.App) {
+func openDungeon(a fyne.App, mainWindow fyne.Window, inv *Inventory) {
+	// Hauptfenster ausblenden, nicht schließen
+	mainWindow.Hide()
+
 	w := a.NewWindow("Dungeon")
 	w.Resize(fyne.NewSize(400, 300))
 
-	label := widget.NewLabel("Willkommen im Dungeon!\nHier kannst du Abenteuer erleben.")
-	w.SetContent(container.NewVBox(label,
-		widget.NewButton("Schließen", func() { w.Close() }),
+	// Dungeon-Buttons
+	adventureBtn := widget.NewButton("Ebene 1", func() {
+		w.Hide()
+		w2 := a.NewWindow("Abenteuer")
+		w2.Resize(fyne.NewSize(400, 300))
+		w2.SetContent(container.NewVBox(
+			widget.NewButton("Zurück zum Dungeon", func() {
+				w2.Close()
+				w.Show() // Dungeon-Fenster wieder anzeigen
+			}),
+		))
+		w2.Show()
+	})
+
+	adventureBtn2 := widget.NewButton("Ebene 2", func() {
+		w.Hide()
+		w2 := a.NewWindow("Abenteuer")
+		w2.Resize(fyne.NewSize(400, 300))
+		w2.SetContent(container.NewVBox(
+			widget.NewLabel("Hier beginnt dein Abenteuer2!"),
+			widget.NewButton("Zurück zum Dungeon", func() {
+				w2.Close()
+				w.Show() // Dungeon-Fenster wieder anzeigen
+			}),
+		))
+		w2.Show()
+	})
+
+	adventureBtn3 := widget.NewButton("Ebene 3", func() {
+		w.Hide()
+		w2 := a.NewWindow("Abenteuer")
+		w2.Resize(fyne.NewSize(400, 300))
+		w2.SetContent(container.NewVBox(
+			widget.NewLabel("Hier beginnt dein Abenteuer3!"),
+			widget.NewButton("Zurück zum Dungeon", func() {
+				w2.Close()
+				w.Show() // Dungeon-Fenster wieder anzeigen
+			}),
+		))
+		w2.Show()
+	})
+
+	// Funktion zum Schließen des Dungeon-Fensters
+	closeDungeon := func() {
+		w.Close()
+		mainWindow.Show() // Hauptfenster wieder anzeigen
+	}
+
+	w.SetContent(container.NewVBox(
+		adventureBtn, adventureBtn2, adventureBtn3,
+		widget.NewButton("Dungeon verlassen", closeDungeon),
 	))
+
+	// Backspace oder Escape schließt auch das Dungeon
+	w.Canvas().SetOnTypedKey(func(k *fyne.KeyEvent) {
+		if k.Name == fyne.KeyBackspace || k.Name == fyne.KeyEscape {
+			closeDungeon()
+		}
+	})
+
 	w.Show()
 }
