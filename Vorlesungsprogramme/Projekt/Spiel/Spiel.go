@@ -81,21 +81,21 @@ var pickaxeResourceCost = map[Pickaxe]map[Resource]int{
 }
 
 var swordAttack = map[Sword]int{
-	WoodSword:     5,
-	StoneSword:    10,
-	IronSword:     20,
-	GoldSword:     30,
-	PlatinumSword: 40,
-	DiamondSword:  50,
+	WoodSword:     1,
+	StoneSword:    3,
+	IronSword:     5,
+	GoldSword:     8,
+	PlatinumSword: 10,
+	DiamondSword:  13,
 }
 
 var armorDefense = map[Armor]int{
-	WoodArmor:     2,
-	StoneArmor:    5,
-	IronArmor:     10,
-	GoldArmor:     15,
-	PlatinumArmor: 20,
-	DiamondArmor:  30,
+	WoodArmor:     1,
+	StoneArmor:    3,
+	IronArmor:     5,
+	GoldArmor:     8,
+	PlatinumArmor: 10,
+	DiamondArmor:  13,
 }
 
 var swordUpgrade = map[Sword]Sword{
@@ -740,6 +740,7 @@ func openDungeon(a fyne.App, mainWindow fyne.Window, inv *Inventory) {
 
 	// Lebenspunkte des Spielers
 	var playerHealth int = 100
+	playerHealth = playerHealth / 10
 	healthLabel := widget.NewLabel(fmt.Sprintf("%d", playerHealth))
 
 	adventureBtn := widget.NewButton("Ebene 1", func() {
@@ -754,36 +755,45 @@ func openDungeon(a fyne.App, mainWindow fyne.Window, inv *Inventory) {
 		player.Move(fyne.NewPos(x, y))
 
 		// Health Bar erstellen
-		healthBarWidth := float32(playerHealth) / 10 // Berechnung des Health Bar mit Skalierung
+		healthBarWidth := float32(playerHealth) // Berechnung des Health Bar mit Skalierung
 		healthBarHeight := float32(5)
 
 		healthBar := canvas.NewRectangle(color.RGBA{255, 0, 0, 255}) // rot
 		healthBar.Resize(fyne.NewSize(healthBarWidth, healthBarHeight))
 		healthBar.Move(fyne.NewPos(x-5, y-healthBarHeight-2)) // über dem Spieler
 
-		objects := []fyne.CanvasObject{player}
+		objects := []fyne.CanvasObject{player, healthLabel}
 
 		// Gegner (rote Blöcke) erstellen
 		type Enemy struct {
-			Rect  *canvas.Rectangle
-			X, Y  float32
-			Speed float32
+			Rect      *canvas.Rectangle
+			Health    int
+			HealthBar *canvas.Rectangle
+			X, Y      float32
+			Speed     float32
 		}
 
+		// Gegner erstellen und Lebensbalken hinzufügen
 		enemies := []*Enemy{
-			{Rect: canvas.NewRectangle(color.RGBA{255, 0, 0, 255}), X: 300, Y: 50, Speed: 2},
-			{Rect: canvas.NewRectangle(color.RGBA{255, 0, 0, 255}), X: 200, Y: 200, Speed: 1.5},
+			{Rect: canvas.NewRectangle(color.RGBA{255, 0, 0, 255}), X: 300, Y: 50, Speed: 2, Health: 50},
+			{Rect: canvas.NewRectangle(color.RGBA{255, 0, 0, 255}), X: 200, Y: 200, Speed: 1.5, Health: 50},
 		}
 
 		for _, e := range enemies {
 			e.Rect.Resize(fyne.NewSize(20, 20))
 			e.Rect.Move(fyne.NewPos(e.X, e.Y))
+
+			// Health Bar für den Gegner erstellen
+			e.HealthBar = canvas.NewRectangle(color.RGBA{255, 0, 0, 255})           // gelb
+			e.HealthBar.Resize(fyne.NewSize(float32(e.Health)/10, healthBarHeight)) // Skalierung des HealthBars
+			e.HealthBar.Move(fyne.NewPos(e.X-5, e.Y-e.HealthBar.Size().Height-2))   // Position über dem Gegner
+
+			// Gegner + HealthBar zu Objekten hinzufügen
+			objects = append(objects, e.Rect, e.HealthBar)
 		}
 
-		objects = append(objects, healthBar)
-		for _, e := range enemies {
-			objects = append(objects, e.Rect)
-		}
+		// Health Label anpassen, damit es sichtbar ist
+		healthLabel.Move(fyne.NewPos(150, 10)) // Position des Labels oben im Fenster
 
 		w2.SetContent(container.NewWithoutLayout(objects...))
 
@@ -815,53 +825,72 @@ func openDungeon(a fyne.App, mainWindow fyne.Window, inv *Inventory) {
 			player.Move(fyne.NewPos(x, y))
 			player.Refresh()
 
-			// Kollisionsüberprüfung mit den Gegnern
-			for _, e := range enemies {
-				dx := x - e.X
-				dy := y - e.Y
-				dist := float32(math.Sqrt(float64(dx*dx + dy*dy)))
+			// Health Bar anpassen
+			healthBar.Resize(fyne.NewSize(healthBarWidth, healthBarHeight)) // Breite anpassen
+			healthBar.Refresh()
 
-				// Wenn der Spieler mit einem Gegner kollidiert (Abstand < 20px)
-				if dist < 20 {
-					// Lebenspunkte abziehen
-					if healthBarWidth > 0 {
-						healthBarWidth -= 5 // Verringere den Wert auf 5, damit die Lebenspunkte langsamer sinken
-
-						// Health Bar anpassen
-						healthBar.Resize(fyne.NewSize(healthBarWidth, healthBarHeight)) // Breite anpassen
-						healthBar.Refresh()
-
-						// Lebenspunkte anzeigen
-						healthLabel.SetText(fmt.Sprintf("%d", int(healthBarWidth*10))) // Update health label
-
-						// Wenn die Lebenspunkte 0 erreichen, kann der Spieler sterben
-						if healthBarWidth <= 0 {
-							healthLabel.SetText("Du bist gestorben!")
-							// Hier könnte der Spieler z.B. zum Hauptmenü zurückkehren oder das Spiel beenden
-							return
-						}
-					}
-				}
-			}
+			// Lebenspunkte anzeigen
+			healthLabel.SetText(fmt.Sprintf("%d", int(healthBarWidth))) // Update health label
 		})
 
-		// Gegner-Bewegung (auf Spieler zu)
+		// Ticker, der alle 2 Sekunden den Health Bar reduziert
+		ticker := time.NewTicker(1 * time.Second)
 		go func() {
-			ticker := time.NewTicker(time.Millisecond * 50)
-			defer ticker.Stop()
 			for range ticker.C {
-				for _, e := range enemies {
-					// Richtung zum Spieler berechnen
-					dx := x - e.X
-					dy := y - e.Y
-					dist := float32(math.Sqrt(float64(dx*dx + dy*dy)))
-					if dist > 0 {
-						e.X += e.Speed * dx / dist
-						e.Y += e.Speed * dy / dist
-					}
-					e.Rect.Move(fyne.NewPos(e.X, e.Y))
-					e.Rect.Refresh()
+				// Health Bar breiter machen (überprüfen, ob sie nicht unter 0 geht)
+				if healthBarWidth > 0 {
+					playerHealth -= 1
+					healthBarWidth = float32(playerHealth)
+					// Health Bar anpassen
+					healthBar.Resize(fyne.NewSize(healthBarWidth, healthBarHeight))
+					healthBar.Refresh()
+
+					// Lebenspunkte anzeigen
+					healthLabel.SetText(fmt.Sprintf("%d", int(healthBarWidth))) // Update health label
 				}
+				// Wenn die Lebenspunkte 0 erreichen, stoppen wir den Ticker
+				if healthBarWidth == 0 {
+					healthLabel.SetText("Du bist gestorben!")
+					ticker.Stop() // Stoppe den Ticker, wenn der Spieler gestorben ist
+					// Dungeon zurück und Hauptfenster anzeigen
+					time.Sleep(2 * time.Second)
+					w2.Close() // Dungeon-Fenster schließen
+					w.Show()   // Hauptfenster anzeigen
+					return
+				}
+
+				// Hier alle 2 Sekunden wiederholen
+				time.Sleep(2 * time.Second)
+			}
+		}()
+
+		// Gegner bewegen und Schaden nehmen, wenn der Spieler in der Nähe ist
+		// Gegner bewegen und Schaden nehmen, wenn der Spieler in der Nähe ist
+		go func() {
+			for {
+				for _, e := range enemies {
+					// Berechne die Distanz zwischen dem Spieler und dem Gegner
+					distance := math.Sqrt(float64((x-e.X)*(x-e.X) + (y-e.Y)*(y-e.Y)))
+
+					// Wenn der Spieler nahe genug am Gegner ist (z.B. Abstand < 50)
+					if distance < 50 {
+						// Gegner verliert Lebenspunkte jede Sekunde
+						if e.Health > 0 {
+							e.Health -= 10
+							// Health Bar des Gegners aktualisieren
+							e.HealthBar.Resize(fyne.NewSize(float32(e.Health)/10, healthBarHeight)) // Health Bar anpassen
+							e.HealthBar.Refresh()                                                   // Health Bar aktualisieren
+						}
+					}
+
+					// Wenn der Gegner keine Lebenspunkte mehr hat
+					if e.Health <= 0 {
+						e.Rect.FillColor = color.Gray{Y: 200} // Gegner "sterben"
+					}
+				}
+
+				// Alle 1 Sekunde Schaden zugefügt werden
+				time.Sleep(1 * time.Second)
 			}
 		}()
 
