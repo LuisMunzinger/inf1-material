@@ -555,22 +555,55 @@ func openMineShop(a fyne.App, m *Mine, inv *Inventory) {
 }
 
 /*====================== Cristal Shop ==================*/
-// Globale Map für die gespeicherten Levels
 var currentLevels = make(map[string]int)
 
 func openKristallShop(a fyne.App, inv *Inventory) {
+
+	// Feste Reihenfolge für die Skills
+	skillOrder := []string{
+		"Kohlemine Multiplier",
+		"Steinminen Multiplier",
+		"Kupfermine Multiplier",
+		"Eisenminen Multiplier",
+		"Silberminen Multiplier",
+		"Goldminen Multiplier",
+		"Platinmine Multiplier",
+		"Rubinmine Multiplier",
+		"Diamantmine Multiplier",
+		"Mythrilmine Multiplier",
+		"Blutkristallmine Multiplier",
+		"Adamantiummine Multiplier",
+	}
+
 	// Preis für jede Fähigkeit (in Kristallen)
 	skills := map[string]map[int]int{
-		"Steinminen Multiplier":  {1: 10, 2: 25, 3: 50},
-		"Eisenminen Multiplier":  {1: 15, 2: 35, 3: 70},
-		"Goldminen Multiplier":   {1: 20, 2: 45, 3: 90},
-		"Platinmine Multiplier":  {1: 10, 2: 25, 3: 50},
-		"Diamantmine Multiplier": {1: 15, 2: 35, 3: 70},
+		"Kohlemine Multiplier":        {1: 10, 2: 25, 3: 50},
+		"Steinminen Multiplier":       {1: 10, 2: 25, 3: 50},
+		"Kupfermine Multiplier":       {1: 10, 2: 25, 3: 50},
+		"Eisenminen Multiplier":       {1: 15, 2: 35, 3: 70},
+		"Silberminen Multiplier":      {1: 10, 2: 25, 3: 50},
+		"Goldminen Multiplier":        {1: 20, 2: 45, 3: 90},
+		"Platinmine Multiplier":       {1: 10, 2: 25, 3: 50},
+		"Rubinmine Multiplier":        {1: 10, 2: 25, 3: 50},
+		"Diamantmine Multiplier":      {1: 15, 2: 35, 3: 70},
+		"Mythrilmine Multiplier":      {1: 10, 2: 25, 3: 50},
+		"Blutkristallmine Multiplier": {1: 10, 2: 25, 3: 50},
+		"Adamantiummine Multiplier":   {1: 10, 2: 25, 3: 50},
 	}
 
 	// Level-Up-Funktionen für Skills
 	levelUpFunctions := map[string]map[int]func(){
+		"Kohleminen Multiplier": {
+			1: func() { fmt.Println("Steinminen Level 1 aktiviert - Mehr Ressourcen sammeln!") },
+			2: func() { fmt.Println("Steinminen Level 2 aktiviert - Kristallgewinn erhöht!") },
+			3: func() { fmt.Println("Steinminen Level 3 aktiviert - Maximale Ressourcengewinnung!") },
+		},
 		"Steinminen Multiplier": {
+			1: func() { fmt.Println("Steinminen Level 1 aktiviert - Mehr Ressourcen sammeln!") },
+			2: func() { fmt.Println("Steinminen Level 2 aktiviert - Kristallgewinn erhöht!") },
+			3: func() { fmt.Println("Steinminen Level 3 aktiviert - Maximale Ressourcengewinnung!") },
+		},
+		"Kupferminen Multiplier": {
 			1: func() { fmt.Println("Steinminen Level 1 aktiviert - Mehr Ressourcen sammeln!") },
 			2: func() { fmt.Println("Steinminen Level 2 aktiviert - Kristallgewinn erhöht!") },
 			3: func() { fmt.Println("Steinminen Level 3 aktiviert - Maximale Ressourcengewinnung!") },
@@ -579,6 +612,11 @@ func openKristallShop(a fyne.App, inv *Inventory) {
 			1: func() { fmt.Println("Eisenminen Level 1 aktiviert - Eisenproduktion startet.") },
 			2: func() { fmt.Println("Eisenminen Level 2 aktiviert - Eisenproduktion verbessert.") },
 			3: func() { fmt.Println("Eisenminen Level 3 aktiviert - Maximale Eisenproduktion.") },
+		},
+		"Silberminen Multiplier": {
+			1: func() { fmt.Println("Steinminen Level 1 aktiviert - Mehr Ressourcen sammeln!") },
+			2: func() { fmt.Println("Steinminen Level 2 aktiviert - Kristallgewinn erhöht!") },
+			3: func() { fmt.Println("Steinminen Level 3 aktiviert - Maximale Ressourcengewinnung!") },
 		},
 		"Goldminen Multiplier": {
 			1: func() { fmt.Println("Goldminen Level 1 aktiviert - Goldproduktion startet.") },
@@ -590,10 +628,30 @@ func openKristallShop(a fyne.App, inv *Inventory) {
 			2: func() { fmt.Println("Platinminen Level 2 aktiviert - Platinproduktion verbessert.") },
 			3: func() { fmt.Println("Platinminen Level 3 aktiviert - Maximale Platinproduktion.") },
 		},
+		"Rubinminen Multiplier": {
+			1: func() { fmt.Println("Steinminen Level 1 aktiviert - Mehr Ressourcen sammeln!") },
+			2: func() { fmt.Println("Steinminen Level 2 aktiviert - Kristallgewinn erhöht!") },
+			3: func() { fmt.Println("Steinminen Level 3 aktiviert - Maximale Ressourcengewinnung!") },
+		},
 		"Diamantmine Multiplier": {
 			1: func() { fmt.Println("Diamantminen Level 1 aktiviert - Diamantproduktion startet.") },
 			2: func() { fmt.Println("Diamantminen Level 2 aktiviert - Diamantproduktion optimiert.") },
 			3: func() { fmt.Println("Diamantminen Level 3 aktiviert - Maximale Diamantproduktion.") },
+		},
+		"Mythrilminen Multiplier": {
+			1: func() { fmt.Println("Steinminen Level 1 aktiviert - Mehr Ressourcen sammeln!") },
+			2: func() { fmt.Println("Steinminen Level 2 aktiviert - Kristallgewinn erhöht!") },
+			3: func() { fmt.Println("Steinminen Level 3 aktiviert - Maximale Ressourcengewinnung!") },
+		},
+		"Blutkristallminen Multiplier": {
+			1: func() { fmt.Println("Steinminen Level 1 aktiviert - Mehr Ressourcen sammeln!") },
+			2: func() { fmt.Println("Steinminen Level 2 aktiviert - Kristallgewinn erhöht!") },
+			3: func() { fmt.Println("Steinminen Level 3 aktiviert - Maximale Ressourcengewinnung!") },
+		},
+		"Adamantiumminen Multiplier": {
+			1: func() { fmt.Println("Steinminen Level 1 aktiviert - Mehr Ressourcen sammeln!") },
+			2: func() { fmt.Println("Steinminen Level 2 aktiviert - Kristallgewinn erhöht!") },
+			3: func() { fmt.Println("Steinminen Level 3 aktiviert - Maximale Ressourcengewinnung!") },
 		},
 	}
 
@@ -604,24 +662,31 @@ func openKristallShop(a fyne.App, inv *Inventory) {
 	// Kristallanzeige
 	kristallLabel := createKristallLabel(inv)
 
-	// Shop-Layout
-	box := container.NewVBox(
+	// Hauptbox für das Fenster
+	mainBox := container.NewVBox(
 		kristallLabel,
 		widget.NewSeparator(),
 		widget.NewLabel("Fähigkeiten freischalten"),
 	)
 
-	// Buttons für alle Fähigkeiten
-	for skill, levels := range skills {
-		// Lade das aktuelle Level aus der globalen Map
-		currentLevel := currentLevels[skill]
+	// VBox für die Skills
+	skillsBox := container.NewVBox()
 
-		// Button und Anzeige für jedes Skill erstellen
-		createSkillButton(skill, levels, currentLevel, inv, kristallLabel, levelUpFunctions, w, box)
+	// Buttons für alle Fähigkeiten in fester Reihenfolge erstellen
+	for _, skill := range skillOrder {
+		levels := skills[skill]
+		currentLevel := currentLevels[skill]
+		skillBox := createSkillButton(skill, levels, currentLevel, inv, kristallLabel, levelUpFunctions, w, nil)
+		skillsBox.Add(skillBox)
 	}
 
-	// Fenster anzeigen
-	w.SetContent(box)
+	// Scrollbaren Container erstellen
+	scroll := container.NewVScroll(skillsBox)
+	scroll.SetMinSize(fyne.NewSize(380, 500)) // Höhe und Breite des Scrollbereichs
+	mainBox.Add(scroll)
+
+	// Fensterinhalt setzen
+	w.SetContent(mainBox)
 	w.Resize(fyne.NewSize(400, 600))
 	w.Show()
 }
@@ -634,7 +699,7 @@ func createKristallLabel(inv *Inventory) *widget.Label {
 }
 
 // Hilfsfunktion für die Erstellung von Buttons
-func createSkillButton(skill string, levels map[int]int, currentLevel int, inv *Inventory, kristallLabel *widget.Label, levelUpFunctions map[string]map[int]func(), w fyne.Window, box *fyne.Container) {
+func createSkillButton(skill string, levels map[int]int, currentLevel int, inv *Inventory, kristallLabel *widget.Label, levelUpFunctions map[string]map[int]func(), w fyne.Window, _ *fyne.Container) *fyne.Container {
 	skillBox := container.NewVBox()
 	skillLabel := widget.NewLabel(fmt.Sprintf("%s", skill))
 	skillBox.Add(skillLabel)
@@ -644,51 +709,49 @@ func createSkillButton(skill string, levels map[int]int, currentLevel int, inv *
 
 	// Button-Event
 	btn.OnTapped = func() {
-		handleSkillUnlock(skill, levels, &currentLevel, inv, kristallLabel, levelUpFunctions, btn, skillLabel, w)
+		handleSkillUnlock(skill, levels, inv, kristallLabel, levelUpFunctions, btn, skillLabel, w)
 	}
 
 	// Button hinzufügen
 	skillBox.Add(btn)
 
-	// SkillBox zur Hauptbox hinzufügen
-	box.Add(skillBox)
-
 	// Anzeige des Levels aktualisieren
 	updateSkillDisplay(skill, currentLevel, levels, btn, skillLabel)
+
+	return skillBox
 }
 
 // Funktion zur Aktualisierung der Anzeige für den Skill
 func updateSkillDisplay(skill string, currentLevel int, levels map[int]int, btn *widget.Button, skillLabel *widget.Label) {
-	// Button und Label mit den aktuellen Level-Informationen aktualisieren
 	btn.SetText(fmt.Sprintf("%s Level %d (Kosten: %d Kristalle)", skill, currentLevel+1, levels[currentLevel+1]))
 	skillLabel.SetText(fmt.Sprintf("%s (Level %d freigeschaltet)", skill, currentLevel+1))
 }
 
 // Funktion für das Freischalten des Skills
-func handleSkillUnlock(skill string, levels map[int]int, currentLevel *int, inv *Inventory, kristallLabel *widget.Label, levelUpFunctions map[string]map[int]func(), btn *widget.Button, skillLabel *widget.Label, w fyne.Window) {
+func handleSkillUnlock(skill string, levels map[int]int, inv *Inventory, kristallLabel *widget.Label, levelUpFunctions map[string]map[int]func(), btn *widget.Button, skillLabel *widget.Label, w fyne.Window) {
 	inv.Lock()
 	defer inv.Unlock()
 
-	// Prüfen, ob genügend Kristalle und Level verfügbar sind
-	if *currentLevel < len(levels) && inv.Kristalle >= levels[*currentLevel+1] {
-		// Kristalle abziehen und Text aktualisieren
-		inv.Kristalle -= levels[*currentLevel+1]
+	currentLevel := currentLevels[skill]
+
+	if currentLevel < len(levels) && inv.Kristalle >= levels[currentLevel+1] {
+		inv.Kristalle -= levels[currentLevel+1]
 		kristallLabel.SetText(fmt.Sprintf("Kristalle: %d", inv.Kristalle))
 
-		// Level erhöhen und Button-Text anpassen
-		*currentLevel++
-		updateSkillDisplay(skill, *currentLevel, levels, btn, skillLabel)
+		currentLevel++
+		currentLevels[skill] = currentLevel
 
-		// Level-Up-Funktion ausführen
-		levelUpFunctions[skill][*currentLevel]()
+		updateSkillDisplay(skill, currentLevel, levels, btn, skillLabel)
 
-		// Aktuelles Level in der globalen Map speichern
-		currentLevels[skill] = *currentLevel
-	} else if *currentLevel < len(levels) {
-		// Fehlermeldung, wenn nicht genügend Kristalle
+		// Sicherstellen, dass Funktion existiert
+		if fnMap, ok := levelUpFunctions[skill]; ok {
+			if fn, ok := fnMap[currentLevel]; ok && fn != nil {
+				fn()
+			}
+		}
+	} else if currentLevel < len(levels) {
 		dialog.ShowInformation("Nicht genug Kristalle", "Du hast nicht genügend Kristalle, um dieses Level freizuschalten.", w)
 	} else {
-		// Maximales Level erreicht
 		dialog.ShowInformation("Maximales Level erreicht", "Du hast bereits das höchste Level für dieses Skill freigeschaltet.", w)
 	}
 }
