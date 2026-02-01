@@ -1198,8 +1198,7 @@ func openSmith(a fyne.App, inv *Inventory) {
 func openInventory(a fyne.App, inv *Inventory) {
 	w := a.NewWindow("Inventar")
 	enableBackspaceClose(w)
-	w.Resize(fyne.NewSize(300, 400))
-	box := container.NewVBox()
+	w.Resize(fyne.NewSize(700, 500))
 
 	inv.Lock()
 	// Labels für Geld und Ausrüstung
@@ -1208,24 +1207,73 @@ func openInventory(a fyne.App, inv *Inventory) {
 	pickaxeLabel := widget.NewLabel(fmt.Sprintf("Spitzhacke: %s", inv.Pickaxe))
 	swordLabel := widget.NewLabel(fmt.Sprintf("Schwert: %s (Attack: %d)", inv.Sword, swordAttack[inv.Sword]))
 	armorLabel := widget.NewLabel(fmt.Sprintf("Rüstung: %s (Verteidigung: %d)", inv.Armor, armorDefense[inv.Armor]))
+	inv.Unlock()
 
-	box.Add(moneyLabel)
-	box.Add(cristalleLabel)
-	box.Add(pickaxeLabel)
-	box.Add(swordLabel)
-	box.Add(armorLabel)
-
-	// Ressourcen-Labels
-	box.Add(widget.NewLabel("--- Ressourcen ---"))
+	// Spalten
+	erzBox := container.NewVBox()
+	barrenBox := container.NewVBox()
+	kristallBox := container.NewVBox()
 	resourceLabels := make(map[Resource]*widget.Label)
-	for _, r := range []Resource{Kohle, Stone, Kupfererz, Eisenerz, Silvererz, Golderz, Platinerz, Rubinerz, Diamanterz, Mythrilerz, Blutkristallerz, Adamantiumerz, Kupferbarren, Eisenbarren, Stahlbarren, Silberbarren, Goldbarren, Platinbarren, Mythrilbarren, Adamantiumbarren, GeschliffenerRubin, GeschliffenerDiamant, GeschliffenerBlutkristall} {
+
+	// Überschriften
+	erzBox.Add(widget.NewLabelWithStyle("⛏ Erze", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}))
+	barrenBox.Add(widget.NewLabelWithStyle("🔥 Barren", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}))
+	kristallBox.Add(widget.NewLabelWithStyle("💎 Geschliffene Edelsteine", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}))
+
+	// Listen
+	erzListe := []Resource{Kohle, Stone, Kupfererz, Eisenerz, Silvererz, Golderz, Platinerz, Mythrilerz, Adamantiumerz}
+	barrenListe := []Resource{Stahlbarren, Kupferbarren, Eisenbarren, Silberbarren, Goldbarren, Platinbarren, Mythrilbarren, Adamantiumbarren}
+	kristallListe := []Resource{GeschliffenerRubin, GeschliffenerDiamant, GeschliffenerBlutkristall}
+
+	inv.Lock()
+	// Erz-Spalte
+	for _, r := range erzListe {
 		label := widget.NewLabel(fmt.Sprintf("%s: %d", r, inv.Resources[r]))
 		resourceLabels[r] = label
-		box.Add(label)
+		erzBox.Add(label)
+	}
+
+	// Barren-Spalte: leeren Abstand einfügen, um sie "nach unten" zu verschieben
+	for i := 0; i < 1; i++ { // z.B. 2 leere Zeilen
+		barrenBox.Add(widget.NewLabel(" "))
+	}
+
+	for _, b := range barrenListe {
+		label := widget.NewLabel(fmt.Sprintf("%s: %d", b, inv.Resources[b]))
+		resourceLabels[b] = label
+		barrenBox.Add(label)
+	}
+
+	// Kristall-Spalte
+	for _, r := range kristallListe {
+		label := widget.NewLabel(fmt.Sprintf("%s: %d", r, inv.Resources[r]))
+		resourceLabels[r] = label
+		kristallBox.Add(label)
 	}
 	inv.Unlock()
 
-	w.SetContent(container.NewVScroll(box))
+	// Layout: Oben Geld + Ausrüstung
+	topBox := container.NewVBox(
+		moneyLabel,
+		cristalleLabel,
+		pickaxeLabel,
+		swordLabel,
+		armorLabel,
+		widget.NewSeparator(),
+	)
+
+	resourceColumns := container.NewHBox(
+		erzBox,
+		barrenBox,
+		kristallBox,
+	)
+
+	mainBox := container.NewVBox(
+		topBox,
+		resourceColumns,
+	)
+
+	w.SetContent(mainBox)
 	w.Show()
 
 	// Live-Update
@@ -1239,8 +1287,15 @@ func openInventory(a fyne.App, inv *Inventory) {
 			pickaxeLabel.SetText(fmt.Sprintf("Spitzhacke: %s", inv.Pickaxe))
 			swordLabel.SetText(fmt.Sprintf("Schwert: %s (Attack: %d)", inv.Sword, swordAttack[inv.Sword]))
 			armorLabel.SetText(fmt.Sprintf("Rüstung: %s (Verteidigung: %d)", inv.Armor, armorDefense[inv.Armor]))
-			for r, label := range resourceLabels {
-				label.SetText(fmt.Sprintf("%s: %d", r, inv.Resources[r]))
+
+			for _, r := range erzListe {
+				resourceLabels[r].SetText(fmt.Sprintf("%s: %d", r, inv.Resources[r]))
+			}
+			for _, b := range barrenListe {
+				resourceLabels[b].SetText(fmt.Sprintf("%s: %d", b, inv.Resources[b]))
+			}
+			for _, r := range kristallListe {
+				resourceLabels[r].SetText(fmt.Sprintf("%s: %d", r, inv.Resources[r]))
 			}
 			inv.Unlock()
 		}
@@ -1262,13 +1317,41 @@ func openDungeon(a fyne.App, mainWindow fyne.Window, inv *Inventory) {
 	}
 
 	// Lebenspunkte des Spielers
-	var playerHealth int = 100
+	playerHealth := 100
 	playerHealth = playerHealth / 10 * armorDefense[inv.Armor]
 	healthLabel := widget.NewLabel(fmt.Sprintf("%d", playerHealth))
 
-	adventureBtn := widget.NewButton("Ebene 1", func() {
+	// Container für Dungeon-Level-Buttons
+	levelButtonContainer := container.NewVBox()
+	currentLevel := 1
+
+	// Initiale Ebene erstellen
+	createLevel(a, inv, w, mainWindow, &currentLevel, levelButtonContainer, healthLabel, playerHealth, closeDungeon)
+
+	w.SetContent(container.NewVBox(
+		levelButtonContainer,
+		widget.NewButton("Dungeon verlassen", closeDungeon),
+	))
+
+	w.Canvas().SetOnTypedKey(func(k *fyne.KeyEvent) {
+		if k.Name == fyne.KeyBackspace || k.Name == fyne.KeyEscape {
+			closeDungeon()
+		}
+	})
+
+	w.Show()
+}
+
+// Ausgelagerte Level-Erstellungsfunktion
+func createLevel(a fyne.App, inv *Inventory, w fyne.Window, mainWindow fyne.Window, currentLevel *int,
+	levelButtonContainer *fyne.Container, healthLabel *widget.Label, playerHealth int, closeDungeon func()) {
+
+	level := *currentLevel
+	levelName := fmt.Sprintf("Ebene %d", level)
+
+	adventureBtn := widget.NewButton(levelName, func() {
 		w.Hide()
-		w2 := a.NewWindow("Ebene 1")
+		w2 := a.NewWindow(levelName)
 		w2.Resize(fyne.NewSize(400, 300))
 
 		// Spieler erstellen
@@ -1278,16 +1361,15 @@ func openDungeon(a fyne.App, mainWindow fyne.Window, inv *Inventory) {
 		player.Move(fyne.NewPos(x, y))
 
 		// Health Bar erstellen
-		healthBarWidth := float32(playerHealth) // Berechnung des Health Bar mit Skalierung
+		healthBarWidth := float32(playerHealth)
 		healthBarHeight := float32(5)
-
-		healthBar := canvas.NewRectangle(color.RGBA{255, 0, 0, 255}) // rot
+		healthBar := canvas.NewRectangle(color.RGBA{255, 0, 0, 255})
 		healthBar.Resize(fyne.NewSize(healthBarWidth, healthBarHeight))
-		healthBar.Move(fyne.NewPos(x-5, y-healthBarHeight-2)) // über dem Spieler
+		healthBar.Move(fyne.NewPos(x-5, y-healthBarHeight-2))
 
 		objects := []fyne.CanvasObject{player, healthLabel}
 
-		// Gegner (rote Blöcke) erstellen
+		// Gegner erstellen
 		type Enemy struct {
 			Rect      *canvas.Rectangle
 			Health    int
@@ -1296,28 +1378,27 @@ func openDungeon(a fyne.App, mainWindow fyne.Window, inv *Inventory) {
 			Speed     float32
 		}
 
-		// Gegner erstellen und Lebensbalken hinzufügen
-		enemies := []*Enemy{
-			{Rect: canvas.NewRectangle(color.RGBA{255, 0, 0, 255}), X: 300, Y: 50, Speed: 2, Health: 50},
-			{Rect: canvas.NewRectangle(color.RGBA{255, 0, 0, 255}), X: 200, Y: 200, Speed: 1.5, Health: 50},
-		}
-
-		for _, e := range enemies {
+		numEnemies := level + 1
+		enemies := []*Enemy{}
+		for i := 0; i < numEnemies; i++ {
+			e := &Enemy{
+				Rect:   canvas.NewRectangle(color.RGBA{255, 0, 0, 255}),
+				X:      float32(50 + i*60),
+				Y:      float32(50 + i*40),
+				Speed:  1 + float32(level)*0.5,
+				Health: 50 + level*10,
+			}
 			e.Rect.Resize(fyne.NewSize(20, 20))
 			e.Rect.Move(fyne.NewPos(e.X, e.Y))
-
-			// Health Bar für den Gegner erstellen
-			e.HealthBar = canvas.NewRectangle(color.RGBA{255, 0, 0, 255})           // rot
-			e.HealthBar.Resize(fyne.NewSize(float32(e.Health)/10, healthBarHeight)) // Skalierung des HealthBars
-			e.HealthBar.Move(fyne.NewPos(e.X-5, e.Y-e.HealthBar.Size().Height-2))   // Position über dem Gegner
-
-			// Gegner + HealthBar zu Objekten hinzufügen
+			e.HealthBar = canvas.NewRectangle(color.RGBA{255, 0, 0, 255})
+			e.HealthBar.Resize(fyne.NewSize(float32(e.Health)/10, healthBarHeight))
+			e.HealthBar.Move(fyne.NewPos(e.X-5, e.Y-e.HealthBar.Size().Height-2))
 			objects = append(objects, e.Rect, e.HealthBar)
+			enemies = append(enemies, e)
 		}
 
-		// Health Label anpassen, damit es sichtbar ist
-		healthLabel.Move(fyne.NewPos(150, 10)) // Position des Labels oben im Fenster
-
+		// Health Label oben positionieren
+		healthLabel.Move(fyne.NewPos(150, 10))
 		w2.SetContent(container.NewWithoutLayout(objects...))
 
 		// Spielerbewegung
@@ -1332,101 +1413,84 @@ func openDungeon(a fyne.App, mainWindow fyne.Window, inv *Inventory) {
 				x -= speed
 			case fyne.KeyRight:
 				x += speed
-			case fyne.KeyEscape, fyne.KeyBackspace: // Dungeon zurück
+			case fyne.KeyEscape, fyne.KeyBackspace:
 				w2.Close()
-				w.Show() // Hauptfenster wieder anzeigen
+				w.Show()
 				return
 			}
-
-			// Health Bar über dem Spieler aktualisieren
-			healthBar.Move(fyne.NewPos(x-5, y-healthBarHeight-2))
-			healthBar.Refresh()
-
-			// Position begrenzen
 			x = clamp(x, 0, 400-playerW)
 			y = clamp(y, 0, 300-playerH)
 			player.Move(fyne.NewPos(x, y))
 			player.Refresh()
 
-			// Health Bar anpassen
-			healthBar.Resize(fyne.NewSize(healthBarWidth, healthBarHeight)) // Breite anpassen
+			healthBar.Move(fyne.NewPos(x-5, y-healthBarHeight-2))
+			healthBar.Resize(fyne.NewSize(healthBarWidth, healthBarHeight))
 			healthBar.Refresh()
-
-			// Lebenspunkte anzeigen
-			healthLabel.SetText(fmt.Sprintf("%d", int(healthBarWidth))) // Update health label
+			healthLabel.SetText(fmt.Sprintf("%d", int(healthBarWidth)))
 		})
 
-		// Ticker, der alle 2 Sekunden den Health Bar reduziert
+		// Spieler-Health Ticker
 		ticker := time.NewTicker(1 * time.Second)
 		go func() {
 			for range ticker.C {
-				// Health Bar breiter machen (überprüfen, ob sie nicht unter 0 geht)
 				if healthBarWidth > 0 {
 					playerHealth -= 1
 					healthBarWidth = float32(playerHealth)
-					// Health Bar anpassen
 					healthBar.Resize(fyne.NewSize(healthBarWidth, healthBarHeight))
 					healthBar.Refresh()
-
-					// Lebenspunkte anzeigen
-					healthLabel.SetText(fmt.Sprintf("%d", int(healthBarWidth))) // Update health label
+					healthLabel.SetText(fmt.Sprintf("%d", int(healthBarWidth)))
 				}
-				// Wenn die Lebenspunkte 0 erreichen, stoppen wir den Ticker
-				if healthBarWidth == 0 {
+				if healthBarWidth <= 0 {
 					healthLabel.SetText("Du bist gestorben!")
-					ticker.Stop() // Stoppe den Ticker, wenn der Spieler gestorben ist
-					// Hauptfenster anzeigen und Dungeon-Fenster schließen
+					ticker.Stop()
 					time.Sleep(2 * time.Second)
-					w2.Close() // Dungeon-Fenster schließen
+					w2.Close()
 					closeDungeon()
 					return
 				}
-
-				// Hier alle 2 Sekunden wiederholen
 				time.Sleep(2 * time.Second)
 			}
 		}()
 
-		// Gegner bewegen und Schaden nehmen, wenn der Spieler in der Nähe ist
+		// Gegner-Logik
 		go func() {
 			for {
-				allEnemiesDead := true // Flag, um zu prüfen, ob alle Gegner tot sind
+				allEnemiesDead := true
 				for _, e := range enemies {
-					// Berechne die Distanz zwischen dem Spieler und dem Gegner
 					distance := math.Sqrt(float64((x-e.X)*(x-e.X) + (y-e.Y)*(y-e.Y)))
-
-					// Wenn der Spieler nahe genug am Gegner ist (z.B. Abstand < 50)
-					if distance < 50 {
-						// Gegner verliert Lebenspunkte jede Sekunde
-						if e.Health > 0 {
-							e.Health -= 10 * swordAttack[inv.Sword]
-							// Health Bar des Gegners aktualisieren
-							e.HealthBar.Resize(fyne.NewSize(float32(e.Health)/10, healthBarHeight)) // Health Bar anpassen
-							e.HealthBar.Refresh()                                                   // Health Bar aktualisieren
-						}
+					if distance < 50 && e.Health > 0 {
+						e.Health -= 10 * swordAttack[inv.Sword]
+						e.HealthBar.Resize(fyne.NewSize(float32(e.Health)/10, healthBarHeight))
+						e.HealthBar.Refresh()
 					}
-
-					// Wenn der Gegner keine Lebenspunkte mehr hat
-					if e.Health <= 0 {
-						e.Rect.FillColor = color.Gray{Y: 200} // Gegner "sterben"
-					} else {
-						// Wenn der Gegner noch lebt, setzen wir das Flag auf false
+					if e.Health > 0 {
 						allEnemiesDead = false
+					} else {
+						e.Rect.FillColor = color.Gray{Y: 200}
+						e.Rect.Refresh()
 					}
 				}
 
-				// Wenn alle Gegner tot sind, schließen wir das Dungeon-Fenster
 				if allEnemiesDead {
-					healthLabel.SetText("Du hast Gewonnen!")
-					ticker.Stop() // Stoppe den Ticker
+					// Spieler hat gewonnen
+					ticker.Stop()
 					inv.Kristalle += 1
-					time.Sleep(2 * time.Second) // Kurze Pause, damit der Spieler den Tod der Gegner sehen kann
-					w2.Close()                  // Dungeon-Fenster schließen
-					closeDungeon()
+
+					// Spielerleben zurücksetzen
+					playerHealth = 100 / 10 * armorDefense[inv.Armor]
+					healthLabel.SetText(fmt.Sprintf("%d", playerHealth))
+					healthLabel.SetText("Du hast Gewonnen!")
+
+					time.Sleep(2 * time.Second)
+					w2.Close()
+					w.Show() // zurück zum Dungeon-Hauptfenster
+
+					// Nächste Ebene als Button hinzufügen, aber nicht direkt starten
+					*currentLevel++
+					createLevel(a, inv, w, mainWindow, currentLevel, levelButtonContainer, healthLabel, playerHealth, closeDungeon)
 					return
 				}
 
-				// Alle 1 Sekunde Schaden zugefügt werden
 				time.Sleep(1 * time.Second)
 			}
 		}()
@@ -1434,17 +1498,7 @@ func openDungeon(a fyne.App, mainWindow fyne.Window, inv *Inventory) {
 		w2.Show()
 	})
 
-	w.SetContent(container.NewVBox(
-		adventureBtn,
-		widget.NewButton("Dungeon verlassen", closeDungeon),
-	))
-
-	// Backspace oder Escape schließt auch das Dungeon
-	w.Canvas().SetOnTypedKey(func(k *fyne.KeyEvent) {
-		if k.Name == fyne.KeyBackspace || k.Name == fyne.KeyEscape {
-			closeDungeon()
-		}
-	})
-
-	w.Show()
+	// Button zum Dungeon-Fenster hinzufügen
+	levelButtonContainer.Add(adventureBtn)
+	levelButtonContainer.Refresh()
 }
