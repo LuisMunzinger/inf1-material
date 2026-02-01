@@ -111,27 +111,27 @@ var pickaxeResourceCost = map[Pickaxe]map[Resource]int{
 
 var swordUpgradeCost = map[Sword]map[Resource]int{
 	WoodSword:       {Stone: 20},
-	StoneSword:      {Kupferbarren: 20},
-	KupferSword:     {Eisenbarren: 20},
-	IronSword:       {Stahlbarren: 20},
-	StahlSword:      {Goldbarren: 20},
-	GoldSword:       {Platinbarren: 20},
-	PlatinumSword:   {GeschliffenerDiamant: 20},
-	DiamondSword:    {Mythrilbarren: 20},
-	MythrilSword:    {Adamantiumbarren: 20},
+	StoneSword:      {Stone: 20},
+	KupferSword:     {Kupferbarren: 20},
+	IronSword:       {Eisenbarren: 20},
+	StahlSword:      {Stahlbarren: 20},
+	GoldSword:       {Goldbarren: 20},
+	PlatinumSword:   {Platinbarren: 20},
+	DiamondSword:    {GeschliffenerDiamant: 20},
+	MythrilSword:    {Mythrilbarren: 20},
 	AdamantiumSword: {Adamantiumbarren: 100},
 }
 
 var armorUpgradeCost = map[Armor]map[Resource]int{
 	WoodArmor:       {Stone: 20},
-	StoneArmor:      {Kupferbarren: 20},
-	KupferArmor:     {Eisenbarren: 20},
-	IronArmor:       {Stahlbarren: 20},
-	StahlArmor:      {Goldbarren: 20},
-	GoldArmor:       {Platinbarren: 20},
-	PlatinumArmor:   {GeschliffenerDiamant: 20},
-	DiamondArmor:    {Mythrilbarren: 20},
-	MythrilArmor:    {Adamantiumbarren: 20},
+	StoneArmor:      {Stone: 20},
+	KupferArmor:     {Kupferbarren: 20},
+	IronArmor:       {Eisenbarren: 20},
+	StahlArmor:      {Stahlbarren: 20},
+	GoldArmor:       {Goldbarren: 20},
+	PlatinumArmor:   {Platinbarren: 20},
+	DiamondArmor:    {GeschliffenerDiamant: 20},
+	MythrilArmor:    {Mythrilbarren: 20},
 	AdamantiumArmor: {Adamantiumbarren: 100},
 }
 
@@ -278,8 +278,8 @@ func main() {
 		Pickaxe:   WoodPickaxe,
 		Sword:     WoodSword,
 		Armor:     WoodArmor,
-		Money:     0,
-		Kristalle: 0,
+		Money:     1000,
+		Kristalle: 1000,
 	}
 
 	player := canvas.NewRectangle(color.RGBA{0, 200, 100, 255})
@@ -1035,170 +1035,217 @@ func openSchmelzofen(a fyne.App, inv *Inventory) {
 
 /* ===================== SCHMIED ===================== */
 func openSmith(a fyne.App, inv *Inventory) {
-	w := a.NewWindow("Schmied")
-	enableBackspaceClose(w)
-	w.Resize(fyne.NewSize(600, 500))
+	w := a.NewWindow("Schmiede")
+	w.Resize(fyne.NewSize(400, 350))
 
-	info := widget.NewLabel("")
-	msgLabel := widget.NewLabel("") // Nur für Upgrade-Meldungen
+	content := container.NewVBox()
 
-	pickaxeCostLabel := widget.NewLabel("")
-	swordCostLabel := widget.NewLabel("")
-	armorCostLabel := widget.NewLabel("")
+	// Statusanzeige
+	moneyLabel := widget.NewLabel("")
+	pickaxeLabel := widget.NewLabel("")
+	swordLabel := widget.NewLabel("")
+	armorLabel := widget.NewLabel("")
 
-	// Update nur der Ressourcen / Kosten Labels
-	updateCosts := func() {
+	updateStatus := func() {
 		inv.Lock()
-		defer inv.Unlock()
+		m := inv.Money
+		p := inv.Pickaxe
+		s := inv.Sword
+		a := inv.Armor
+		inv.Unlock()
 
-		info.SetText(fmt.Sprintf(
-			"Geld: %d\nSpitzhacke: %s\nSchwert: %s (Attack: %d)\nRüstung: %s (Verteidigung: %d)",
-			inv.Money,
-			inv.Pickaxe,
-			inv.Sword, swordAttack[inv.Sword],
-			inv.Armor, armorDefense[inv.Armor],
-		))
-
-		updateLabel := func(current interface{}, label *widget.Label, itemType string) {
-			switch c := current.(type) {
-			case Pickaxe:
-				if next, ok := pickaxeUpgrade[c]; ok {
-					text := fmt.Sprintf("Für Upgrade auf %s benötigst du:\n", next)
-					for r, amt := range pickaxeResourceCost[c] {
-						text += fmt.Sprintf("%s: %d (Du hast: %d)\n", r, amt, inv.Resources[r])
-					}
-					label.SetText(text)
-				} else {
-					label.SetText(itemType + " ist max. Level")
-				}
-			case Sword:
-				if next, ok := swordUpgrade[c]; ok {
-					text := fmt.Sprintf("Für Upgrade auf %s benötigst du:\n", next)
-					for r, amt := range swordUpgradeCost[c] {
-						text += fmt.Sprintf("%s: %d (Du hast: %d)\n", r, amt, inv.Resources[r])
-					}
-					label.SetText(text)
-				} else {
-					label.SetText(itemType + " ist max. Level")
-				}
-			case Armor:
-				if next, ok := armorUpgrade[c]; ok {
-					text := fmt.Sprintf("Für Upgrade auf %s benötigst du:\n", next)
-					for r, amt := range armorUpgradeCost[c] {
-						text += fmt.Sprintf("%s: %d (Du hast: %d)\n", r, amt, inv.Resources[r])
-					}
-					label.SetText(text)
-				} else {
-					label.SetText(itemType + " ist max. Level")
-				}
-			}
-		}
-
-		updateLabel(inv.Pickaxe, pickaxeCostLabel, "Spitzhacke")
-		updateLabel(inv.Sword, swordCostLabel, "Schwert")
-		updateLabel(inv.Armor, armorCostLabel, "Rüstung")
+		moneyLabel.SetText(fmt.Sprintf("Geld: %d", m))
+		pickaxeLabel.SetText(fmt.Sprintf("Pickaxe: %s", p))
+		swordLabel.SetText(fmt.Sprintf("Sword: %s", s))
+		armorLabel.SetText(fmt.Sprintf("Armor: %s", a))
 	}
 
-	tryUpgrade := func(current interface{}) {
-		inv.Lock()
-		defer inv.Unlock()
-
-		switch c := current.(type) {
-		case Pickaxe:
-			next, ok := pickaxeUpgrade[c]
-			if !ok {
-				dialog.ShowInformation("Spitzhacke ist max. Level!", "Deine Spitzhacke ist schon auf dem maximalen Level", w)
-				return
-			}
-			for r, amt := range pickaxeResourceCost[c] {
-				if inv.Resources[r] < amt {
-					dialog.ShowInformation("Nicht genügend Ressourcen für die Spitzhacke!", "Dir fehlen Ressourcen für das Spitzhacke-Upgraden", w)
-					return
-				}
-			}
-			for r, amt := range pickaxeResourceCost[c] {
-				inv.Resources[r] -= amt
-			}
-			inv.Pickaxe = next
-			dialog.ShowInformation("", "Spitzhacke erfolgreich geupgradet", w)
-
-		case Sword:
-			next, ok := swordUpgrade[c]
-			if !ok {
-				dialog.ShowInformation("Schwert ist max. Level!", "Deine Schwert ist schon auf dem maximalen Level", w)
-				return
-			}
-			for r, amt := range swordUpgradeCost[c] {
-				if inv.Resources[r] < amt {
-					dialog.ShowInformation("Nicht genügend Ressourcen für das Schwert!", "Dir fehlen Ressourcen für das Schwert upzugraden", w)
-					return
-				}
-			}
-			for r, amt := range swordUpgradeCost[c] {
-				inv.Resources[r] -= amt
-			}
-			inv.Sword = next
-			dialog.ShowInformation("", "Schwert erfolgreich geupgradet", w)
-
-		case Armor:
-			next, ok := armorUpgrade[c]
-			if !ok {
-				dialog.ShowInformation("Rüstung ist max. Level!", "Deine Rüstung ist schon auf dem maximalen Level", w)
-				return
-			}
-			for r, amt := range armorUpgradeCost[c] {
-				if inv.Resources[r] < amt {
-					dialog.ShowInformation("Nicht genügend Ressourcen für Rüstung!", "Dir fehlen Ressourcen für das Rüstungs-Upgrade", w)
-					return
-				}
-			}
-			for r, amt := range armorUpgradeCost[c] {
-				inv.Resources[r] -= amt
-			}
-			inv.Armor = next
-			dialog.ShowInformation("", "Rüstung erfolgreich geupgradet", w)
-
-		default:
-			dialog.ShowInformation("Fehler", "Unbekannter Gegenstand zum Upgraden", w)
-		}
-		updateCosts() // Hier rufst du die Funktion zur Aktualisierung der Ressourcen auf
-	}
-	pickaxeBtn := widget.NewButton("Upgrade Spitzhacke", func() {
-		tryUpgrade(inv.Pickaxe) // Nur die Funktion aufrufen, ohne msgLabel.SetText
-	})
-
-	swordBtn := widget.NewButton("Upgrade Schwert", func() {
-		tryUpgrade(inv.Sword)
-	})
-
-	armorBtn := widget.NewButton("Upgrade Rüstung", func() {
-		tryUpgrade(inv.Armor)
-	})
-	box := container.NewVBox(
-		info, msgLabel,
-		pickaxeCostLabel, pickaxeBtn,
-		swordCostLabel, swordBtn,
-		armorCostLabel, armorBtn,
+	statusContainer := container.NewVBox(
+		moneyLabel,
+		pickaxeLabel,
+		swordLabel,
+		armorLabel,
 	)
-	w.SetContent(container.NewVScroll(box))
-	updateCosts() // Initiale Ressourcen-Updates, falls erforderlich
-	w.Show()
+	content.Add(statusContainer)
 
-	// Live-Update nur für die Ressourcen, msgLabel bleibt unberührt
-	go func() {
-		ticker := time.NewTicker(500 * time.Millisecond)
-		defer ticker.Stop()
-		for range ticker.C {
-			updateCosts()
+	separator := canvas.NewRectangle(color.Gray{Y: 150})
+	separator.SetMinSize(fyne.NewSize(400, 2))
+	content.Add(separator)
+
+	// Upgrade-Button Helper
+	addUpgradeButton := func(name string, currentItem interface{}) {
+		btn := widget.NewButton("", nil)
+
+		updateButtonText := func() {
+			inv.Lock()
+			var fromLevel, toLevel string
+			var costText string
+			canUpgrade := false
+
+			switch ci := currentItem.(type) {
+			case *Pickaxe:
+				fromLevel = string(*ci)
+				next, ok := pickaxeUpgrade[*ci]
+				if !ok {
+					inv.Unlock()
+					btn.SetText(fmt.Sprintf("%s kann nicht weiter verbessert werden.", name))
+					btn.Disable()
+					return
+				}
+				toLevel = string(next)
+				cost := pickaxeResourceCost[next]
+				costStr := ""
+				hasAll := true
+				for r, v := range cost {
+					costStr += fmt.Sprintf("%s: %d ", r, v)
+					if inv.Resources[r] < v {
+						hasAll = false
+					}
+				}
+				costText = costStr
+				canUpgrade = hasAll
+			case *Sword:
+				fromLevel = string(*ci)
+				next, ok := swordUpgrade[*ci]
+				if !ok {
+					inv.Unlock()
+					btn.SetText(fmt.Sprintf("%s kann nicht weiter verbessert werden.", name))
+					btn.Disable()
+					return
+				}
+				toLevel = string(next)
+				cost := swordUpgradeCost[next]
+				costStr := ""
+				hasAll := true
+				for r, v := range cost {
+					costStr += fmt.Sprintf("%s: %d ", r, v)
+					if inv.Resources[r] < v {
+						hasAll = false
+					}
+				}
+				costText = costStr
+				canUpgrade = hasAll
+			case *Armor:
+				fromLevel = string(*ci)
+				next, ok := armorUpgrade[*ci]
+				if !ok {
+					inv.Unlock()
+					btn.SetText(fmt.Sprintf("%s kann nicht weiter verbessert werden.", name))
+					btn.Disable()
+					return
+				}
+				toLevel = string(next)
+				cost := armorUpgradeCost[next]
+				costStr := ""
+				hasAll := true
+				for r, v := range cost {
+					costStr += fmt.Sprintf("%s: %d ", r, v)
+					if inv.Resources[r] < v {
+						hasAll = false
+					}
+				}
+				costText = costStr
+				canUpgrade = hasAll
+			}
+			inv.Unlock()
+
+			btn.SetText(fmt.Sprintf("%s Upgrade: Von %s ➡ %s | Kosten: %s", name, fromLevel, toLevel, costText))
+			if canUpgrade {
+				btn.Enable()
+			} else {
+				btn.Disable()
+			}
 		}
-	}()
+
+		btn.OnTapped = func() {
+			var success bool
+			var nextLevel string
+
+			inv.Lock()
+			switch ci := currentItem.(type) {
+			case *Pickaxe:
+				next := pickaxeUpgrade[*ci]
+				cost := pickaxeResourceCost[next]
+				hasAll := true
+				for r, v := range cost {
+					if inv.Resources[r] < v {
+						hasAll = false
+					}
+				}
+				if hasAll {
+					for r, v := range cost {
+						inv.Resources[r] -= v
+					}
+					*ci = next
+					success = true
+					nextLevel = string(next)
+				}
+			case *Sword:
+				next := swordUpgrade[*ci]
+				cost := swordUpgradeCost[next]
+				hasAll := true
+				for r, v := range cost {
+					if inv.Resources[r] < v {
+						hasAll = false
+					}
+				}
+				if hasAll {
+					for r, v := range cost {
+						inv.Resources[r] -= v
+					}
+					*ci = next
+					success = true
+					nextLevel = string(next)
+				}
+			case *Armor:
+				next := armorUpgrade[*ci]
+				cost := armorUpgradeCost[next]
+				hasAll := true
+				for r, v := range cost {
+					if inv.Resources[r] < v {
+						hasAll = false
+					}
+				}
+				if hasAll {
+					for r, v := range cost {
+						inv.Resources[r] -= v
+					}
+					*ci = next
+					success = true
+					nextLevel = string(next)
+				}
+			}
+			inv.Unlock()
+
+			if success {
+				updateStatus() // Status-Labels aktualisieren
+				dialog.ShowInformation("Erfolg", fmt.Sprintf("%s wurde auf %s verbessert!", name, nextLevel), w)
+			} else {
+				dialog.ShowError(fmt.Errorf("Nicht genug Ressourcen"), w)
+			}
+
+			updateButtonText() // Button aktualisieren
+		}
+
+		updateButtonText()
+		content.Add(btn)
+	}
+
+	addUpgradeButton("Pickaxe", &inv.Pickaxe)
+	addUpgradeButton("Sword", &inv.Sword)
+	addUpgradeButton("Armor", &inv.Armor)
+
+	updateStatus() // initiale Statusanzeige
+
+	w.SetContent(container.NewScroll(content))
+	w.Show()
 }
 
 /* ===================== INVENTAR ===================== */
 func openInventory(a fyne.App, inv *Inventory) {
 	w := a.NewWindow("Inventar")
 	enableBackspaceClose(w)
-	w.Resize(fyne.NewSize(700, 500))
+	w.Resize(fyne.NewSize(800, 600))
 
 	inv.Lock()
 	// Labels für Geld und Ausrüstung
