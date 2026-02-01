@@ -23,19 +23,29 @@ type Sword string
 type Armor string
 
 const (
-	Kohle        Resource = "Kohle" //------
-	Stone        Resource = "Stein"
-	Kupfer       Resource = "Kupfer"
-	Iron         Resource = "Eisen"
-	Stahl        Resource = "Stahl"
-	Silver       Resource = "Silber" //-----
-	Gold         Resource = "Gold"
-	Platinum     Resource = "Platin"
-	Rubin        Resource = "Rubin" //-------
-	Diamond      Resource = "Diamant"
-	Mythril      Resource = "Mythril"
-	Blutkristall Resource = "Blutkristall" //-----
-	Adamantium   Resource = "Adamantium"
+	Kohle                     Resource = "Kohle"
+	Stone                     Resource = "Stein"
+	Kupfererz                 Resource = "Kupferore"
+	Kupferbarren              Resource = "Kupferbarren"
+	Eisenerz                  Resource = "Eisenerz"
+	Eisenbarren               Resource = "Eisenbarren"
+	Stahlbarren               Resource = "Stahlbarren"
+	Silvererz                 Resource = "Silbererz"
+	Silberbarren              Resource = "Silberbarren"
+	Golderz                   Resource = "Golderz"
+	Goldbarren                Resource = "Goldbarren"
+	Platinerz                 Resource = "Platinerz"
+	Platinbarren              Resource = "Platinbarren"
+	Rubinerz                  Resource = "Rubinerz"
+	GeschliffenerRubin        Resource = "Geschliffener Rubin"
+	Diamanterz                Resource = "Diamanterz"
+	GeschliffenerDiamant      Resource = "GeschliffenerDiamant"
+	Mythrilerz                Resource = "Mythrilerz"
+	Mythrilbarren             Resource = "Mythrilbarren "
+	Blutkristallerz           Resource = "Blutkristallerz"
+	GeschliffenerBlutkristall Resource = "GeschliffenerBlutkristall"
+	Adamantiumerz             Resource = "Adamantiumerz"
+	Adamantiumbarren          Resource = "Adamantiumbarren "
 
 	WoodPickaxe      Pickaxe = "Holzspitzhacke"
 	StonePickaxe     Pickaxe = "Steinspitzhacke"
@@ -89,40 +99,40 @@ const (
 var pickaxeResourceCost = map[Pickaxe]map[Resource]int{
 	WoodPickaxe:      {Stone: 50},
 	StonePickaxe:     {Stone: 50},
-	KupferPickaxe:    {Kupfer: 50},
-	IronPickaxe:      {Iron: 50},
-	StahlPickaxe:     {Stahl: 50},
-	GoldPickaxe:      {Gold: 50},
-	PlatinumPickaxe:  {Platinum: 50},
-	DiamondPickaxe:   {Diamond: 50},
-	MythrilPickax:    {Mythril: 50},
-	AdamantiumPickax: {Adamantium: 50},
+	KupferPickaxe:    {Kupferbarren: 50},
+	IronPickaxe:      {Eisenbarren: 50},
+	StahlPickaxe:     {Stahlbarren: 50},
+	GoldPickaxe:      {Goldbarren: 50},
+	PlatinumPickaxe:  {Platinbarren: 50},
+	DiamondPickaxe:   {GeschliffenerDiamant: 50},
+	MythrilPickax:    {Mythrilbarren: 50},
+	AdamantiumPickax: {Adamantiumbarren: 50},
 }
 
 var swordUpgradeCost = map[Sword]map[Resource]int{
 	WoodSword:       {Stone: 20},
-	StoneSword:      {Kupfer: 20},
-	KupferSword:     {Iron: 20},
-	IronSword:       {Stahl: 20},
-	StahlSword:      {Gold: 20},
-	GoldSword:       {Platinum: 20},
-	PlatinumSword:   {Diamond: 20},
-	DiamondSword:    {Mythril: 20},
-	MythrilSword:    {Adamantium: 20},
-	AdamantiumSword: {Adamantium: 100},
+	StoneSword:      {Kupferbarren: 20},
+	KupferSword:     {Eisenbarren: 20},
+	IronSword:       {Stahlbarren: 20},
+	StahlSword:      {Goldbarren: 20},
+	GoldSword:       {Platinbarren: 20},
+	PlatinumSword:   {GeschliffenerDiamant: 20},
+	DiamondSword:    {Mythrilbarren: 20},
+	MythrilSword:    {Adamantiumbarren: 20},
+	AdamantiumSword: {Adamantiumbarren: 100},
 }
 
 var armorUpgradeCost = map[Armor]map[Resource]int{
 	WoodArmor:       {Stone: 20},
-	StoneArmor:      {Kupfer: 20},
-	KupferArmor:     {Iron: 20},
-	IronArmor:       {Stahl: 20},
-	StahlArmor:      {Gold: 20},
-	GoldArmor:       {Platinum: 20},
-	PlatinumArmor:   {Diamond: 20},
-	DiamondArmor:    {Mythril: 20},
-	MythrilArmor:    {Adamantium: 20},
-	AdamantiumArmor: {Adamantium: 100},
+	StoneArmor:      {Kupferbarren: 20},
+	KupferArmor:     {Eisenbarren: 20},
+	IronArmor:       {Stahlbarren: 20},
+	StahlArmor:      {Goldbarren: 20},
+	GoldArmor:       {Platinbarren: 20},
+	PlatinumArmor:   {GeschliffenerDiamant: 20},
+	DiamondArmor:    {Mythrilbarren: 20},
+	MythrilArmor:    {Adamantiumbarren: 20},
+	AdamantiumArmor: {Adamantiumbarren: 100},
 }
 
 var swordAttack = map[Sword]int{
@@ -187,7 +197,7 @@ var armorUpgrade = map[Armor]Armor{
 	MythrilArmor:  AdamantiumArmor,
 }
 
-var mineUpgradeResources = []Resource{Kohle, Stone, Kupfer, Iron, Stahl, Silver, Gold, Platinum, Rubin, Diamond, Mythril, Blutkristall, Adamantium}
+var mineUpgradeResources = []Resource{Kohle, Stone, Kupferbarren, Eisenbarren, Stahlbarren, Silberbarren, Goldbarren, Platinbarren, GeschliffenerRubin, GeschliffenerDiamant, Mythrilbarren, GeschliffenerBlutkristall, Adamantiumbarren}
 
 /* ===================== STRUKTUREN ===================== */
 type Mine struct {
@@ -292,16 +302,16 @@ func main() {
 	mines := []*Mine{
 		{"Kohlemine", fyne.NewPos(100, 200), Kohle, 0, 1, WoodPickaxe, false, 0, nil, nil},
 		{"Steinmine", fyne.NewPos(300, 200), Stone, 100, 1, WoodPickaxe, false, 0, nil, nil},
-		{"Kupfermine", fyne.NewPos(500, 200), Kupfer, 200, 1, StonePickaxe, false, 0, nil, nil},
-		{"Eisenmine", fyne.NewPos(700, 200), Iron, 250, 1, KupferPickaxe, false, 0, nil, nil},
-		{"Silbernmine", fyne.NewPos(900, 200), Silver, 500, 1, IronPickaxe, false, 0, nil, nil},
-		{"Goldmine", fyne.NewPos(1100, 200), Gold, 500, 1, IronPickaxe, false, 0, nil, nil},
-		{"Platinmine", fyne.NewPos(100, 400), Platinum, 1000, 1, GoldPickaxe, false, 0, nil, nil},
-		{"Rubinnmine", fyne.NewPos(300, 400), Rubin, 2000, 1, PlatinumPickaxe, false, 0, nil, nil},
-		{"Diamantmine", fyne.NewPos(500, 400), Diamond, 3000, 1, PlatinumPickaxe, false, 0, nil, nil},
-		{"Mythrilmine", fyne.NewPos(700, 400), Mythril, 5000, 1, DiamondPickaxe, false, 0, nil, nil},
-		{"Blutkristallmine", fyne.NewPos(900, 400), Blutkristall, 10000, 1, DiamondPickaxe, false, 0, nil, nil},
-		{"Adamantiummine", fyne.NewPos(1100, 400), Adamantium, 100000, 1, MythrilPickax, false, 0, nil, nil},
+		{"Kupfermine", fyne.NewPos(500, 200), Kupfererz, 200, 1, StonePickaxe, false, 0, nil, nil},
+		{"Eisenmine", fyne.NewPos(700, 200), Eisenerz, 250, 1, KupferPickaxe, false, 0, nil, nil},
+		{"Silbernmine", fyne.NewPos(900, 200), Silvererz, 500, 1, IronPickaxe, false, 0, nil, nil},
+		{"Goldmine", fyne.NewPos(1100, 200), Golderz, 500, 1, IronPickaxe, false, 0, nil, nil},
+		{"Platinmine", fyne.NewPos(100, 400), Platinerz, 1000, 1, GoldPickaxe, false, 0, nil, nil},
+		{"Rubinnmine", fyne.NewPos(300, 400), Rubinerz, 2000, 1, PlatinumPickaxe, false, 0, nil, nil},
+		{"Diamantmine", fyne.NewPos(500, 400), Diamanterz, 3000, 1, PlatinumPickaxe, false, 0, nil, nil},
+		{"Mythrilmine", fyne.NewPos(700, 400), Mythrilerz, 5000, 1, DiamondPickaxe, false, 0, nil, nil},
+		{"Blutkristallmine", fyne.NewPos(900, 400), Blutkristallerz, 10000, 1, DiamondPickaxe, false, 0, nil, nil},
+		{"Adamantiummine", fyne.NewPos(1100, 400), Adamantiumerz, 100000, 1, MythrilPickax, false, 0, nil, nil},
 	}
 
 	for _, m := range mines {
@@ -354,7 +364,12 @@ func main() {
 	kristall.Move(kristallShopPos)
 	kristall.Resize(fyne.NewSize(110, 40))
 
-	objects = append(objects, shop, smith, kristall)
+	schmelzofenPos := fyne.NewPos(1000, 20)
+	schmelzofen := widget.NewButtonWithIcon("Schmelzofen", theme.InfoIcon(), func() { openSchmelzofen(a, inv) })
+	schmelzofen.Move(schmelzofenPos)
+	schmelzofen.Resize(fyne.NewSize(110, 40))
+
+	objects = append(objects, shop, smith, kristall, schmelzofen)
 	w.SetContent(container.NewWithoutLayout(objects...))
 
 	// Zentraler Tick
@@ -679,66 +694,138 @@ func handleSkillUnlock(skill string, levels map[int]int, currentLevel *int, inv 
 }
 
 /* ===================== SHOP ===================== */
-
 func openShop(a fyne.App, inv *Inventory) {
 
 	prices := map[Resource]int{
-		Kohle:        1,
-		Stone:        1,
-		Kupfer:       2,
-		Iron:         5,
-		Stahl:        5,
-		Silver:       10,
-		Gold:         10,
-		Platinum:     20,
-		Rubin:        30,
-		Diamond:      50,
-		Mythril:      100,
-		Blutkristall: 200,
-		Adamantium:   1000,
+		Kohle:                     1,
+		Stone:                     1,
+		Kupfererz:                 2,
+		Kupferbarren:              2,
+		Eisenerz:                  5,
+		Eisenbarren:               5,
+		Stahlbarren:               5,
+		Silvererz:                 10,
+		Silberbarren:              10,
+		Golderz:                   10,
+		Goldbarren:                10,
+		Platinerz:                 20,
+		Platinbarren:              20,
+		Rubinerz:                  30,
+		GeschliffenerRubin:        30,
+		Diamanterz:                50,
+		GeschliffenerDiamant:      50,
+		Mythrilerz:                100,
+		Mythrilbarren:             100,
+		Blutkristallerz:           200,
+		GeschliffenerBlutkristall: 200,
+		Adamantiumerz:             1000,
+		Adamantiumbarren:          1000,
 	}
-	resourceOrder := []Resource{Kohle, Stone, Kupfer, Iron, Stahl, Silver, Gold, Platinum, Rubin, Diamond, Mythril, Blutkristall, Adamantium}
+
+	// 🟩 Kategorien
+	edelsteine := []Resource{
+		GeschliffenerRubin,
+		GeschliffenerDiamant,
+		GeschliffenerBlutkristall,
+	}
+
+	barren := []Resource{
+		Kupferbarren,
+		Eisenbarren,
+		Stahlbarren,
+		Silberbarren,
+		Goldbarren,
+		Platinbarren,
+		Mythrilbarren,
+		Adamantiumbarren,
+	}
+
+	erze := []Resource{
+		Kohle,
+		Stone,
+		Kupfererz,
+		Eisenerz,
+		Silvererz,
+		Golderz,
+		Platinerz,
+		Rubinerz,
+		Diamanterz,
+		Mythrilerz,
+		Blutkristallerz,
+		Adamantiumerz,
+	}
 
 	w := a.NewWindow("Shop")
 	enableBackspaceClose(w)
-	moneyLabel := widget.NewLabel(fmt.Sprintf("Geld: %d", inv.Money))
+
+	moneyLabel := widget.NewLabel("")
 	moneyLabel.TextStyle = fyne.TextStyle{Bold: true}
-	box := container.NewVBox(
-		moneyLabel,
-		widget.NewSeparator(),
-		widget.NewLabel("Ressourcen verkaufen"),
-	)
+
 	labels := make(map[Resource]*widget.Label)
 	sellAmounts := []int{1, 10, 100}
 
-	for _, r := range resourceOrder {
-		p := prices[r]
+	// Hilfsfunktion für Verkaufsblock
+	createSellBlock := func(r Resource) *fyne.Container {
 		resBox := container.NewVBox()
-		label := widget.NewLabel(fmt.Sprintf("%s: %d", r, inv.Resources[r]))
+		label := widget.NewLabel("")
 		labels[r] = label
 		resBox.Add(label)
+
+		price := prices[r]
+
 		for _, amt := range sellAmounts {
 			amount := amt
 			btn := widget.NewButton(fmt.Sprintf("Verkaufen %d", amount), func() {
 				inv.Lock()
 				defer inv.Unlock()
+
 				sell := amount
 				if inv.Resources[r] < sell {
 					sell = inv.Resources[r]
 				}
 				if sell > 0 {
 					inv.Resources[r] -= sell
-					inv.Money += sell * p
+					inv.Money += sell * price
 				}
+
 				label.SetText(fmt.Sprintf("%s: %d", r, inv.Resources[r]))
 				moneyLabel.SetText(fmt.Sprintf("Geld: %d", inv.Money))
-
 			})
 			resBox.Add(btn)
 		}
-		box.Add(resBox)
+
+		resBox.Add(widget.NewSeparator())
+		return resBox
 	}
 
+	// 🟦 Spalten
+	leftBox := container.NewVBox(widget.NewLabel("💎 Geschliffene Edelsteine"))
+	midBox := container.NewVBox(widget.NewLabel("🔩 Barren"))
+	rightBox := container.NewVBox(widget.NewLabel("⛏️ Erze & Rohstoffe"))
+
+	for _, r := range edelsteine {
+		leftBox.Add(createSellBlock(r))
+	}
+	for _, r := range barren {
+		midBox.Add(createSellBlock(r))
+	}
+	for _, r := range erze {
+		rightBox.Add(createSellBlock(r))
+	}
+
+	// Layout
+	content := container.NewBorder(
+		container.NewHBox(moneyLabel),
+		nil, nil, nil,
+		container.NewGridWithColumns(
+			3,
+			container.NewVScroll(rightBox),
+			container.NewVScroll(midBox),
+			container.NewVScroll(leftBox),
+		),
+	)
+
+	// UI Refresh
 	go func() {
 		ticker := time.NewTicker(time.Second)
 		defer ticker.Stop()
@@ -752,8 +839,197 @@ func openShop(a fyne.App, inv *Inventory) {
 		}
 	}()
 
-	w.SetContent(container.NewVScroll(box))
-	w.Resize(fyne.NewSize(300, 400))
+	w.SetContent(content)
+	w.Resize(fyne.NewSize(900, 450))
+	w.Show()
+}
+
+/* ===================Schmelz ofen =================== */
+func openSchmelzofen(a fyne.App, inv *Inventory) {
+	w := a.NewWindow("Schmelzofen")
+	enableBackspaceClose(w)
+
+	// Kohle-Kosten pro Einheit
+	KohleKosten := map[Resource]int{
+		Kupfererz:     1,
+		Eisenerz:      1,
+		Eisenbarren:   2,
+		Silvererz:     2,
+		Golderz:       3,
+		Platinerz:     4,
+		Mythrilerz:    6,
+		Adamantiumerz: 10,
+	}
+
+	// Erz -> Barren
+	OreSchmelzen := map[Resource]Resource{
+		Kupfererz:     Kupferbarren,
+		Eisenerz:      Eisenbarren,
+		Eisenbarren:   Stahlbarren,
+		Silvererz:     Silberbarren,
+		Golderz:       Goldbarren,
+		Platinerz:     Platinbarren,
+		Mythrilerz:    Mythrilbarren,
+		Adamantiumerz: Adamantiumbarren,
+	}
+
+	// Kristall -> geschliffen
+	Kristalleschleifen := map[Resource]Resource{
+		Rubinerz:        GeschliffenerRubin,
+		Diamanterz:      GeschliffenerDiamant,
+		Blutkristallerz: GeschliffenerBlutkristall,
+	}
+
+	resourceOrderMetall := []Resource{
+		Kupfererz, Eisenerz, Eisenbarren,
+		Silvererz, Golderz, Platinerz,
+		Mythrilerz, Adamantiumerz,
+	}
+
+	resourceOrderKristall := []Resource{
+		Rubinerz, Diamanterz, Blutkristallerz,
+	}
+
+	labels := make(map[Resource]*widget.Label)
+	sellAmounts := []int{1, 10, 100}
+	coalLabel := widget.NewLabel("")
+	coalLabel.TextStyle = fyne.TextStyle{Bold: true}
+
+	// 🔥 Metall-Spalte
+	metallBox := container.NewVBox(
+		widget.NewLabel("🔥 Brennstoff"),
+		coalLabel,
+		widget.NewLabel("🔥 Metalle schmelzen"),
+	)
+
+	// 💎 Kristall-Spalte
+	kristallBox := container.NewVBox(
+		widget.NewSeparator(),
+		widget.NewLabel("💎 Kristalle schleifen"),
+	)
+
+	// Block-Erzeugung
+	createResourceBlock := func(input Resource, output Resource, brauchtKohle bool) *fyne.Container {
+		resBox := container.NewVBox()
+
+		title := widget.NewLabel(fmt.Sprintf("%s ➜ %s", input, output))
+		title.TextStyle = fyne.TextStyle{Bold: true}
+		resBox.Add(title)
+
+		label := widget.NewLabel("")
+		labels[input] = label
+		resBox.Add(label)
+
+		var localCoalLabel *widget.Label
+		coalCost := 0
+		if brauchtKohle {
+			coalCost = KohleKosten[input]
+			localCoalLabel = widget.NewLabel(fmt.Sprintf("Benötigt Kohle pro Einheit: %d", coalCost))
+			resBox.Add(localCoalLabel)
+		}
+
+		for _, amt := range sellAmounts {
+			amount := amt
+			btn := widget.NewButton(fmt.Sprintf("%d verarbeiten", amount), func() {
+				inv.Lock()
+				defer inv.Unlock()
+
+				if inv.Resources[input] <= 0 {
+					dialog.ShowInformation(
+						"Zu wenig Material",
+						fmt.Sprintf("Du hast kein %s mehr.", input),
+						w,
+					)
+					return
+				}
+
+				use := amount
+				if inv.Resources[input] < use {
+					use = inv.Resources[input]
+				}
+
+				if brauchtKohle {
+					maxByCoal := inv.Resources[Kohle] / coalCost
+					if maxByCoal <= 0 {
+						dialog.ShowInformation(
+							"Zu wenig Kohle",
+							fmt.Sprintf(
+								"Du brauchst %d Kohle pro Einheit, hast aber nur %d.",
+								coalCost,
+								inv.Resources[Kohle],
+							),
+							w,
+						)
+						return
+					}
+					if maxByCoal < use {
+						use = maxByCoal
+					}
+				}
+
+				if use <= 0 {
+					return
+				}
+
+				// Ressourcen umwandeln
+				inv.Resources[input] -= use
+				inv.Resources[output] += use
+
+				if brauchtKohle {
+					inv.Resources[Kohle] -= use * coalCost
+				}
+
+				label.SetText(fmt.Sprintf("%s: %d", input, inv.Resources[input]))
+			})
+			resBox.Add(btn)
+		}
+
+		resBox.Add(widget.NewSeparator())
+		return resBox
+	}
+
+	// Metalle füllen
+	for _, r := range resourceOrderMetall {
+		if out, ok := OreSchmelzen[r]; ok {
+			metallBox.Add(createResourceBlock(r, out, true))
+		}
+	}
+
+	// Kristalle füllen
+	for _, r := range resourceOrderKristall {
+		if out, ok := Kristalleschleifen[r]; ok {
+			kristallBox.Add(createResourceBlock(r, out, false))
+		}
+	}
+
+	// 🔲 Layout: nebeneinander
+	content := container.NewGridWithColumns(
+		2,
+		container.NewVScroll(metallBox),
+		container.NewVScroll(kristallBox),
+	)
+
+	// UI Refresh
+	go func() {
+		ticker := time.NewTicker(time.Second)
+		defer ticker.Stop()
+		for range ticker.C {
+			inv.Lock()
+
+			// Kohle immer aktualisieren
+			coalLabel.SetText(fmt.Sprintf("Kohle: %d", inv.Resources[Kohle]))
+
+			// Ressourcen aktualisieren
+			for r, label := range labels {
+				label.SetText(fmt.Sprintf("%s: %d", r, inv.Resources[r]))
+			}
+
+			inv.Unlock()
+		}
+	}()
+
+	w.SetContent(content)
+	w.Resize(fyne.NewSize(700, 450))
 	w.Show()
 }
 
@@ -942,7 +1218,7 @@ func openInventory(a fyne.App, inv *Inventory) {
 	// Ressourcen-Labels
 	box.Add(widget.NewLabel("--- Ressourcen ---"))
 	resourceLabels := make(map[Resource]*widget.Label)
-	for _, r := range []Resource{Kohle, Stone, Kupfer, Iron, Stahl, Silver, Gold, Platinum, Rubin, Diamond, Mythril, Blutkristall, Adamantium} {
+	for _, r := range []Resource{Kohle, Stone, Kupfererz, Eisenerz, Silvererz, Golderz, Platinerz, Rubinerz, Diamanterz, Mythrilerz, Blutkristallerz, Adamantiumerz, Kupferbarren, Eisenbarren, Stahlbarren, Silberbarren, Goldbarren, Platinbarren, Mythrilbarren, Adamantiumbarren, GeschliffenerRubin, GeschliffenerDiamant, GeschliffenerBlutkristall} {
 		label := widget.NewLabel(fmt.Sprintf("%s: %d", r, inv.Resources[r]))
 		resourceLabels[r] = label
 		box.Add(label)
