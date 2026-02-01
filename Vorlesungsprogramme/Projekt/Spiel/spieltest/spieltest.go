@@ -199,6 +199,21 @@ var armorUpgrade = map[Armor]Armor{
 
 var mineUpgradeResources = []Resource{Kohle, Stone, Kupferbarren, Eisenbarren, Stahlbarren, Silberbarren, Goldbarren, Platinbarren, GeschliffenerRubin, GeschliffenerDiamant, Mythrilbarren, GeschliffenerBlutkristall, Adamantiumbarren}
 
+var mines = []*Mine{
+	{"Kohlemine", fyne.NewPos(100, 200), Kohle, 0, 1, WoodPickaxe, false, 0, nil, nil},
+	{"Steinmine", fyne.NewPos(300, 200), Stone, 100, 1, WoodPickaxe, false, 0, nil, nil},
+	{"Kupfermine", fyne.NewPos(500, 200), Kupfererz, 200, 1, StonePickaxe, false, 0, nil, nil},
+	{"Eisenmine", fyne.NewPos(700, 200), Eisenerz, 250, 1, KupferPickaxe, false, 0, nil, nil},
+	{"Silbernmine", fyne.NewPos(900, 200), Silvererz, 500, 1, IronPickaxe, false, 0, nil, nil},
+	{"Goldmine", fyne.NewPos(1100, 200), Golderz, 500, 1, IronPickaxe, false, 0, nil, nil},
+	{"Platinmine", fyne.NewPos(100, 400), Platinerz, 1000, 1, GoldPickaxe, false, 0, nil, nil},
+	{"Rubinnmine", fyne.NewPos(300, 400), Rubinerz, 2000, 1, PlatinumPickaxe, false, 0, nil, nil},
+	{"Diamantmine", fyne.NewPos(500, 400), Diamanterz, 3000, 1, PlatinumPickaxe, false, 0, nil, nil},
+	{"Mythrilmine", fyne.NewPos(700, 400), Mythrilerz, 5000, 1, DiamondPickaxe, false, 0, nil, nil},
+	{"Blutkristallmine", fyne.NewPos(900, 400), Blutkristallerz, 10000, 1, DiamondPickaxe, false, 0, nil, nil},
+	{"Adamantiummine", fyne.NewPos(1100, 400), Adamantiumerz, 100000, 1, MythrilPickax, false, 0, nil, nil},
+}
+
 /* ===================== STRUKTUREN ===================== */
 type Mine struct {
 	Name         string
@@ -298,22 +313,6 @@ func main() {
 
 	objects := []fyne.CanvasObject{healthBar, player}
 
-	// Minen erstellen
-	mines := []*Mine{
-		{"Kohlemine", fyne.NewPos(100, 200), Kohle, 0, 1, WoodPickaxe, false, 0, nil, nil},
-		{"Steinmine", fyne.NewPos(300, 200), Stone, 100, 1, WoodPickaxe, false, 0, nil, nil},
-		{"Kupfermine", fyne.NewPos(500, 200), Kupfererz, 200, 1, StonePickaxe, false, 0, nil, nil},
-		{"Eisenmine", fyne.NewPos(700, 200), Eisenerz, 250, 1, KupferPickaxe, false, 0, nil, nil},
-		{"Silbernmine", fyne.NewPos(900, 200), Silvererz, 500, 1, IronPickaxe, false, 0, nil, nil},
-		{"Goldmine", fyne.NewPos(1100, 200), Golderz, 500, 1, IronPickaxe, false, 0, nil, nil},
-		{"Platinmine", fyne.NewPos(100, 400), Platinerz, 1000, 1, GoldPickaxe, false, 0, nil, nil},
-		{"Rubinnmine", fyne.NewPos(300, 400), Rubinerz, 2000, 1, PlatinumPickaxe, false, 0, nil, nil},
-		{"Diamantmine", fyne.NewPos(500, 400), Diamanterz, 3000, 1, PlatinumPickaxe, false, 0, nil, nil},
-		{"Mythrilmine", fyne.NewPos(700, 400), Mythrilerz, 5000, 1, DiamondPickaxe, false, 0, nil, nil},
-		{"Blutkristallmine", fyne.NewPos(900, 400), Blutkristallerz, 10000, 1, DiamondPickaxe, false, 0, nil, nil},
-		{"Adamantiummine", fyne.NewPos(1100, 400), Adamantiumerz, 100000, 1, MythrilPickax, false, 0, nil, nil},
-	}
-
 	for _, m := range mines {
 		icon := canvas.NewRectangle(color.Gray{Y: 180})
 		icon.Resize(fyne.NewSize(iconSize, iconSize))
@@ -360,7 +359,7 @@ func main() {
 	smith.Resize(fyne.NewSize(110, 40))
 
 	kristallShopPos := fyne.NewPos(700, 20)
-	kristall := widget.NewButtonWithIcon("Kristall Shop", theme.InfoIcon(), func() { openKristallShop(a, inv) })
+	kristall := widget.NewButtonWithIcon("Kristall Shop", theme.InfoIcon(), func() { openKristallShop(a, inv, mines) })
 	kristall.Move(kristallShopPos)
 	kristall.Resize(fyne.NewSize(110, 40))
 
@@ -414,7 +413,7 @@ func main() {
 				return
 			}
 			if dist2(p, kristallShopPos) < interactionDist*interactionDist {
-				openKristallShop(a, inv)
+				openKristallShop(a, inv, mines)
 				return
 			}
 			if dist2(p, dungeon.Pos) < interactionDist*interactionDist {
@@ -557,7 +556,7 @@ func openMineShop(a fyne.App, m *Mine, inv *Inventory) {
 /*====================== Cristal Shop ==================*/
 var currentLevels = make(map[string]int)
 
-func openKristallShop(a fyne.App, inv *Inventory) {
+func openKristallShop(a fyne.App, inv *Inventory, mines []*Mine) {
 
 	// Feste Reihenfolge für die Skills
 	skillOrder := []string{
@@ -592,66 +591,11 @@ func openKristallShop(a fyne.App, inv *Inventory) {
 	}
 
 	// Level-Up-Funktionen für Skills
-	levelUpFunctions := map[string]map[int]func(){
-		"Kohleminen Multiplier": {
-			1: func() { fmt.Println("Steinminen Level 1 aktiviert - Mehr Ressourcen sammeln!") },
-			2: func() { fmt.Println("Steinminen Level 2 aktiviert - Kristallgewinn erhöht!") },
-			3: func() { fmt.Println("Steinminen Level 3 aktiviert - Maximale Ressourcengewinnung!") },
-		},
-		"Steinminen Multiplier": {
-			1: func() { fmt.Println("Steinminen Level 1 aktiviert - Mehr Ressourcen sammeln!") },
-			2: func() { fmt.Println("Steinminen Level 2 aktiviert - Kristallgewinn erhöht!") },
-			3: func() { fmt.Println("Steinminen Level 3 aktiviert - Maximale Ressourcengewinnung!") },
-		},
-		"Kupferminen Multiplier": {
-			1: func() { fmt.Println("Steinminen Level 1 aktiviert - Mehr Ressourcen sammeln!") },
-			2: func() { fmt.Println("Steinminen Level 2 aktiviert - Kristallgewinn erhöht!") },
-			3: func() { fmt.Println("Steinminen Level 3 aktiviert - Maximale Ressourcengewinnung!") },
-		},
-		"Eisenminen Multiplier": {
-			1: func() { fmt.Println("Eisenminen Level 1 aktiviert - Eisenproduktion startet.") },
-			2: func() { fmt.Println("Eisenminen Level 2 aktiviert - Eisenproduktion verbessert.") },
-			3: func() { fmt.Println("Eisenminen Level 3 aktiviert - Maximale Eisenproduktion.") },
-		},
-		"Silberminen Multiplier": {
-			1: func() { fmt.Println("Steinminen Level 1 aktiviert - Mehr Ressourcen sammeln!") },
-			2: func() { fmt.Println("Steinminen Level 2 aktiviert - Kristallgewinn erhöht!") },
-			3: func() { fmt.Println("Steinminen Level 3 aktiviert - Maximale Ressourcengewinnung!") },
-		},
-		"Goldminen Multiplier": {
-			1: func() { fmt.Println("Goldminen Level 1 aktiviert - Goldproduktion startet.") },
-			2: func() { fmt.Println("Goldminen Level 2 aktiviert - Goldproduktion optimiert.") },
-			3: func() { fmt.Println("Goldminen Level 3 aktiviert - Maximale Goldproduktion.") },
-		},
-		"Platinmine Multiplier": {
-			1: func() { fmt.Println("Platinminen Level 1 aktiviert - Platinproduktion startet.") },
-			2: func() { fmt.Println("Platinminen Level 2 aktiviert - Platinproduktion verbessert.") },
-			3: func() { fmt.Println("Platinminen Level 3 aktiviert - Maximale Platinproduktion.") },
-		},
-		"Rubinminen Multiplier": {
-			1: func() { fmt.Println("Steinminen Level 1 aktiviert - Mehr Ressourcen sammeln!") },
-			2: func() { fmt.Println("Steinminen Level 2 aktiviert - Kristallgewinn erhöht!") },
-			3: func() { fmt.Println("Steinminen Level 3 aktiviert - Maximale Ressourcengewinnung!") },
-		},
-		"Diamantmine Multiplier": {
-			1: func() { fmt.Println("Diamantminen Level 1 aktiviert - Diamantproduktion startet.") },
-			2: func() { fmt.Println("Diamantminen Level 2 aktiviert - Diamantproduktion optimiert.") },
-			3: func() { fmt.Println("Diamantminen Level 3 aktiviert - Maximale Diamantproduktion.") },
-		},
-		"Mythrilminen Multiplier": {
-			1: func() { fmt.Println("Steinminen Level 1 aktiviert - Mehr Ressourcen sammeln!") },
-			2: func() { fmt.Println("Steinminen Level 2 aktiviert - Kristallgewinn erhöht!") },
-			3: func() { fmt.Println("Steinminen Level 3 aktiviert - Maximale Ressourcengewinnung!") },
-		},
-		"Blutkristallminen Multiplier": {
-			1: func() { fmt.Println("Steinminen Level 1 aktiviert - Mehr Ressourcen sammeln!") },
-			2: func() { fmt.Println("Steinminen Level 2 aktiviert - Kristallgewinn erhöht!") },
-			3: func() { fmt.Println("Steinminen Level 3 aktiviert - Maximale Ressourcengewinnung!") },
-		},
-		"Adamantiumminen Multiplier": {
-			1: func() { fmt.Println("Steinminen Level 1 aktiviert - Mehr Ressourcen sammeln!") },
-			2: func() { fmt.Println("Steinminen Level 2 aktiviert - Kristallgewinn erhöht!") },
-			3: func() { fmt.Println("Steinminen Level 3 aktiviert - Maximale Ressourcengewinnung!") },
+	levelUpFunctions := map[string]map[int]func(mines []*Mine){
+		"Kohlemine Multiplier": {
+			1: func(mines []*Mine) { mines[0].Rate = int(float64(mines[0].Rate) * 1.2) },
+			2: func(mines []*Mine) { mines[0].Rate = int(float64(mines[0].Rate) * 1.5) },
+			3: func(mines []*Mine) { mines[0].Rate = int(float64(mines[0].Rate) * 2.0) },
 		},
 	}
 
@@ -673,11 +617,14 @@ func openKristallShop(a fyne.App, inv *Inventory) {
 	skillsBox := container.NewVBox()
 
 	// Buttons für alle Fähigkeiten in fester Reihenfolge erstellen
-	for _, skill := range skillOrder {
-		levels := skills[skill]
-		currentLevel := currentLevels[skill]
-		skillBox := createSkillButton(skill, levels, currentLevel, inv, kristallLabel, levelUpFunctions, w, nil)
-		skillsBox.Add(skillBox)
+	for _, m := range mines {
+		// Hier übergibst du 'm' (das aktuelle Mine-Objekt) an createSkillButton
+		for _, skill := range skillOrder {
+			levels := skills[skill]
+			currentLevel := currentLevels[skill]
+			skillBox := createSkillButton(skill, levels, currentLevel, inv, kristallLabel, levelUpFunctions, w, m)
+			skillsBox.Add(skillBox)
+		}
 	}
 
 	// Scrollbaren Container erstellen
@@ -699,7 +646,8 @@ func createKristallLabel(inv *Inventory) *widget.Label {
 }
 
 // Hilfsfunktion für die Erstellung von Buttons
-func createSkillButton(skill string, levels map[int]int, currentLevel int, inv *Inventory, kristallLabel *widget.Label, levelUpFunctions map[string]map[int]func(), w fyne.Window, _ *fyne.Container) *fyne.Container {
+// Funktion zum Erstellen eines Skill-Buttons
+func createSkillButton(skill string, levels map[int]int, currentLevel int, inv *Inventory, kristallLabel *widget.Label, levelUpFunctions map[string]map[int]func(mines []*Mine), w fyne.Window, m *Mine) *fyne.Container {
 	skillBox := container.NewVBox()
 	skillLabel := widget.NewLabel(fmt.Sprintf("%s", skill))
 	skillBox.Add(skillLabel)
@@ -709,7 +657,8 @@ func createSkillButton(skill string, levels map[int]int, currentLevel int, inv *
 
 	// Button-Event
 	btn.OnTapped = func() {
-		handleSkillUnlock(skill, levels, inv, kristallLabel, levelUpFunctions, btn, skillLabel, w)
+		// Hier wird das *Mine-Objekt 'm' korrekt übergeben
+		handleSkillUnlock(skill, levels, inv, kristallLabel, levelUpFunctions, btn, skillLabel, w, m)
 	}
 
 	// Button hinzufügen
@@ -728,30 +677,35 @@ func updateSkillDisplay(skill string, currentLevel int, levels map[int]int, btn 
 }
 
 // Funktion für das Freischalten des Skills
-func handleSkillUnlock(skill string, levels map[int]int, inv *Inventory, kristallLabel *widget.Label, levelUpFunctions map[string]map[int]func(), btn *widget.Button, skillLabel *widget.Label, w fyne.Window) {
+func handleSkillUnlock(skill string, levels map[int]int, inv *Inventory, kristallLabel *widget.Label, levelUpFunctions map[string]map[int]func(mines []*Mine), btn *widget.Button, skillLabel *widget.Label, w fyne.Window, m *Mine) {
 	inv.Lock()
 	defer inv.Unlock()
 
 	currentLevel := currentLevels[skill]
 
+	// Überprüfen, ob genügend Kristalle vorhanden sind und der Level noch nicht maximal ist
 	if currentLevel < len(levels) && inv.Kristalle >= levels[currentLevel+1] {
+		// Kristalle abziehen und das Label aktualisieren
 		inv.Kristalle -= levels[currentLevel+1]
 		kristallLabel.SetText(fmt.Sprintf("Kristalle: %d", inv.Kristalle))
 
+		// Level erhöhen und die Anzeige aktualisieren
 		currentLevel++
 		currentLevels[skill] = currentLevel
-
 		updateSkillDisplay(skill, currentLevel, levels, btn, skillLabel)
 
-		// Sicherstellen, dass Funktion existiert
+		// Sicherstellen, dass die Funktion existiert und aufrufen
 		if fnMap, ok := levelUpFunctions[skill]; ok {
 			if fn, ok := fnMap[currentLevel]; ok && fn != nil {
-				fn()
+				// Hier übergeben wir das *Mine-Objekt an die Level-Up-Funktion
+				fn(mines) // Überprüfe, ob 'm' hier korrekt übergeben wird
 			}
 		}
 	} else if currentLevel < len(levels) {
+		// Wenn nicht genug Kristalle vorhanden sind
 		dialog.ShowInformation("Nicht genug Kristalle", "Du hast nicht genügend Kristalle, um dieses Level freizuschalten.", w)
 	} else {
+		// Wenn das maximale Level erreicht ist
 		dialog.ShowInformation("Maximales Level erreicht", "Du hast bereits das höchste Level für dieses Skill freigeschaltet.", w)
 	}
 }
