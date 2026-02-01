@@ -213,6 +213,15 @@ var mines = []*Mine{
 	{"Blutkristallmine", fyne.NewPos(900, 400), Blutkristallerz, 10000, 1, DiamondPickaxe, false, 0, nil, nil},
 	{"Adamantiummine", fyne.NewPos(1100, 400), Adamantiumerz, 100000, 1, MythrilPickax, false, 0, nil, nil},
 }
+var inv = &Inventory{
+	Resources:      make(map[Resource]int),
+	Pickaxe:        WoodPickaxe,
+	Sword:          WoodSword,
+	Armor:          WoodArmor,
+	Wiedergeburten: 0,
+	Money:          1000,
+	Kristalle:      1000,
+}
 
 /* ===================== STRUKTUREN ===================== */
 type Mine struct {
@@ -237,12 +246,13 @@ type Dungeon struct {
 
 type Inventory struct {
 	sync.Mutex
-	Resources map[Resource]int
-	Pickaxe   Pickaxe
-	Sword     Sword
-	Armor     Armor
-	Money     int
-	Kristalle int
+	Resources      map[Resource]int
+	Pickaxe        Pickaxe
+	Sword          Sword
+	Armor          Armor
+	Money          int
+	Kristalle      int
+	Wiedergeburten int
 }
 
 /* ===================== HELPER ===================== */
@@ -287,15 +297,6 @@ func main() {
 	a := app.New()
 	w := a.NewWindow("Mining Game")
 	w.Resize(fyne.NewSize(windowWidth, windowHeight))
-
-	inv := &Inventory{
-		Resources: make(map[Resource]int),
-		Pickaxe:   WoodPickaxe,
-		Sword:     WoodSword,
-		Armor:     WoodArmor,
-		Money:     1000,
-		Kristalle: 1000,
-	}
 
 	player := canvas.NewRectangle(color.RGBA{0, 200, 100, 255})
 	player.Resize(fyne.NewSize(playerW, playerH))
@@ -366,9 +367,14 @@ func main() {
 	schmelzofenPos := fyne.NewPos(1000, 20)
 	schmelzofen := widget.NewButtonWithIcon("Schmelzofen", theme.InfoIcon(), func() { openSchmelzofen(a, inv) })
 	schmelzofen.Move(schmelzofenPos)
-	schmelzofen.Resize(fyne.NewSize(110, 40))
+	schmelzofen.Resize(fyne.NewSize(130, 40))
 
-	objects = append(objects, shop, smith, kristall, schmelzofen)
+	wiedergeburtenLadnePos := fyne.NewPos(1200, 20)
+	wiedergeburtenladen := widget.NewButtonWithIcon("Wiedergeburtenladen", theme.InfoIcon(), func() { openWiedergeburtenLaden(a, inv, mines) })
+	wiedergeburtenladen.Move(wiedergeburtenLadnePos)
+	wiedergeburtenladen.Resize(fyne.NewSize(210, 40))
+
+	objects = append(objects, shop, smith, kristall, schmelzofen, wiedergeburtenladen)
 	w.SetContent(container.NewWithoutLayout(objects...))
 
 	// Zentraler Tick
@@ -416,6 +422,14 @@ func main() {
 				openKristallShop(a, inv, mines)
 				return
 			}
+			if dist2(p, schmelzofenPos) < interactionDist*interactionDist {
+				openSchmelzofen(a, inv)
+				return
+			}
+			if dist2(p, wiedergeburtenLadnePos) < interactionDist*interactionDist {
+				openWiedergeburtenLaden(a, inv, mines)
+				return
+			}
 			if dist2(p, dungeon.Pos) < interactionDist*interactionDist {
 				openDungeon(a, w, inv) // hier übergeben wir das Hauptfenster
 				return
@@ -455,6 +469,134 @@ func main() {
 	})
 
 	w.ShowAndRun()
+}
+
+/* ==================Wiedergeburten ==================*/
+func openWiedergeburtenLaden(a fyne.App, inv *Inventory, mines []*Mine) {
+	w := a.NewWindow("Wiedergeburten")
+	enableBackspaceClose(w)
+
+	// Kristallanzeige
+	kristallLabel := widget.NewLabel(fmt.Sprintf("Kristalle: %d", inv.Kristalle))
+	kristallLabel.TextStyle = fyne.TextStyle{Bold: true}
+
+	// Skill-Level für Wiedergeburten
+	currentLevel := inv.Wiedergeburten
+	maxLevel := 5
+	costs := map[int]int{
+		1: 100,
+		2: 200,
+		3: 400,
+		4: 600,
+		5: 1000,
+	}
+
+	skillLabel := widget.NewLabel(fmt.Sprintf("Wiedergeburten-Skill Level %d", currentLevel))
+
+	// Button zum Leveln
+	btn := widget.NewButton("", nil)
+	updateButton := func() {
+		if currentLevel >= maxLevel {
+			btn.SetText("Maximales Level erreicht")
+			btn.Disable()
+		} else {
+			btn.SetText(fmt.Sprintf("Wiedergeboren %d (Kosten: %d Kristalle)", currentLevel+1, costs[currentLevel+1]))
+			btn.Enable()
+		}
+		skillLabel.SetText(fmt.Sprintf("Wiedergeburt %d", currentLevel))
+	}
+	updateButton()
+
+	btn.OnTapped = func() {
+		if currentLevel >= maxLevel {
+			dialog.ShowInformation("Maximale Wiedergeburt", "Du hast bereits die höheste Wiedergeburt ereicht.", w)
+			return
+		}
+
+		inv.Lock()
+		defer inv.Unlock()
+
+		cost := costs[currentLevel+1]
+		if inv.Kristalle >= cost {
+
+			currentLevel++
+			inv.Wiedergeburten = currentLevel
+
+			inv.Kristalle = 0
+			inv.Money = 0
+			inv.Armor = "Holzrüstung"
+			inv.Pickaxe = "Holzspitzhacke"
+			inv.Sword = "Holzschwert"
+			inv.Resources = map[Resource]int{
+				Kohle:                     0,
+				Stone:                     0,
+				Kupfererz:                 0,
+				Kupferbarren:              0,
+				Eisenerz:                  0,
+				Eisenbarren:               0,
+				Stahlbarren:               0,
+				Silvererz:                 0,
+				Silberbarren:              0,
+				Golderz:                   0,
+				Goldbarren:                0,
+				Platinerz:                 0,
+				Platinbarren:              0,
+				Rubinerz:                  0,
+				GeschliffenerRubin:        0,
+				Diamanterz:                0,
+				GeschliffenerDiamant:      0,
+				Mythrilerz:                0,
+				Mythrilbarren:             0,
+				Blutkristallerz:           0,
+				GeschliffenerBlutkristall: 0,
+				Adamantiumerz:             0,
+				Adamantiumbarren:          0,
+			}
+			mines[0].Owned = false
+			mines[1].Owned = false
+			mines[2].Owned = false
+			mines[3].Owned = false
+			mines[4].Owned = false
+			mines[5].Owned = false
+			mines[6].Owned = false
+			mines[7].Owned = false
+			mines[8].Owned = false
+			mines[9].Owned = false
+			mines[10].Owned = false
+			mines[11].Owned = false
+
+			mines[0].Rate = mines[0].Rate * (inv.Wiedergeburten + 1)
+			mines[1].Rate = mines[1].Rate * (inv.Wiedergeburten + 1)
+			mines[2].Rate = mines[2].Rate * (inv.Wiedergeburten + 1)
+			mines[3].Rate = mines[3].Rate * (inv.Wiedergeburten + 1)
+			mines[4].Rate = mines[4].Rate * (inv.Wiedergeburten + 1)
+			mines[5].Rate = mines[5].Rate * (inv.Wiedergeburten + 1)
+			mines[6].Rate = mines[6].Rate * (inv.Wiedergeburten + 1)
+			mines[7].Rate = mines[7].Rate * (inv.Wiedergeburten + 1)
+			mines[8].Rate = mines[8].Rate * (inv.Wiedergeburten + 1)
+			mines[9].Rate = mines[9].Rate * (inv.Wiedergeburten + 1)
+			mines[10].Rate = mines[10].Rate * (inv.Wiedergeburten + 1)
+			mines[11].Rate = mines[11].Rate * (inv.Wiedergeburten + 1)
+
+			kristallLabel.SetText(fmt.Sprintf("Kristalle: %d", inv.Kristalle))
+			updateButton()
+			dialog.ShowInformation("Erfolg", fmt.Sprintf("Wiedergeburt %d freigeschaltet!", currentLevel), w)
+		} else {
+			dialog.ShowInformation("Nicht genug Kristalle", "Du hast nicht genügend Kristalle, um wiedergebore zu werden.", w)
+		}
+	}
+
+	// Layout
+	mainBox := container.NewVBox(
+		kristallLabel,
+		widget.NewSeparator(),
+		skillLabel,
+		btn,
+	)
+
+	w.SetContent(mainBox)
+	w.Resize(fyne.NewSize(400, 200))
+	w.Show()
 }
 
 /* ===================== MINE SHOP ===================== */
@@ -596,6 +738,61 @@ func openKristallShop(a fyne.App, inv *Inventory, mines []*Mine) {
 			1: func(mines []*Mine) { mines[0].Rate = int(float64(mines[0].Rate) * 1.2) },
 			2: func(mines []*Mine) { mines[0].Rate = int(float64(mines[0].Rate) * 1.5) },
 			3: func(mines []*Mine) { mines[0].Rate = int(float64(mines[0].Rate) * 2.0) },
+		},
+		"Steinmine Multiplier": {
+			1: func(mines []*Mine) { mines[1].Rate = int(float64(mines[1].Rate) * 1.2) },
+			2: func(mines []*Mine) { mines[1].Rate = int(float64(mines[1].Rate) * 1.5) },
+			3: func(mines []*Mine) { mines[1].Rate = int(float64(mines[1].Rate) * 2.0) },
+		},
+		"Kupfermine Multiplier": {
+			1: func(mines []*Mine) { mines[2].Rate = int(float64(mines[2].Rate) * 1.2) },
+			2: func(mines []*Mine) { mines[2].Rate = int(float64(mines[2].Rate) * 1.5) },
+			3: func(mines []*Mine) { mines[2].Rate = int(float64(mines[2].Rate) * 2.0) },
+		},
+		"Eisenmine Multiplier": {
+			1: func(mines []*Mine) { mines[3].Rate = int(float64(mines[3].Rate) * 1.2) },
+			2: func(mines []*Mine) { mines[3].Rate = int(float64(mines[3].Rate) * 1.5) },
+			3: func(mines []*Mine) { mines[3].Rate = int(float64(mines[3].Rate) * 2.0) },
+		},
+		"Silbermine Multiplier": {
+			1: func(mines []*Mine) { mines[4].Rate = int(float64(mines[4].Rate) * 1.2) },
+			2: func(mines []*Mine) { mines[4].Rate = int(float64(mines[4].Rate) * 1.5) },
+			3: func(mines []*Mine) { mines[4].Rate = int(float64(mines[4].Rate) * 2.0) },
+		},
+		"Goldmine Multiplier": {
+			1: func(mines []*Mine) { mines[5].Rate = int(float64(mines[5].Rate) * 1.2) },
+			2: func(mines []*Mine) { mines[5].Rate = int(float64(mines[5].Rate) * 1.5) },
+			3: func(mines []*Mine) { mines[5].Rate = int(float64(mines[5].Rate) * 2.0) },
+		},
+		"Platinmine Multiplier": {
+			1: func(mines []*Mine) { mines[6].Rate = int(float64(mines[6].Rate) * 1.2) },
+			2: func(mines []*Mine) { mines[6].Rate = int(float64(mines[6].Rate) * 1.5) },
+			3: func(mines []*Mine) { mines[6].Rate = int(float64(mines[6].Rate) * 2.0) },
+		},
+		"Rubinmine Multiplier": {
+			1: func(mines []*Mine) { mines[7].Rate = int(float64(mines[7].Rate) * 1.2) },
+			2: func(mines []*Mine) { mines[7].Rate = int(float64(mines[7].Rate) * 1.5) },
+			3: func(mines []*Mine) { mines[7].Rate = int(float64(mines[7].Rate) * 2.0) },
+		},
+		"Diamandmine Multiplier": {
+			1: func(mines []*Mine) { mines[8].Rate = int(float64(mines[8].Rate) * 1.2) },
+			2: func(mines []*Mine) { mines[8].Rate = int(float64(mines[8].Rate) * 1.5) },
+			3: func(mines []*Mine) { mines[8].Rate = int(float64(mines[8].Rate) * 2.0) },
+		},
+		"Mythrilmine Multiplier": {
+			1: func(mines []*Mine) { mines[9].Rate = int(float64(mines[9].Rate) * 1.2) },
+			2: func(mines []*Mine) { mines[9].Rate = int(float64(mines[9].Rate) * 1.5) },
+			3: func(mines []*Mine) { mines[9].Rate = int(float64(mines[9].Rate) * 2.0) },
+		},
+		"Blutkristallmine Multiplier": {
+			1: func(mines []*Mine) { mines[10].Rate = int(float64(mines[10].Rate) * 1.2) },
+			2: func(mines []*Mine) { mines[10].Rate = int(float64(mines[10].Rate) * 1.5) },
+			3: func(mines []*Mine) { mines[10].Rate = int(float64(mines[10].Rate) * 2.0) },
+		},
+		"Adamantiummine Multiplier": {
+			1: func(mines []*Mine) { mines[11].Rate = int(float64(mines[11].Rate) * 1.2) },
+			2: func(mines []*Mine) { mines[11].Rate = int(float64(mines[11].Rate) * 1.5) },
+			3: func(mines []*Mine) { mines[11].Rate = int(float64(mines[11].Rate) * 2.0) },
 		},
 	}
 
@@ -1268,6 +1465,7 @@ func openInventory(a fyne.App, inv *Inventory) {
 	// Labels für Geld und Ausrüstung
 	moneyLabel := widget.NewLabel(fmt.Sprintf("Geld: %d", inv.Money))
 	cristalleLabel := widget.NewLabel(fmt.Sprintf("Cristalle: %d", inv.Kristalle))
+	wiedergeburtenLabel := widget.NewLabel(fmt.Sprintf("Wiedergeburten: %d", inv.Wiedergeburten))
 	pickaxeLabel := widget.NewLabel(fmt.Sprintf("Spitzhacke: %s", inv.Pickaxe))
 	swordLabel := widget.NewLabel(fmt.Sprintf("Schwert: %s (Attack: %d)", inv.Sword, swordAttack[inv.Sword]))
 	armorLabel := widget.NewLabel(fmt.Sprintf("Rüstung: %s (Verteidigung: %d)", inv.Armor, armorDefense[inv.Armor]))
@@ -1297,8 +1495,8 @@ func openInventory(a fyne.App, inv *Inventory) {
 		erzBox.Add(label)
 	}
 
-	// Barren-Spalte: leeren Abstand einfügen, um sie "nach unten" zu verschieben
-	for i := 0; i < 1; i++ { // z.B. 2 leere Zeilen
+	// Barren-Spalte
+	for i := 0; i < 1; i++ {
 		barrenBox.Add(widget.NewLabel(" "))
 	}
 
@@ -1320,6 +1518,7 @@ func openInventory(a fyne.App, inv *Inventory) {
 	topBox := container.NewVBox(
 		moneyLabel,
 		cristalleLabel,
+		wiedergeburtenLabel, // Hier wird das Label für Wiedergeburten hinzugefügt
 		pickaxeLabel,
 		swordLabel,
 		armorLabel,
@@ -1348,6 +1547,7 @@ func openInventory(a fyne.App, inv *Inventory) {
 			inv.Lock()
 			moneyLabel.SetText(fmt.Sprintf("Geld: %d", inv.Money))
 			cristalleLabel.SetText(fmt.Sprintf("Cristalle: %d", inv.Kristalle))
+			wiedergeburtenLabel.SetText(fmt.Sprintf("Wiedergeburten: %d", inv.Wiedergeburten)) // Hier wird der Text für das Label aktualisiert
 			pickaxeLabel.SetText(fmt.Sprintf("Spitzhacke: %s", inv.Pickaxe))
 			swordLabel.SetText(fmt.Sprintf("Schwert: %s (Attack: %d)", inv.Sword, swordAttack[inv.Sword]))
 			armorLabel.SetText(fmt.Sprintf("Rüstung: %s (Verteidigung: %d)", inv.Armor, armorDefense[inv.Armor]))
@@ -1538,7 +1738,7 @@ func createLevel(a fyne.App, inv *Inventory, w fyne.Window, mainWindow fyne.Wind
 				if allEnemiesDead {
 					// Spieler hat gewonnen
 					ticker.Stop()
-					inv.Kristalle += 1
+					inv.Kristalle += 1 * (inv.Wiedergeburten + 1) * level
 
 					// Spielerleben zurücksetzen
 					playerHealth = 100 / 10 * armorDefense[inv.Armor]
