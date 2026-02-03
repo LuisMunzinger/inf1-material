@@ -200,18 +200,18 @@ var armorUpgrade = map[Armor]Armor{
 var mineUpgradeResources = []Resource{Kohle, Stone, Kupferbarren, Eisenbarren, Stahlbarren, Silberbarren, Goldbarren, Platinbarren, GeschliffenerRubin, GeschliffenerDiamant, Mythrilbarren, GeschliffenerBlutkristall, Adamantiumbarren}
 
 var mines = []*Mine{
-	{"Kohlemine", fyne.NewPos(100, 200), Kohle, 0, 1, WoodPickaxe, false, 0, nil, nil},
-	{"Steinmine", fyne.NewPos(300, 200), Stone, 100, 1, WoodPickaxe, false, 0, nil, nil},
-	{"Kupfermine", fyne.NewPos(500, 200), Kupfererz, 200, 1, StonePickaxe, false, 0, nil, nil},
-	{"Eisenmine", fyne.NewPos(700, 200), Eisenerz, 250, 1, KupferPickaxe, false, 0, nil, nil},
-	{"Silbernmine", fyne.NewPos(900, 200), Silvererz, 500, 1, IronPickaxe, false, 0, nil, nil},
-	{"Goldmine", fyne.NewPos(1100, 200), Golderz, 500, 1, IronPickaxe, false, 0, nil, nil},
-	{"Platinmine", fyne.NewPos(100, 400), Platinerz, 1000, 1, GoldPickaxe, false, 0, nil, nil},
-	{"Rubinnmine", fyne.NewPos(300, 400), Rubinerz, 2000, 1, PlatinumPickaxe, false, 0, nil, nil},
-	{"Diamantmine", fyne.NewPos(500, 400), Diamanterz, 3000, 1, PlatinumPickaxe, false, 0, nil, nil},
-	{"Mythrilmine", fyne.NewPos(700, 400), Mythrilerz, 5000, 1, DiamondPickaxe, false, 0, nil, nil},
-	{"Blutkristallmine", fyne.NewPos(900, 400), Blutkristallerz, 10000, 1, DiamondPickaxe, false, 0, nil, nil},
-	{"Adamantiummine", fyne.NewPos(1100, 400), Adamantiumerz, 100000, 1, MythrilPickax, false, 0, nil, nil},
+	{"Kohlemine", fyne.NewPos(100, 200), Kohle, 0, 1, WoodPickaxe, false, 0, "GolderzVerbessert.png", nil, nil, nil},
+	{"Steinmine", fyne.NewPos(300, 200), Stone, 100, 1, WoodPickaxe, false, 0, "GolderzVerbessert.png", nil, nil, nil},
+	{"Kupfermine", fyne.NewPos(500, 200), Kupfererz, 200, 1, StonePickaxe, false, 0, "GolderzVerbessert.png", nil, nil, nil},
+	{"Eisenmine", fyne.NewPos(700, 200), Eisenerz, 250, 1, KupferPickaxe, false, 0, "GolderzVerbessert.png", nil, nil, nil},
+	{"Silbernmine", fyne.NewPos(900, 200), Silvererz, 500, 1, IronPickaxe, false, 0, "GolderzVerbessert.png", nil, nil, nil},
+	{"Goldmine", fyne.NewPos(1100, 200), Golderz, 500, 1, IronPickaxe, false, 0, "GolderzVerbessert.png", nil, nil, nil},
+	{"Platinmine", fyne.NewPos(100, 400), Platinerz, 1000, 1, GoldPickaxe, false, 0, "GolderzVerbessert.png", nil, nil, nil},
+	{"Rubinnmine", fyne.NewPos(300, 400), Rubinerz, 2000, 1, PlatinumPickaxe, false, 0, "GolderzVerbessert.png", nil, nil, nil},
+	{"Diamantmine", fyne.NewPos(500, 400), Diamanterz, 3000, 1, PlatinumPickaxe, false, 0, "GolderzVerbessert.png", nil, nil, nil},
+	{"Mythrilmine", fyne.NewPos(700, 400), Mythrilerz, 5000, 1, DiamondPickaxe, false, 0, "GolderzVerbessert.png", nil, nil, nil},
+	{"Blutkristallmine", fyne.NewPos(900, 400), Blutkristallerz, 10000, 1, DiamondPickaxe, false, 0, "GolderzVerbessert.png", nil, nil, nil},
+	{"Adamantiummine", fyne.NewPos(1100, 400), Adamantiumerz, 100000, 1, MythrilPickax, false, 0, "GolderzVerbessert.png", nil, nil, nil},
 }
 var inv = &Inventory{
 	Resources:      make(map[Resource]int),
@@ -233,7 +233,9 @@ type Mine struct {
 	Required     Pickaxe
 	Owned        bool
 	UpgradeLevel int
-	Icon         *canvas.Rectangle
+	ImageFile    string
+	Icon         *canvas.Image
+	Border       *canvas.Rectangle
 	Label        *canvas.Text
 }
 
@@ -295,8 +297,34 @@ func enableBackspaceClose(w fyne.Window) {
 /* ===================== SPIEL ===================== */
 func main() {
 	a := app.New()
+	showStartWindow(a)
+	a.Run()
+}
+func showStartWindow(a fyne.App) {
+	w := a.NewWindow("Mining Game – Start")
+	w.Resize(fyne.NewSize(windowWidth, windowHeight))
+	w.CenterOnScreen()
+
+	// Hintergrund
+	background := canvas.NewImageFromFile("Grünes Tal und Vulkanausbruch.png")
+	background.FillMode = canvas.ImageFillStretch
+	background.Resize(fyne.NewSize(windowWidth, windowHeight))
+	background.Move(fyne.NewPos(0, 0))
+
+	startBtnPos := fyne.NewPos(650, 390)
+	startBtn := widget.NewButton("Start", func() { w.Close(); showGameWindow(a) })
+	startBtn.Move(startBtnPos)
+	startBtn.Resize(fyne.NewSize(200, 50))
+
+	objects := []fyne.CanvasObject{background, startBtn}
+	w.SetContent(container.NewWithoutLayout(objects...))
+	w.Show()
+}
+
+func showGameWindow(a fyne.App) {
 	w := a.NewWindow("Mining Game")
 	w.Resize(fyne.NewSize(windowWidth, windowHeight))
+	w.CenterOnScreen()
 
 	player := canvas.NewRectangle(color.RGBA{0, 200, 100, 255})
 	player.Resize(fyne.NewSize(playerW, playerH))
@@ -308,27 +336,15 @@ func main() {
 	healthBarWidth := float32(playerHealth) / 10
 	healthBarHeight := float32(5)
 
-	healthBar := canvas.NewRectangle(color.RGBA{255, 0, 0, 255}) // rot
+	healthBar := canvas.NewRectangle(color.RGBA{255, 0, 0, 255})
 	healthBar.Resize(fyne.NewSize(healthBarWidth, healthBarHeight))
-	healthBar.Move(fyne.NewPos(x-5, y-healthBarHeight-2)) // über dem Spieler
+	healthBar.Move(fyne.NewPos(x-5, y-healthBarHeight-2))
 
-	objects := []fyne.CanvasObject{healthBar, player}
+	background := canvas.NewImageFromFile("Grünes Tal und Vulkanausbruch.png")
+	background.FillMode = canvas.ImageFillStretch
+	background.Resize(fyne.NewSize(windowWidth, windowHeight))
 
-	for _, m := range mines {
-		icon := canvas.NewRectangle(color.Gray{Y: 180})
-		icon.Resize(fyne.NewSize(iconSize, iconSize))
-		icon.Move(m.Pos)
-		icon.StrokeColor = color.Black
-		icon.StrokeWidth = borderWidth
-		m.Icon = icon
-
-		label := canvas.NewText(m.Name, color.Black)
-		label.TextSize = 12
-		label.Move(fyne.NewPos(m.Pos.X, m.Pos.Y+45))
-		m.Label = label
-
-		objects = append(objects, icon, label)
-	}
+	objects := []fyne.CanvasObject{background, healthBar, player}
 
 	// Dungeon erstellen
 	dungeonPos := fyne.NewPos(700, 600)
@@ -374,7 +390,12 @@ func main() {
 	wiedergeburtenladen.Move(wiedergeburtenLadnePos)
 	wiedergeburtenladen.Resize(fyne.NewSize(210, 40))
 
-	objects = append(objects, shop, smith, kristall, schmelzofen, wiedergeburtenladen)
+	miningweltPos := fyne.NewPos(1200, 400)
+	miningwelt := widget.NewButtonWithIcon("Miningwelt", theme.InfoIcon(), func() { w.Close(); openMiningwelt1(a, inv, mines) })
+	miningwelt.Move(miningweltPos)
+	miningwelt.Resize(fyne.NewSize(210, 40))
+
+	objects = append(objects, shop, smith, kristall, schmelzofen, wiedergeburtenladen, miningwelt)
 	w.SetContent(container.NewWithoutLayout(objects...))
 
 	// Zentraler Tick
@@ -447,18 +468,6 @@ func main() {
 		healthBar.Move(fyne.NewPos(x-5, y-healthBarHeight-2))
 		healthBar.Refresh()
 
-		for _, m := range mines {
-			d := dist2(fyne.NewPos(x, y), m.Pos)
-			if m.Owned {
-				m.Icon.FillColor = color.RGBA{0, 255, 0, 255}
-			} else if d < interactionDist*interactionDist {
-				m.Icon.FillColor = color.RGBA{255, 255, 0, 255}
-			} else {
-				m.Icon.FillColor = color.Gray{Y: 180}
-			}
-			m.Icon.Refresh()
-		}
-
 		// Dungeon hervorheben, wenn nah
 		if dist2(fyne.NewPos(x, y), dungeon.Pos) < interactionDist*interactionDist {
 			dungeon.Icon.FillColor = color.RGBA{255, 255, 0, 255}
@@ -468,13 +477,335 @@ func main() {
 		dungeon.Icon.Refresh()
 	})
 
-	w.ShowAndRun()
+	w.SetContent(container.NewWithoutLayout(objects...))
+	w.Show()
+}
+
+/* =================Miningwelt ========================*/
+func openMiningwelt1(a fyne.App, inv *Inventory, mines []*Mine) {
+	w := a.NewWindow("Miningwelt 1")
+	w.Resize(fyne.NewSize(600, 400))
+	w.CenterOnScreen()
+
+	var objects []fyne.CanvasObject
+	xPositions := []float32{150, 300, 450}
+	y := float32(200)
+
+	// Welt 1: erste 3 Minen (Index 0-2)
+	for i := 0; i < 3; i++ {
+		m := mines[i]
+		m.Pos = fyne.NewPos(xPositions[i], y)
+
+		icon := canvas.NewRectangle(color.Gray{Y: 180})
+		icon.Resize(fyne.NewSize(80, 80))
+		icon.Move(m.Pos)
+		icon.StrokeColor = color.Black
+		icon.StrokeWidth = 2
+
+		label := canvas.NewText(m.Name, color.Black)
+		label.TextSize = 12
+		label.Move(fyne.NewPos(xPositions[i], y+90))
+		m.Label = label
+
+		objects = append(objects, icon, label)
+	}
+
+	player := canvas.NewRectangle(color.RGBA{0, 200, 100, 255})
+	player.Resize(fyne.NewSize(playerW, playerH))
+	x, y := float32(50), float32(50)
+	player.Move(fyne.NewPos(x, y))
+
+	w.Canvas().SetOnTypedKey(func(k *fyne.KeyEvent) {
+		switch k.Name {
+		case fyne.KeyUp:
+			y -= speed
+		case fyne.KeyDown:
+			y += speed
+		case fyne.KeyLeft:
+			x -= speed
+		case fyne.KeyRight:
+			x += speed
+		case fyne.KeyReturn:
+			p := fyne.NewPos(x, y)
+			for j := 0; j < 3; j++ {
+				if dist2(p, mines[j].Pos) < interactionDist*interactionDist {
+					openMineShop(a, mines[j], inv)
+					return
+				}
+			}
+		case fyne.KeySpace:
+			openInventory(a, inv)
+		}
+		x = clamp(x, 0, windowWidth-playerW)
+		y = clamp(y, 0, windowHeight-playerH)
+		player.Move(fyne.NewPos(x, y))
+	})
+
+	// Rausgehen
+	hoch := widget.NewButtonWithIcon("Rausgehen", theme.InfoIcon(), func() {
+		w.Close()
+		showGameWindow(a)
+	})
+	hoch.Move(fyne.NewPos(10, 20))
+	hoch.Resize(fyne.NewSize(130, 40))
+	objects = append(objects, hoch)
+
+	// Runter -> Welt 2
+	runter := widget.NewButtonWithIcon("Runter", theme.InfoIcon(), func() {
+		w.Close()
+		openMiningwelt2(a, inv, mines)
+	})
+	runter.Move(fyne.NewPos(150, 20))
+	runter.Resize(fyne.NewSize(130, 40))
+	objects = append(objects, runter)
+
+	objects = append(objects, player)
+	w.SetContent(container.NewWithoutLayout(objects...))
+	w.Show()
+}
+
+func openMiningwelt2(a fyne.App, inv *Inventory, mines []*Mine) {
+	w := a.NewWindow("Miningwelt 2")
+	w.Resize(fyne.NewSize(600, 400))
+	w.CenterOnScreen()
+
+	var objects []fyne.CanvasObject
+	xPositions := []float32{150, 300, 450}
+	y := float32(200)
+
+	// Welt 2: Minen 3-5
+	for i := 3; i < 6; i++ {
+		m := mines[i]
+		m.Pos = fyne.NewPos(xPositions[i-3], y)
+
+		icon := canvas.NewRectangle(color.Gray{Y: 180})
+		icon.Resize(fyne.NewSize(80, 80))
+		icon.Move(m.Pos)
+		icon.StrokeColor = color.Black
+		icon.StrokeWidth = 2
+
+		label := canvas.NewText(m.Name, color.Black)
+		label.TextSize = 12
+		label.Move(fyne.NewPos(xPositions[i-3], y+90))
+		m.Label = label
+
+		objects = append(objects, icon, label)
+	}
+
+	player := canvas.NewRectangle(color.RGBA{0, 200, 100, 255})
+	player.Resize(fyne.NewSize(playerW, playerH))
+	x, y := float32(50), float32(50)
+	player.Move(fyne.NewPos(x, y))
+
+	w.Canvas().SetOnTypedKey(func(k *fyne.KeyEvent) {
+		switch k.Name {
+		case fyne.KeyUp:
+			y -= speed
+		case fyne.KeyDown:
+			y += speed
+		case fyne.KeyLeft:
+			x -= speed
+		case fyne.KeyRight:
+			x += speed
+		case fyne.KeyReturn:
+			p := fyne.NewPos(x, y)
+			for j := 3; j < 6; j++ {
+				if dist2(p, mines[j].Pos) < interactionDist*interactionDist {
+					openMineShop(a, mines[j], inv)
+					return
+				}
+			}
+		case fyne.KeySpace:
+			openInventory(a, inv)
+		}
+		x = clamp(x, 0, windowWidth-playerW)
+		y = clamp(y, 0, windowHeight-playerH)
+		player.Move(fyne.NewPos(x, y))
+	})
+
+	// Hoch -> Welt 1
+	hoch := widget.NewButtonWithIcon("Hoch", theme.InfoIcon(), func() {
+		w.Close()
+		openMiningwelt1(a, inv, mines)
+	})
+	hoch.Move(fyne.NewPos(10, 20))
+	hoch.Resize(fyne.NewSize(130, 40))
+	objects = append(objects, hoch)
+
+	// Runter -> Welt 3
+	runter := widget.NewButtonWithIcon("Runter", theme.InfoIcon(), func() {
+		w.Close()
+		openMiningwelt3(a, inv, mines)
+	})
+	runter.Move(fyne.NewPos(150, 20))
+	runter.Resize(fyne.NewSize(130, 40))
+	objects = append(objects, runter)
+
+	objects = append(objects, player)
+	w.SetContent(container.NewWithoutLayout(objects...))
+	w.Show()
+}
+
+func openMiningwelt3(a fyne.App, inv *Inventory, mines []*Mine) {
+	w := a.NewWindow("Miningwelt 3")
+	w.Resize(fyne.NewSize(600, 400))
+	w.CenterOnScreen()
+
+	var objects []fyne.CanvasObject
+	xPositions := []float32{150, 300, 450}
+	y := float32(200)
+
+	// Welt 3: Minen 6-8
+	for i := 6; i < 9; i++ {
+		m := mines[i]
+		m.Pos = fyne.NewPos(xPositions[i-6], y)
+
+		icon := canvas.NewRectangle(color.Gray{Y: 180})
+		icon.Resize(fyne.NewSize(80, 80))
+		icon.Move(m.Pos)
+		icon.StrokeColor = color.Black
+		icon.StrokeWidth = 2
+
+		label := canvas.NewText(m.Name, color.Black)
+		label.TextSize = 12
+		label.Move(fyne.NewPos(xPositions[i-6], y+90))
+		m.Label = label
+
+		objects = append(objects, icon, label)
+	}
+
+	player := canvas.NewRectangle(color.RGBA{0, 200, 100, 255})
+	player.Resize(fyne.NewSize(playerW, playerH))
+	x, y := float32(50), float32(50)
+	player.Move(fyne.NewPos(x, y))
+
+	w.Canvas().SetOnTypedKey(func(k *fyne.KeyEvent) {
+		switch k.Name {
+		case fyne.KeyUp:
+			y -= speed
+		case fyne.KeyDown:
+			y += speed
+		case fyne.KeyLeft:
+			x -= speed
+		case fyne.KeyRight:
+			x += speed
+		case fyne.KeyReturn:
+			p := fyne.NewPos(x, y)
+			for j := 6; j < 9; j++ {
+				if dist2(p, mines[j].Pos) < interactionDist*interactionDist {
+					openMineShop(a, mines[j], inv)
+					return
+				}
+			}
+		case fyne.KeySpace:
+			openInventory(a, inv)
+		}
+		x = clamp(x, 0, windowWidth-playerW)
+		y = clamp(y, 0, windowHeight-playerH)
+		player.Move(fyne.NewPos(x, y))
+	})
+
+	// Hoch -> Welt 2
+	hoch := widget.NewButtonWithIcon("Hoch", theme.InfoIcon(), func() {
+		w.Close()
+		openMiningwelt2(a, inv, mines)
+	})
+	hoch.Move(fyne.NewPos(10, 20))
+	hoch.Resize(fyne.NewSize(130, 40))
+	objects = append(objects, hoch)
+
+	// Runter -> Welt 4
+	runter := widget.NewButtonWithIcon("Runter", theme.InfoIcon(), func() {
+		w.Close()
+		openMiningwelt4(a, inv, mines)
+	})
+	runter.Move(fyne.NewPos(150, 20))
+	runter.Resize(fyne.NewSize(130, 40))
+	objects = append(objects, runter)
+
+	objects = append(objects, player)
+	w.SetContent(container.NewWithoutLayout(objects...))
+	w.Show()
+}
+
+func openMiningwelt4(a fyne.App, inv *Inventory, mines []*Mine) {
+	w := a.NewWindow("Miningwelt 4")
+	w.Resize(fyne.NewSize(600, 400))
+	w.CenterOnScreen()
+
+	var objects []fyne.CanvasObject
+	xPositions := []float32{150, 300, 450}
+	y := float32(200)
+
+	// Welt 4: Minen 9-11
+	for i := 9; i < 12 && i < len(mines); i++ {
+		m := mines[i]
+		m.Pos = fyne.NewPos(xPositions[i-9], y)
+
+		icon := canvas.NewRectangle(color.Gray{Y: 180})
+		icon.Resize(fyne.NewSize(80, 80))
+		icon.Move(m.Pos)
+		icon.StrokeColor = color.Black
+		icon.StrokeWidth = 2
+
+		label := canvas.NewText(m.Name, color.Black)
+		label.TextSize = 12
+		label.Move(fyne.NewPos(xPositions[i-9], y+90))
+		m.Label = label
+
+		objects = append(objects, icon, label)
+	}
+
+	player := canvas.NewRectangle(color.RGBA{0, 200, 100, 255})
+	player.Resize(fyne.NewSize(playerW, playerH))
+	x, y := float32(50), float32(50)
+	player.Move(fyne.NewPos(x, y))
+
+	w.Canvas().SetOnTypedKey(func(k *fyne.KeyEvent) {
+		switch k.Name {
+		case fyne.KeyUp:
+			y -= speed
+		case fyne.KeyDown:
+			y += speed
+		case fyne.KeyLeft:
+			x -= speed
+		case fyne.KeyRight:
+			x += speed
+		case fyne.KeyReturn:
+			p := fyne.NewPos(x, y)
+			for j := 9; j < 12 && j < len(mines); j++ {
+				if dist2(p, mines[j].Pos) < interactionDist*interactionDist {
+					openMineShop(a, mines[j], inv)
+					return
+				}
+			}
+		case fyne.KeySpace:
+			openInventory(a, inv)
+		}
+		x = clamp(x, 0, windowWidth-playerW)
+		y = clamp(y, 0, windowHeight-playerH)
+		player.Move(fyne.NewPos(x, y))
+	})
+
+	// Hoch -> Welt 3
+	hoch := widget.NewButtonWithIcon("Hoch", theme.InfoIcon(), func() {
+		w.Close()
+		openMiningwelt3(a, inv, mines)
+	})
+	hoch.Move(fyne.NewPos(10, 20))
+	hoch.Resize(fyne.NewSize(130, 40))
+	objects = append(objects, hoch)
+
+	objects = append(objects, player)
+	w.SetContent(container.NewWithoutLayout(objects...))
+	w.Show()
 }
 
 /* ==================Wiedergeburten ==================*/
 func openWiedergeburtenLaden(a fyne.App, inv *Inventory, mines []*Mine) {
 	w := a.NewWindow("Wiedergeburten")
 	enableBackspaceClose(w)
+	w.CenterOnScreen()
 
 	// Kristallanzeige
 	kristallLabel := widget.NewLabel(fmt.Sprintf("Kristalle: %d", inv.Kristalle))
@@ -604,6 +935,7 @@ func openMineShop(a fyne.App, m *Mine, inv *Inventory) {
 	w := a.NewWindow(m.Name)
 	enableBackspaceClose(w)
 	w.Resize(fyne.NewSize(400, 350))
+	w.CenterOnScreen()
 
 	label := widget.NewLabel("")
 	actionBtn := widget.NewButton("", nil)
@@ -699,7 +1031,6 @@ func openMineShop(a fyne.App, m *Mine, inv *Inventory) {
 var currentLevels = make(map[string]int)
 
 func openKristallShop(a fyne.App, inv *Inventory, mines []*Mine) {
-
 	// Feste Reihenfolge für die Skills
 	skillOrder := []string{
 		"Kohlemine Multiplier",
@@ -799,6 +1130,7 @@ func openKristallShop(a fyne.App, inv *Inventory, mines []*Mine) {
 	// Fenster erstellen
 	w := a.NewWindow("Skill Tree Shop")
 	enableBackspaceClose(w)
+	w.CenterOnScreen()
 
 	// Kristallanzeige
 	kristallLabel := createKristallLabel(inv)
@@ -971,6 +1303,7 @@ func openShop(a fyne.App, inv *Inventory) {
 
 	w := a.NewWindow("Shop")
 	enableBackspaceClose(w)
+	w.CenterOnScreen()
 
 	moneyLabel := widget.NewLabel("")
 	moneyLabel.TextStyle = fyne.TextStyle{Bold: true}
@@ -1062,6 +1395,7 @@ func openShop(a fyne.App, inv *Inventory) {
 func openSchmelzofen(a fyne.App, inv *Inventory) {
 	w := a.NewWindow("Schmelzofen")
 	enableBackspaceClose(w)
+	w.CenterOnScreen()
 
 	// Kohle-Kosten pro Einheit
 	KohleKosten := map[Resource]int{
@@ -1251,6 +1585,7 @@ func openSchmelzofen(a fyne.App, inv *Inventory) {
 func openSmith(a fyne.App, inv *Inventory) {
 	w := a.NewWindow("Schmiede")
 	w.Resize(fyne.NewSize(400, 350))
+	w.CenterOnScreen()
 
 	content := container.NewVBox()
 
@@ -1459,6 +1794,7 @@ func openSmith(a fyne.App, inv *Inventory) {
 func openInventory(a fyne.App, inv *Inventory) {
 	w := a.NewWindow("Inventar")
 	enableBackspaceClose(w)
+	w.CenterOnScreen()
 	w.Resize(fyne.NewSize(800, 600))
 
 	inv.Lock()
@@ -1573,6 +1909,7 @@ func openDungeon(a fyne.App, mainWindow fyne.Window, inv *Inventory) {
 
 	w := a.NewWindow("Dungeon")
 	w.Resize(fyne.NewSize(400, 300))
+	w.CenterOnScreen()
 
 	// Funktion zum Schließen des Dungeon-Fensters
 	closeDungeon := func() {
