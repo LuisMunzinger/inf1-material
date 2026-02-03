@@ -515,6 +515,13 @@ func openMiningwelt1(a fyne.App, inv *Inventory, mines []*Mine) {
 	x, y := float32(50), float32(50)
 	player.Move(fyne.NewPos(x, y))
 
+	playerHealth := 100
+	healthBarWidth := float32(playerHealth) / 10
+	healthBarHeight := float32(5)
+	healthBar := canvas.NewRectangle(color.RGBA{255, 0, 0, 255})
+	healthBar.Resize(fyne.NewSize(healthBarWidth, healthBarHeight))
+	healthBar.Move(fyne.NewPos(x-5, y-healthBarHeight-2))
+
 	w.Canvas().SetOnTypedKey(func(k *fyne.KeyEvent) {
 		switch k.Name {
 		case fyne.KeyUp:
@@ -539,6 +546,9 @@ func openMiningwelt1(a fyne.App, inv *Inventory, mines []*Mine) {
 		x = clamp(x, 0, windowWidth-playerW)
 		y = clamp(y, 0, windowHeight-playerH)
 		player.Move(fyne.NewPos(x, y))
+
+		healthBar.Move(fyne.NewPos(x-5, y-healthBarHeight-2))
+		healthBar.Refresh()
 	})
 
 	// Rausgehen
@@ -559,7 +569,7 @@ func openMiningwelt1(a fyne.App, inv *Inventory, mines []*Mine) {
 	runter.Resize(fyne.NewSize(130, 40))
 	objects = append(objects, runter)
 
-	objects = append(objects, player)
+	objects = append(objects, player, healthBar)
 	w.SetContent(container.NewWithoutLayout(objects...))
 	w.Show()
 }
@@ -597,6 +607,13 @@ func openMiningwelt2(a fyne.App, inv *Inventory, mines []*Mine) {
 	x, y := float32(50), float32(50)
 	player.Move(fyne.NewPos(x, y))
 
+	playerHealth := 100
+	healthBarWidth := float32(playerHealth) / 10
+	healthBarHeight := float32(5)
+	healthBar := canvas.NewRectangle(color.RGBA{255, 0, 0, 255})
+	healthBar.Resize(fyne.NewSize(healthBarWidth, healthBarHeight))
+	healthBar.Move(fyne.NewPos(x-5, y-healthBarHeight-2))
+
 	w.Canvas().SetOnTypedKey(func(k *fyne.KeyEvent) {
 		switch k.Name {
 		case fyne.KeyUp:
@@ -621,6 +638,9 @@ func openMiningwelt2(a fyne.App, inv *Inventory, mines []*Mine) {
 		x = clamp(x, 0, windowWidth-playerW)
 		y = clamp(y, 0, windowHeight-playerH)
 		player.Move(fyne.NewPos(x, y))
+
+		healthBar.Move(fyne.NewPos(x-5, y-healthBarHeight-2))
+		healthBar.Refresh()
 	})
 
 	// Hoch -> Welt 1
@@ -641,7 +661,7 @@ func openMiningwelt2(a fyne.App, inv *Inventory, mines []*Mine) {
 	runter.Resize(fyne.NewSize(130, 40))
 	objects = append(objects, runter)
 
-	objects = append(objects, player)
+	objects = append(objects, player, healthBar)
 	w.SetContent(container.NewWithoutLayout(objects...))
 	w.Show()
 }
@@ -679,6 +699,13 @@ func openMiningwelt3(a fyne.App, inv *Inventory, mines []*Mine) {
 	x, y := float32(50), float32(50)
 	player.Move(fyne.NewPos(x, y))
 
+	playerHealth := 100
+	healthBarWidth := float32(playerHealth) / 10
+	healthBarHeight := float32(5)
+	healthBar := canvas.NewRectangle(color.RGBA{255, 0, 0, 255})
+	healthBar.Resize(fyne.NewSize(healthBarWidth, healthBarHeight))
+	healthBar.Move(fyne.NewPos(x-5, y-healthBarHeight-2))
+
 	w.Canvas().SetOnTypedKey(func(k *fyne.KeyEvent) {
 		switch k.Name {
 		case fyne.KeyUp:
@@ -703,6 +730,9 @@ func openMiningwelt3(a fyne.App, inv *Inventory, mines []*Mine) {
 		x = clamp(x, 0, windowWidth-playerW)
 		y = clamp(y, 0, windowHeight-playerH)
 		player.Move(fyne.NewPos(x, y))
+
+		healthBar.Move(fyne.NewPos(x-5, y-healthBarHeight-2))
+		healthBar.Refresh()
 	})
 
 	// Hoch -> Welt 2
@@ -723,7 +753,7 @@ func openMiningwelt3(a fyne.App, inv *Inventory, mines []*Mine) {
 	runter.Resize(fyne.NewSize(130, 40))
 	objects = append(objects, runter)
 
-	objects = append(objects, player)
+	objects = append(objects, player, healthBar)
 	w.SetContent(container.NewWithoutLayout(objects...))
 	w.Show()
 }
@@ -761,6 +791,13 @@ func openMiningwelt4(a fyne.App, inv *Inventory, mines []*Mine) {
 	x, y := float32(50), float32(50)
 	player.Move(fyne.NewPos(x, y))
 
+	playerHealth := 100
+	healthBarWidth := float32(playerHealth) / 10
+	healthBarHeight := float32(5)
+	healthBar := canvas.NewRectangle(color.RGBA{255, 0, 0, 255})
+	healthBar.Resize(fyne.NewSize(healthBarWidth, healthBarHeight))
+	healthBar.Move(fyne.NewPos(x-5, y-healthBarHeight-2))
+
 	w.Canvas().SetOnTypedKey(func(k *fyne.KeyEvent) {
 		switch k.Name {
 		case fyne.KeyUp:
@@ -785,6 +822,9 @@ func openMiningwelt4(a fyne.App, inv *Inventory, mines []*Mine) {
 		x = clamp(x, 0, windowWidth-playerW)
 		y = clamp(y, 0, windowHeight-playerH)
 		player.Move(fyne.NewPos(x, y))
+
+		healthBar.Move(fyne.NewPos(x-5, y-healthBarHeight-2))
+		healthBar.Refresh()
 	})
 
 	// Hoch -> Welt 3
@@ -796,7 +836,7 @@ func openMiningwelt4(a fyne.App, inv *Inventory, mines []*Mine) {
 	hoch.Resize(fyne.NewSize(130, 40))
 	objects = append(objects, hoch)
 
-	objects = append(objects, player)
+	objects = append(objects, player, healthBar)
 	w.SetContent(container.NewWithoutLayout(objects...))
 	w.Show()
 }
@@ -1819,7 +1859,7 @@ func openInventory(a fyne.App, inv *Inventory) {
 	kristallBox.Add(widget.NewLabelWithStyle("💎 Geschliffene Edelsteine", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}))
 
 	// Listen
-	erzListe := []Resource{Kohle, Stone, Kupfererz, Eisenerz, Silvererz, Golderz, Platinerz, Mythrilerz, Adamantiumerz}
+	erzListe := []Resource{Kohle, Stone, Kupfererz, Eisenerz, Silvererz, Golderz, Platinerz, Mythrilerz, Adamantiumerz, Rubinerz, Diamanterz, Blutkristallerz}
 	barrenListe := []Resource{Stahlbarren, Kupferbarren, Eisenbarren, Silberbarren, Goldbarren, Platinbarren, Mythrilbarren, Adamantiumbarren}
 	kristallListe := []Resource{GeschliffenerRubin, GeschliffenerDiamant, GeschliffenerBlutkristall}
 
@@ -1863,7 +1903,9 @@ func openInventory(a fyne.App, inv *Inventory) {
 
 	resourceColumns := container.NewHBox(
 		erzBox,
+		widget.NewSeparator(),
 		barrenBox,
+		widget.NewSeparator(),
 		kristallBox,
 	)
 
@@ -1954,6 +1996,7 @@ func createLevel(a fyne.App, inv *Inventory, w fyne.Window, mainWindow fyne.Wind
 		w.Hide()
 		w2 := a.NewWindow(levelName)
 		w2.Resize(fyne.NewSize(400, 300))
+		w.CenterOnScreen()
 
 		// Spieler erstellen
 		player := canvas.NewRectangle(color.RGBA{0, 200, 100, 255})
