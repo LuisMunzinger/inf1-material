@@ -496,14 +496,14 @@ func openMiningwelt1(a fyne.App, inv *Inventory, mines []*Mine) {
 		m := mines[i]
 		m.Pos = fyne.NewPos(xPositions[i], y)
 
-		icon := canvas.NewRectangle(color.Gray{Y: 180})
+		icon := canvas.NewImageFromFile(m.ImageFile)
 		icon.Resize(fyne.NewSize(80, 80))
 		icon.Move(m.Pos)
-		icon.StrokeColor = color.Black
-		icon.StrokeWidth = 2
+		icon.FillMode = canvas.ImageFillContain
 
 		label := canvas.NewText(m.Name, color.Black)
 		label.TextSize = 12
+		label.Alignment = fyne.TextAlignCenter
 		label.Move(fyne.NewPos(xPositions[i], y+90))
 		m.Label = label
 
@@ -588,11 +588,10 @@ func openMiningwelt2(a fyne.App, inv *Inventory, mines []*Mine) {
 		m := mines[i]
 		m.Pos = fyne.NewPos(xPositions[i-3], y)
 
-		icon := canvas.NewRectangle(color.Gray{Y: 180})
+		icon := canvas.NewImageFromFile(m.ImageFile)
 		icon.Resize(fyne.NewSize(80, 80))
 		icon.Move(m.Pos)
-		icon.StrokeColor = color.Black
-		icon.StrokeWidth = 2
+		icon.FillMode = canvas.ImageFillContain
 
 		label := canvas.NewText(m.Name, color.Black)
 		label.TextSize = 12
@@ -680,11 +679,10 @@ func openMiningwelt3(a fyne.App, inv *Inventory, mines []*Mine) {
 		m := mines[i]
 		m.Pos = fyne.NewPos(xPositions[i-6], y)
 
-		icon := canvas.NewRectangle(color.Gray{Y: 180})
+		icon := canvas.NewImageFromFile(m.ImageFile)
 		icon.Resize(fyne.NewSize(80, 80))
 		icon.Move(m.Pos)
-		icon.StrokeColor = color.Black
-		icon.StrokeWidth = 2
+		icon.FillMode = canvas.ImageFillContain
 
 		label := canvas.NewText(m.Name, color.Black)
 		label.TextSize = 12
@@ -772,11 +770,10 @@ func openMiningwelt4(a fyne.App, inv *Inventory, mines []*Mine) {
 		m := mines[i]
 		m.Pos = fyne.NewPos(xPositions[i-9], y)
 
-		icon := canvas.NewRectangle(color.Gray{Y: 180})
+		icon := canvas.NewImageFromFile(m.ImageFile)
 		icon.Resize(fyne.NewSize(80, 80))
 		icon.Move(m.Pos)
-		icon.StrokeColor = color.Black
-		icon.StrokeWidth = 2
+		icon.FillMode = canvas.ImageFillContain
 
 		label := canvas.NewText(m.Name, color.Black)
 		label.TextSize = 12
