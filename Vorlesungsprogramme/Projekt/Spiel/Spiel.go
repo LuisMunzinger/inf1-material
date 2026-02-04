@@ -488,8 +488,16 @@ func openMiningwelt1(a fyne.App, inv *Inventory, mines []*Mine) {
 	w.CenterOnScreen()
 
 	var objects []fyne.CanvasObject
-	xPositions := []float32{150, 300, 450}
-	y := float32(200)
+	xPositions := []float32{100, 250, 400}
+	y := float32(150)
+
+	// Hintergrund
+	background := canvas.NewImageFromFile("bild/Steinboden1.png")
+	background.FillMode = canvas.ImageFillStretch
+	background.Resize(fyne.NewSize(windowWidth, windowHeight))
+	background.Move(fyne.NewPos(0, 0))
+
+	objects = append(objects, background)
 
 	// Welt 1: erste 3 Minen (Index 0-2)
 	for i := 0; i < 3; i++ {
@@ -556,7 +564,7 @@ func openMiningwelt1(a fyne.App, inv *Inventory, mines []*Mine) {
 		w.Close()
 		showGameWindow(a)
 	})
-	hoch.Move(fyne.NewPos(10, 20))
+	hoch.Move(fyne.NewPos(225, 20))
 	hoch.Resize(fyne.NewSize(130, 40))
 	objects = append(objects, hoch)
 
@@ -565,7 +573,7 @@ func openMiningwelt1(a fyne.App, inv *Inventory, mines []*Mine) {
 		w.Close()
 		openMiningwelt2(a, inv, mines)
 	})
-	runter.Move(fyne.NewPos(150, 20))
+	runter.Move(fyne.NewPos(225, 300))
 	runter.Resize(fyne.NewSize(130, 40))
 	objects = append(objects, runter)
 
@@ -580,8 +588,16 @@ func openMiningwelt2(a fyne.App, inv *Inventory, mines []*Mine) {
 	w.CenterOnScreen()
 
 	var objects []fyne.CanvasObject
-	xPositions := []float32{150, 300, 450}
-	y := float32(200)
+	xPositions := []float32{100, 250, 400}
+	y := float32(150)
+
+	// Hintergrund
+	background := canvas.NewImageFromFile("bild/Steinboden1.png")
+	background.FillMode = canvas.ImageFillStretch
+	background.Resize(fyne.NewSize(windowWidth, windowHeight))
+	background.Move(fyne.NewPos(0, 0))
+
+	objects = append(objects, background)
 
 	// Welt 2: Minen 3-5
 	for i := 3; i < 6; i++ {
@@ -647,7 +663,7 @@ func openMiningwelt2(a fyne.App, inv *Inventory, mines []*Mine) {
 		w.Close()
 		openMiningwelt1(a, inv, mines)
 	})
-	hoch.Move(fyne.NewPos(10, 20))
+	hoch.Move(fyne.NewPos(225, 20))
 	hoch.Resize(fyne.NewSize(130, 40))
 	objects = append(objects, hoch)
 
@@ -656,7 +672,7 @@ func openMiningwelt2(a fyne.App, inv *Inventory, mines []*Mine) {
 		w.Close()
 		openMiningwelt3(a, inv, mines)
 	})
-	runter.Move(fyne.NewPos(150, 20))
+	runter.Move(fyne.NewPos(225, 300))
 	runter.Resize(fyne.NewSize(130, 40))
 	objects = append(objects, runter)
 
@@ -671,8 +687,16 @@ func openMiningwelt3(a fyne.App, inv *Inventory, mines []*Mine) {
 	w.CenterOnScreen()
 
 	var objects []fyne.CanvasObject
-	xPositions := []float32{150, 300, 450}
-	y := float32(200)
+	xPositions := []float32{100, 250, 400}
+	y := float32(150)
+
+	// Hintergrund
+	background := canvas.NewImageFromFile("bild/Steinboden1.png")
+	background.FillMode = canvas.ImageFillStretch
+	background.Resize(fyne.NewSize(windowWidth, windowHeight))
+	background.Move(fyne.NewPos(0, 0))
+
+	objects = append(objects, background)
 
 	// Welt 3: Minen 6-8
 	for i := 6; i < 9; i++ {
@@ -738,7 +762,7 @@ func openMiningwelt3(a fyne.App, inv *Inventory, mines []*Mine) {
 		w.Close()
 		openMiningwelt2(a, inv, mines)
 	})
-	hoch.Move(fyne.NewPos(10, 20))
+	hoch.Move(fyne.NewPos(225, 20))
 	hoch.Resize(fyne.NewSize(130, 40))
 	objects = append(objects, hoch)
 
@@ -747,7 +771,7 @@ func openMiningwelt3(a fyne.App, inv *Inventory, mines []*Mine) {
 		w.Close()
 		openMiningwelt4(a, inv, mines)
 	})
-	runter.Move(fyne.NewPos(150, 20))
+	runter.Move(fyne.NewPos(225, 300))
 	runter.Resize(fyne.NewSize(130, 40))
 	objects = append(objects, runter)
 
@@ -762,8 +786,16 @@ func openMiningwelt4(a fyne.App, inv *Inventory, mines []*Mine) {
 	w.CenterOnScreen()
 
 	var objects []fyne.CanvasObject
-	xPositions := []float32{150, 300, 450}
-	y := float32(200)
+	xPositions := []float32{100, 250, 400}
+	y := float32(150)
+
+	// Hintergrund
+	background := canvas.NewImageFromFile("bild/Steinboden1.png")
+	background.FillMode = canvas.ImageFillStretch
+	background.Resize(fyne.NewSize(windowWidth, windowHeight))
+	background.Move(fyne.NewPos(0, 0))
+
+	objects = append(objects, background)
 
 	// Welt 4: Minen 9-11
 	for i := 9; i < 12 && i < len(mines); i++ {
@@ -829,7 +861,7 @@ func openMiningwelt4(a fyne.App, inv *Inventory, mines []*Mine) {
 		w.Close()
 		openMiningwelt3(a, inv, mines)
 	})
-	hoch.Move(fyne.NewPos(10, 20))
+	hoch.Move(fyne.NewPos(225, 20))
 	hoch.Resize(fyne.NewSize(130, 40))
 	objects = append(objects, hoch)
 
