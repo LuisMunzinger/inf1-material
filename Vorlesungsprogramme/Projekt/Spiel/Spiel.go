@@ -200,18 +200,18 @@ var armorUpgrade = map[Armor]Armor{
 var mineUpgradeResources = []Resource{Kohle, Stone, Kupferbarren, Eisenbarren, Stahlbarren, Silberbarren, Goldbarren, Platinbarren, GeschliffenerRubin, GeschliffenerDiamant, Mythrilbarren, GeschliffenerBlutkristall, Adamantiumbarren}
 
 var mines = []*Mine{
-	{"Kohlemine", fyne.NewPos(100, 200), Kohle, 0, 1, WoodPickaxe, false, 0, "GolderzVerbessert.png", nil, nil, nil},
-	{"Steinmine", fyne.NewPos(300, 200), Stone, 100, 1, WoodPickaxe, false, 0, "GolderzVerbessert.png", nil, nil, nil},
-	{"Kupfermine", fyne.NewPos(500, 200), Kupfererz, 200, 1, StonePickaxe, false, 0, "GolderzVerbessert.png", nil, nil, nil},
-	{"Eisenmine", fyne.NewPos(700, 200), Eisenerz, 250, 1, KupferPickaxe, false, 0, "GolderzVerbessert.png", nil, nil, nil},
-	{"Silbernmine", fyne.NewPos(900, 200), Silvererz, 500, 1, IronPickaxe, false, 0, "GolderzVerbessert.png", nil, nil, nil},
-	{"Goldmine", fyne.NewPos(1100, 200), Golderz, 500, 1, IronPickaxe, false, 0, "GolderzVerbessert.png", nil, nil, nil},
-	{"Platinmine", fyne.NewPos(100, 400), Platinerz, 1000, 1, GoldPickaxe, false, 0, "GolderzVerbessert.png", nil, nil, nil},
-	{"Rubinnmine", fyne.NewPos(300, 400), Rubinerz, 2000, 1, PlatinumPickaxe, false, 0, "GolderzVerbessert.png", nil, nil, nil},
-	{"Diamantmine", fyne.NewPos(500, 400), Diamanterz, 3000, 1, PlatinumPickaxe, false, 0, "GolderzVerbessert.png", nil, nil, nil},
-	{"Mythrilmine", fyne.NewPos(700, 400), Mythrilerz, 5000, 1, DiamondPickaxe, false, 0, "GolderzVerbessert.png", nil, nil, nil},
-	{"Blutkristallmine", fyne.NewPos(900, 400), Blutkristallerz, 10000, 1, DiamondPickaxe, false, 0, "GolderzVerbessert.png", nil, nil, nil},
-	{"Adamantiummine", fyne.NewPos(1100, 400), Adamantiumerz, 100000, 1, MythrilPickax, false, 0, "GolderzVerbessert.png", nil, nil, nil},
+	{"Kohlemine", fyne.NewPos(100, 200), Kohle, 0, 1, WoodPickaxe, false, 0, "bild/Kohleerz.png", nil, nil, nil},
+	{"Steinmine", fyne.NewPos(300, 200), Stone, 100, 1, WoodPickaxe, false, 0, "bild/Steinerz.png", nil, nil, nil},
+	{"Kupfermine", fyne.NewPos(500, 200), Kupfererz, 200, 1, StonePickaxe, false, 0, "bild/Kupfererz.png", nil, nil, nil},
+	{"Eisenmine", fyne.NewPos(700, 200), Eisenerz, 250, 1, KupferPickaxe, false, 0, "bild/Eisenerz.png", nil, nil, nil},
+	{"Silbernmine", fyne.NewPos(900, 200), Silvererz, 500, 1, IronPickaxe, false, 0, "bild/Silbererz.png", nil, nil, nil},
+	{"Goldmine", fyne.NewPos(1100, 200), Golderz, 500, 1, IronPickaxe, false, 0, "bild/Golderz.png", nil, nil, nil},
+	{"Platinmine", fyne.NewPos(100, 400), Platinerz, 1000, 1, GoldPickaxe, false, 0, "bild/Platinerz.png", nil, nil, nil},
+	{"Rubinnmine", fyne.NewPos(300, 400), Rubinerz, 2000, 1, PlatinumPickaxe, false, 0, "bild/Rubinerz.png", nil, nil, nil},
+	{"Diamantmine", fyne.NewPos(500, 400), Diamanterz, 3000, 1, PlatinumPickaxe, false, 0, "bild/Diamanterz.png", nil, nil, nil},
+	{"Mythrilmine", fyne.NewPos(700, 400), Mythrilerz, 5000, 1, DiamondPickaxe, false, 0, "bild/Mythrilerz.png", nil, nil, nil},
+	{"Blutkristallmine", fyne.NewPos(900, 400), Blutkristallerz, 10000, 1, DiamondPickaxe, false, 0, "bild/Blutkristallerz.png", nil, nil, nil},
+	{"Adamantiummine", fyne.NewPos(1100, 400), Adamantiumerz, 100000, 1, MythrilPickax, false, 0, "bild/Adamantiumerz.png", nil, nil, nil},
 }
 var inv = &Inventory{
 	Resources:      make(map[Resource]int),
@@ -306,7 +306,7 @@ func showStartWindow(a fyne.App) {
 	w.CenterOnScreen()
 
 	// Hintergrund
-	background := canvas.NewImageFromFile("Grünes Tal und Vulkanausbruch.png")
+	background := canvas.NewImageFromFile("bild/StartBild.png")
 	background.FillMode = canvas.ImageFillStretch
 	background.Resize(fyne.NewSize(windowWidth, windowHeight))
 	background.Move(fyne.NewPos(0, 0))
@@ -340,7 +340,7 @@ func showGameWindow(a fyne.App) {
 	healthBar.Resize(fyne.NewSize(healthBarWidth, healthBarHeight))
 	healthBar.Move(fyne.NewPos(x-5, y-healthBarHeight-2))
 
-	background := canvas.NewImageFromFile("Grünes Tal und Vulkanausbruch.png")
+	background := canvas.NewImageFromFile("bild/WeltenBild.png")
 	background.FillMode = canvas.ImageFillStretch
 	background.Resize(fyne.NewSize(windowWidth, windowHeight))
 
@@ -2022,6 +2022,8 @@ func createLevel(a fyne.App, inv *Inventory, w fyne.Window, mainWindow fyne.Wind
 			Rect      *canvas.Rectangle
 			Health    int
 			HealthBar *canvas.Rectangle
+			Name      string
+			NameLabel *widget.Label
 			X, Y      float32
 			Speed     float32
 		}
@@ -2031,17 +2033,24 @@ func createLevel(a fyne.App, inv *Inventory, w fyne.Window, mainWindow fyne.Wind
 		for i := 0; i < numEnemies; i++ {
 			e := &Enemy{
 				Rect:   canvas.NewRectangle(color.RGBA{255, 0, 0, 255}),
+				Name:   "Magmamonster",
 				X:      float32(50 + i*60),
 				Y:      float32(50 + i*40),
 				Speed:  1 + float32(level)*0.5,
 				Health: 50 + level*10,
 			}
+
 			e.Rect.Resize(fyne.NewSize(20, 20))
 			e.Rect.Move(fyne.NewPos(e.X, e.Y))
+			e.NameLabel = widget.NewLabel(e.Name)
+			e.NameLabel.Move(fyne.NewPos(
+				e.X-5,
+				e.Y-healthBarHeight-18, // über HealthBar
+			))
 			e.HealthBar = canvas.NewRectangle(color.RGBA{255, 0, 0, 255})
 			e.HealthBar.Resize(fyne.NewSize(float32(e.Health)/10, healthBarHeight))
 			e.HealthBar.Move(fyne.NewPos(e.X-5, e.Y-e.HealthBar.Size().Height-2))
-			objects = append(objects, e.Rect, e.HealthBar)
+			objects = append(objects, e.Rect, e.NameLabel, e.HealthBar)
 			enemies = append(enemies, e)
 		}
 
@@ -2116,6 +2125,7 @@ func createLevel(a fyne.App, inv *Inventory, w fyne.Window, mainWindow fyne.Wind
 					} else {
 						e.Rect.FillColor = color.Gray{Y: 200}
 						e.Rect.Refresh()
+						e.NameLabel.SetText("☠")
 					}
 				}
 
