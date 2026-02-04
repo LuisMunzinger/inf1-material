@@ -1281,7 +1281,6 @@ func handleSkillUnlock(skill string, levels map[int]int, inv *Inventory, kristal
 
 /* ===================== SHOP ===================== */
 func openShop(a fyne.App, inv *Inventory) {
-
 	prices := map[Resource]int{
 		Kohle:                     1,
 		Stone:                     1,
@@ -1308,13 +1307,11 @@ func openShop(a fyne.App, inv *Inventory) {
 		Adamantiumbarren:          1000,
 	}
 
-	// 🟩 Kategorien
 	edelsteine := []Resource{
 		GeschliffenerRubin,
 		GeschliffenerDiamant,
 		GeschliffenerBlutkristall,
 	}
-
 	barren := []Resource{
 		Kupferbarren,
 		Eisenbarren,
@@ -1325,20 +1322,10 @@ func openShop(a fyne.App, inv *Inventory) {
 		Mythrilbarren,
 		Adamantiumbarren,
 	}
-
 	erze := []Resource{
-		Kohle,
-		Stone,
-		Kupfererz,
-		Eisenerz,
-		Silvererz,
-		Golderz,
-		Platinerz,
-		Rubinerz,
-		Diamanterz,
-		Mythrilerz,
-		Blutkristallerz,
-		Adamantiumerz,
+		Kohle, Stone, Kupfererz, Eisenerz, Silvererz, Golderz,
+		Platinerz, Rubinerz, Diamanterz, Mythrilerz,
+		Blutkristallerz, Adamantiumerz,
 	}
 
 	w := a.NewWindow("Shop")
@@ -1349,43 +1336,55 @@ func openShop(a fyne.App, inv *Inventory) {
 	moneyLabel.TextStyle = fyne.TextStyle{Bold: true}
 
 	labels := make(map[Resource]*widget.Label)
-	sellAmounts := []int{1, 10, 100}
 
-	// Hilfsfunktion für Verkaufsblock
+	// 🔘 Verkaufsmenge (global)
+	selectedAmount := 1
+	amountSelector := widget.NewRadioGroup(
+		[]string{"1", "10", "100"},
+		func(value string) {
+			switch value {
+			case "10":
+				selectedAmount = 10
+			case "100":
+				selectedAmount = 100
+			default:
+				selectedAmount = 1
+			}
+		},
+	)
+	amountSelector.SetSelected("1")
+
+	// Verkaufsblock pro Resource
 	createSellBlock := func(r Resource) *fyne.Container {
-		resBox := container.NewVBox()
+		box := container.NewVBox()
+
 		label := widget.NewLabel("")
 		labels[r] = label
-		resBox.Add(label)
+		box.Add(label)
 
 		price := prices[r]
+		btn := widget.NewButton("Verkaufen", func() {
+			inv.Lock()
+			defer inv.Unlock()
 
-		for _, amt := range sellAmounts {
-			amount := amt
-			btn := widget.NewButton(fmt.Sprintf("Verkaufen %d", amount), func() {
-				inv.Lock()
-				defer inv.Unlock()
+			sell := selectedAmount
+			if inv.Resources[r] < sell {
+				sell = inv.Resources[r]
+			}
+			if sell > 0 {
+				inv.Resources[r] -= sell
+				inv.Money += sell * price
+			}
 
-				sell := amount
-				if inv.Resources[r] < sell {
-					sell = inv.Resources[r]
-				}
-				if sell > 0 {
-					inv.Resources[r] -= sell
-					inv.Money += sell * price
-				}
+			label.SetText(fmt.Sprintf("%s: %d", r, inv.Resources[r]))
+			moneyLabel.SetText(fmt.Sprintf("Geld: %d", inv.Money))
+		})
 
-				label.SetText(fmt.Sprintf("%s: %d", r, inv.Resources[r]))
-				moneyLabel.SetText(fmt.Sprintf("Geld: %d", inv.Money))
-			})
-			resBox.Add(btn)
-		}
-
-		resBox.Add(widget.NewSeparator())
-		return resBox
+		box.Add(btn)
+		box.Add(widget.NewSeparator())
+		return box
 	}
 
-	// 🟦 Spalten
 	leftBox := container.NewVBox(widget.NewLabel("💎 Geschliffene Edelsteine"))
 	midBox := container.NewVBox(widget.NewLabel("🔩 Barren"))
 	rightBox := container.NewVBox(widget.NewLabel("⛏️ Erze & Rohstoffe"))
@@ -1400,9 +1399,15 @@ func openShop(a fyne.App, inv *Inventory) {
 		rightBox.Add(createSellBlock(r))
 	}
 
-	// Layout
+	topBar := container.NewHBox(
+		moneyLabel,
+		widget.NewSeparator(),
+		widget.NewLabel("Menge:"),
+		amountSelector,
+	)
+
 	content := container.NewBorder(
-		container.NewHBox(moneyLabel),
+		topBar,
 		nil, nil, nil,
 		container.NewGridWithColumns(
 			3,
@@ -1412,7 +1417,6 @@ func openShop(a fyne.App, inv *Inventory) {
 		),
 	)
 
-	// UI Refresh
 	go func() {
 		ticker := time.NewTicker(time.Second)
 		defer ticker.Stop()
@@ -1738,7 +1742,7 @@ func openSmith(a fyne.App, inv *Inventory) {
 			}
 			inv.Unlock()
 
-			btn.SetText(fmt.Sprintf("%s Upgrade: Von %s ➡ %s | Kosten: %s", name, fromLevel, toLevel, costText))
+			btn.SetText(fmt.Sprintf("%s Upgrade: Von %s => %s | Kosten: %s", name, fromLevel, toLevel, costText))
 			if canUpgrade {
 				btn.Enable()
 			} else {
