@@ -84,12 +84,10 @@ const (
 const (
 	windowWidth     = 1470
 	windowHeight    = 765
-	playerW         = 20
-	playerH         = 40
+	playerW         = 40
+	playerH         = 60
 	speed           = 20
-	iconSize        = 40
 	interactionDist = 80
-	borderWidth     = 4
 	MaxMineUpgrade  = 9
 	mineUpgradeRate = 1
 )
@@ -326,9 +324,10 @@ func showGameWindow(a fyne.App) {
 	w.Resize(fyne.NewSize(windowWidth, windowHeight))
 	w.CenterOnScreen()
 
-	player := canvas.NewRectangle(color.RGBA{0, 200, 100, 255})
+	player := canvas.NewImageFromFile("bild/player_down.png")
+	player.FillMode = canvas.ImageFillContain
 	player.Resize(fyne.NewSize(playerW, playerH))
-	x, y := float32(50), float32(50)
+	x, y := float32(50), float32(500)
 	player.Move(fyne.NewPos(x, y))
 
 	// Spieler-Lebensanzeige
@@ -407,16 +406,33 @@ func showGameWindow(a fyne.App) {
 		}
 	}()
 
+	playerSprites := map[string]string{
+		"up":    "bild/LaufenRückwärts.png",
+		"down":  "bild/LaufenForwärts.png",
+		"left":  "bild/LaufenLinks.png",
+		"right": "bild/LaufenRechts.png",
+	}
+
+	currentDir := "down"
+
 	w.Canvas().SetOnTypedKey(func(k *fyne.KeyEvent) {
 		switch k.Name {
 		case fyne.KeyUp:
 			y -= speed
+			currentDir = "up"
+
 		case fyne.KeyDown:
 			y += speed
+			currentDir = "down"
+
 		case fyne.KeyLeft:
 			x -= speed
+			currentDir = "left"
+
 		case fyne.KeyRight:
 			x += speed
+			currentDir = "right"
+
 		case fyne.KeyReturn:
 			p := fyne.NewPos(x, y)
 			for _, m := range mines {
@@ -462,6 +478,8 @@ func showGameWindow(a fyne.App) {
 		x = clamp(x, 0, windowWidth-playerW)
 		y = clamp(y, 0, windowHeight-playerH)
 		player.Move(fyne.NewPos(x, y))
+		player.File = playerSprites[currentDir]
+		player.Refresh()
 
 		// Health Bar über dem Spieler aktualisieren
 		healthBar.Move(fyne.NewPos(x-5, y-healthBarHeight-2))
@@ -521,7 +539,8 @@ func openMiningwelt1(a fyne.App, inv *Inventory, mines []*Mine) {
 		objects = append(objects, icon, label)
 	}
 
-	player := canvas.NewRectangle(color.RGBA{0, 200, 100, 255})
+	player := canvas.NewImageFromFile("bild/player_down.png")
+	player.FillMode = canvas.ImageFillContain
 	player.Resize(fyne.NewSize(playerW, playerH))
 	x, y := float32(50), float32(50)
 	player.Move(fyne.NewPos(x, y))
@@ -533,16 +552,33 @@ func openMiningwelt1(a fyne.App, inv *Inventory, mines []*Mine) {
 	healthBar.Resize(fyne.NewSize(healthBarWidth, healthBarHeight))
 	healthBar.Move(fyne.NewPos(x-5, y-healthBarHeight-2))
 
+	playerSprites := map[string]string{
+		"up":    "bild/LaufenRückwärts.png",
+		"down":  "bild/LaufenForwärts.png",
+		"left":  "bild/LaufenLinks.png",
+		"right": "bild/LaufenRechts.png",
+	}
+
+	currentDir := "down"
+
 	w.Canvas().SetOnTypedKey(func(k *fyne.KeyEvent) {
 		switch k.Name {
 		case fyne.KeyUp:
 			y -= speed
+			currentDir = "up"
+
 		case fyne.KeyDown:
 			y += speed
+			currentDir = "down"
+
 		case fyne.KeyLeft:
 			x -= speed
+			currentDir = "left"
+
 		case fyne.KeyRight:
 			x += speed
+			currentDir = "right"
+
 		case fyne.KeyReturn:
 			p := fyne.NewPos(x, y)
 			for j := 0; j < 3; j++ {
@@ -567,6 +603,8 @@ func openMiningwelt1(a fyne.App, inv *Inventory, mines []*Mine) {
 		x = clamp(x, 0, windowWidth-playerW)
 		y = clamp(y, 0, windowHeight-playerH)
 		player.Move(fyne.NewPos(x, y))
+		player.File = playerSprites[currentDir]
+		player.Refresh()
 
 		healthBar.Move(fyne.NewPos(x-5, y-healthBarHeight-2))
 		healthBar.Refresh()
@@ -624,7 +662,8 @@ func openMiningwelt2(a fyne.App, inv *Inventory, mines []*Mine) {
 		objects = append(objects, icon, label)
 	}
 
-	player := canvas.NewRectangle(color.RGBA{0, 200, 100, 255})
+	player := canvas.NewImageFromFile("bild/player_down.png")
+	player.FillMode = canvas.ImageFillContain
 	player.Resize(fyne.NewSize(playerW, playerH))
 	x, y := float32(50), float32(50)
 	player.Move(fyne.NewPos(x, y))
@@ -636,16 +675,32 @@ func openMiningwelt2(a fyne.App, inv *Inventory, mines []*Mine) {
 	healthBar.Resize(fyne.NewSize(healthBarWidth, healthBarHeight))
 	healthBar.Move(fyne.NewPos(x-5, y-healthBarHeight-2))
 
+	playerSprites := map[string]string{
+		"up":    "bild/LaufenRückwärts.png",
+		"down":  "bild/LaufenForwärts.png",
+		"left":  "bild/LaufenLinks.png",
+		"right": "bild/LaufenRechts.png",
+	}
+
+	currentDir := "down"
+
 	w.Canvas().SetOnTypedKey(func(k *fyne.KeyEvent) {
 		switch k.Name {
 		case fyne.KeyUp:
 			y -= speed
+			currentDir = "up"
+
 		case fyne.KeyDown:
 			y += speed
+			currentDir = "down"
+
 		case fyne.KeyLeft:
 			x -= speed
+			currentDir = "left"
+
 		case fyne.KeyRight:
 			x += speed
+			currentDir = "right"
 		case fyne.KeyReturn:
 			p := fyne.NewPos(x, y)
 			for j := 3; j < 6; j++ {
@@ -670,6 +725,8 @@ func openMiningwelt2(a fyne.App, inv *Inventory, mines []*Mine) {
 		x = clamp(x, 0, windowWidth-playerW)
 		y = clamp(y, 0, windowHeight-playerH)
 		player.Move(fyne.NewPos(x, y))
+		player.File = playerSprites[currentDir]
+		player.Refresh()
 
 		healthBar.Move(fyne.NewPos(x-5, y-healthBarHeight-2))
 		healthBar.Refresh()
@@ -726,7 +783,8 @@ func openMiningwelt3(a fyne.App, inv *Inventory, mines []*Mine) {
 		objects = append(objects, icon, label)
 	}
 
-	player := canvas.NewRectangle(color.RGBA{0, 200, 100, 255})
+	player := canvas.NewImageFromFile("bild/player_down.png")
+	player.FillMode = canvas.ImageFillContain
 	player.Resize(fyne.NewSize(playerW, playerH))
 	x, y := float32(50), float32(50)
 	player.Move(fyne.NewPos(x, y))
@@ -738,16 +796,32 @@ func openMiningwelt3(a fyne.App, inv *Inventory, mines []*Mine) {
 	healthBar.Resize(fyne.NewSize(healthBarWidth, healthBarHeight))
 	healthBar.Move(fyne.NewPos(x-5, y-healthBarHeight-2))
 
+	playerSprites := map[string]string{
+		"up":    "bild/LaufenRückwärts.png",
+		"down":  "bild/LaufenForwärts.png",
+		"left":  "bild/LaufenLinks.png",
+		"right": "bild/LaufenRechts.png",
+	}
+
+	currentDir := "down"
+
 	w.Canvas().SetOnTypedKey(func(k *fyne.KeyEvent) {
 		switch k.Name {
 		case fyne.KeyUp:
 			y -= speed
+			currentDir = "up"
+
 		case fyne.KeyDown:
 			y += speed
+			currentDir = "down"
+
 		case fyne.KeyLeft:
 			x -= speed
+			currentDir = "left"
+
 		case fyne.KeyRight:
 			x += speed
+			currentDir = "right"
 		case fyne.KeyReturn:
 			p := fyne.NewPos(x, y)
 			for j := 6; j < 9; j++ {
@@ -772,6 +846,8 @@ func openMiningwelt3(a fyne.App, inv *Inventory, mines []*Mine) {
 		x = clamp(x, 0, windowWidth-playerW)
 		y = clamp(y, 0, windowHeight-playerH)
 		player.Move(fyne.NewPos(x, y))
+		player.File = playerSprites[currentDir]
+		player.Refresh()
 
 		healthBar.Move(fyne.NewPos(x-5, y-healthBarHeight-2))
 		healthBar.Refresh()
@@ -822,7 +898,8 @@ func openMiningwelt4(a fyne.App, inv *Inventory, mines []*Mine) {
 		objects = append(objects, icon, label)
 	}
 
-	player := canvas.NewRectangle(color.RGBA{0, 200, 100, 255})
+	player := canvas.NewImageFromFile("bild/player_down.png")
+	player.FillMode = canvas.ImageFillContain
 	player.Resize(fyne.NewSize(playerW, playerH))
 	x, y := float32(50), float32(50)
 	player.Move(fyne.NewPos(x, y))
@@ -834,16 +911,32 @@ func openMiningwelt4(a fyne.App, inv *Inventory, mines []*Mine) {
 	healthBar.Resize(fyne.NewSize(healthBarWidth, healthBarHeight))
 	healthBar.Move(fyne.NewPos(x-5, y-healthBarHeight-2))
 
+	playerSprites := map[string]string{
+		"up":    "bild/LaufenRückwärts.png",
+		"down":  "bild/LaufenForwärts.png",
+		"left":  "bild/LaufenLinks.png",
+		"right": "bild/LaufenRechts.png",
+	}
+
+	currentDir := "down"
+
 	w.Canvas().SetOnTypedKey(func(k *fyne.KeyEvent) {
 		switch k.Name {
 		case fyne.KeyUp:
 			y -= speed
+			currentDir = "up"
+
 		case fyne.KeyDown:
 			y += speed
+			currentDir = "down"
+
 		case fyne.KeyLeft:
 			x -= speed
+			currentDir = "left"
+
 		case fyne.KeyRight:
 			x += speed
+			currentDir = "right"
 		case fyne.KeyReturn:
 			p := fyne.NewPos(x, y)
 			for j := 9; j < 12 && j < len(mines); j++ {
@@ -863,6 +956,8 @@ func openMiningwelt4(a fyne.App, inv *Inventory, mines []*Mine) {
 		x = clamp(x, 0, windowWidth-playerW)
 		y = clamp(y, 0, windowHeight-playerH)
 		player.Move(fyne.NewPos(x, y))
+		player.File = playerSprites[currentDir]
+		player.Refresh()
 
 		healthBar.Move(fyne.NewPos(x-5, y-healthBarHeight-2))
 		healthBar.Refresh()
@@ -2109,9 +2204,10 @@ func createLevel(a fyne.App, inv *Inventory, w fyne.Window, mainWindow fyne.Wind
 		w.CenterOnScreen()
 
 		// Spieler erstellen
-		player := canvas.NewRectangle(color.RGBA{0, 200, 100, 255})
+		player := canvas.NewImageFromFile("bild/player_down.png")
+		player.FillMode = canvas.ImageFillContain
 		player.Resize(fyne.NewSize(playerW, playerH))
-		x, y := float32(50), float32(50)
+		x, y := float32(50), float32(500)
 		player.Move(fyne.NewPos(x, y))
 
 		// Health Bar erstellen
@@ -2170,25 +2266,42 @@ func createLevel(a fyne.App, inv *Inventory, w fyne.Window, mainWindow fyne.Wind
 		w2.SetContent(container.NewWithoutLayout(objects...))
 
 		// Spielerbewegung
+		playerSprites := map[string]string{
+			"up":    "bild/LaufenRückwärts.png",
+			"down":  "bild/LaufenForwärts.png",
+			"left":  "bild/LaufenLinks.png",
+			"right": "bild/LaufenRechts.png",
+		}
+
+		currentDir := "down"
+
 		w2.Canvas().SetOnTypedKey(func(k *fyne.KeyEvent) {
-			speed := float32(10)
 			switch k.Name {
 			case fyne.KeyUp:
 				y -= speed
+				currentDir = "up"
+
 			case fyne.KeyDown:
 				y += speed
+				currentDir = "down"
+
 			case fyne.KeyLeft:
 				x -= speed
+				currentDir = "left"
+
 			case fyne.KeyRight:
 				x += speed
+				currentDir = "right"
 			case fyne.KeyEscape, fyne.KeyBackspace:
 				w2.Close()
 				w.Show()
 				return
 			}
+
 			x = clamp(x, 0, 400-playerW)
 			y = clamp(y, 0, 300-playerH)
 			player.Move(fyne.NewPos(x, y))
+			player.File = playerSprites[currentDir]
 			player.Refresh()
 
 			healthBar.Move(fyne.NewPos(x-5, y-healthBarHeight-2))
