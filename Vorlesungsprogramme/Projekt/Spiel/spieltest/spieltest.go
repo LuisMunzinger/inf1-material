@@ -346,46 +346,53 @@ func showGameWindow(a fyne.App) {
 	objects := []fyne.CanvasObject{background, healthBar, player}
 
 	// Dungeon erstellen
-	dungeonPos := fyne.NewPos(700, 600)
+	dungeonPos1 := fyne.NewPos(950, 500)
+	dungeonPos2 := fyne.NewPos(1100, 550)
 	dungeon := canvas.NewImageFromFile("bild/Dungeon.png")
-	dungeon.Move(dungeonPos)
-	dungeon.Resize(fyne.NewSize(64, 64))
+	dungeon.Move(dungeonPos1)
+	dungeon.Resize(fyne.NewSize(400, 200))
 	dungeon.FillMode = canvas.ImageFillContain
 
-	shopPos := fyne.NewPos(100, 20)
+	shopPos1 := fyne.NewPos(130, 350)
+	shopPos2 := fyne.NewPos(180, 400)
 	shop := canvas.NewImageFromFile("bild/Shop.png")
-	shop.Move(shopPos)
-	shop.Resize(fyne.NewSize(64, 64))
+	shop.Move(shopPos1)
+	shop.Resize(fyne.NewSize(100, 100))
 	shop.FillMode = canvas.ImageFillContain
 
-	smithPos := fyne.NewPos(400, 20)
+	smithPos1 := fyne.NewPos(300, 350)
+	smithPos2 := fyne.NewPos(350, 400)
 	smith := canvas.NewImageFromFile("bild/Smith.png")
-	smith.Move(smithPos)
-	smith.Resize(fyne.NewSize(64, 64))
+	smith.Move(smithPos1)
+	smith.Resize(fyne.NewSize(100, 100))
 	smith.FillMode = canvas.ImageFillContain
 
-	kristallShopPos := fyne.NewPos(700, 20)
-	kristall := canvas.NewImageFromFile("bild/Kristallshop.png")
-	kristall.Move(kristallShopPos)
-	kristall.Resize(fyne.NewSize(64, 64))
-	kristall.FillMode = canvas.ImageFillContain
-
-	schmelzofenPos := fyne.NewPos(1000, 20)
+	schmelzofenPos1 := fyne.NewPos(430, 350)
+	schmelzofenPos2 := fyne.NewPos(400, 400)
 	schmelzofen := canvas.NewImageFromFile("bild/Schmelzofen.png")
-	schmelzofen.Move(schmelzofenPos)
-	schmelzofen.Resize(fyne.NewSize(64, 64))
+	schmelzofen.Move(schmelzofenPos1)
+	schmelzofen.Resize(fyne.NewSize(100, 100))
 	schmelzofen.FillMode = canvas.ImageFillContain
 
-	wiedergeburtenLadnePos := fyne.NewPos(1200, 20)
+	kristallShopPos1 := fyne.NewPos(560, 350)
+	kristallShopPos2 := fyne.NewPos(600, 400)
+	kristall := canvas.NewImageFromFile("bild/Kristallshop.png")
+	kristall.Move(kristallShopPos1)
+	kristall.Resize(fyne.NewSize(100, 100))
+	kristall.FillMode = canvas.ImageFillContain
+
+	wiedergeburtenLadnePos1 := fyne.NewPos(800, 150)
+	wiedergeburtenLadnePos2 := fyne.NewPos(850, 200)
 	wiedergeburtenladen := canvas.NewImageFromFile("bild/Wiedergeburtenladen.png")
-	wiedergeburtenladen.Move(wiedergeburtenLadnePos)
-	wiedergeburtenladen.Resize(fyne.NewSize(64, 64))
+	wiedergeburtenladen.Move(wiedergeburtenLadnePos1)
+	wiedergeburtenladen.Resize(fyne.NewSize(100, 100))
 	wiedergeburtenladen.FillMode = canvas.ImageFillContain
 
-	miningweltPos := fyne.NewPos(1200, 400)
+	miningweltPos1 := fyne.NewPos(1300, 180)
+	miningweltPos2 := fyne.NewPos(1350, 230)
 	miningwelt := canvas.NewImageFromFile("bild/Miningwelt.png")
-	miningwelt.Move(miningweltPos)
-	miningwelt.Resize(fyne.NewSize(64, 64))
+	miningwelt.Move(miningweltPos1)
+	miningwelt.Resize(fyne.NewSize(100, 100))
 	miningwelt.FillMode = canvas.ImageFillContain
 
 	objects = append(objects, smith, kristall, schmelzofen, wiedergeburtenladen, miningwelt, shop, dungeon)
@@ -435,37 +442,31 @@ func showGameWindow(a fyne.App) {
 
 		case fyne.KeyReturn:
 			p := fyne.NewPos(x, y)
-			for _, m := range mines {
-				if dist2(p, m.Pos) < interactionDist*interactionDist {
-					openMineShop(a, m, inv)
-					return
-				}
-			}
-			if dist2(p, shopPos) < interactionDist*interactionDist {
+			if dist2(p, shopPos2) < interactionDist*interactionDist {
 				openShop(a, inv)
 				return
 			}
-			if dist2(p, smithPos) < interactionDist*interactionDist {
+			if dist2(p, smithPos2) < interactionDist*interactionDist {
 				openSmith(a, inv)
 				return
 			}
-			if dist2(p, kristallShopPos) < interactionDist*interactionDist {
+			if dist2(p, kristallShopPos2) < interactionDist*interactionDist {
 				openKristallShop(a, inv, mines)
 				return
 			}
-			if dist2(p, schmelzofenPos) < interactionDist*interactionDist {
+			if dist2(p, schmelzofenPos2) < interactionDist*interactionDist {
 				openSchmelzofen(a, inv)
 				return
 			}
-			if dist2(p, wiedergeburtenLadnePos) < interactionDist*interactionDist {
+			if dist2(p, wiedergeburtenLadnePos2) < interactionDist*interactionDist {
 				openWiedergeburtenLaden(a, inv, mines)
 				return
 			}
-			if dist2(p, dungeonPos) < interactionDist*interactionDist {
+			if dist2(p, dungeonPos2) < interactionDist*interactionDist {
 				openDungeon(a, w, inv)
 				return
 			}
-			if dist2(p, miningweltPos) < interactionDist*interactionDist {
+			if dist2(p, miningweltPos2) < interactionDist*interactionDist {
 				w.Close()
 				openMiningwelt1(a, inv, mines)
 				return
@@ -513,7 +514,7 @@ func openMiningwelt1(a fyne.App, inv *Inventory, mines []*Mine) {
 	runter.FillMode = canvas.ImageFillContain
 
 	// Hintergrund
-	background := canvas.NewImageFromFile("bild/Steinboden1.png")
+	background := canvas.NewImageFromFile("bild/Steinboden.png")
 	background.FillMode = canvas.ImageFillStretch
 	background.Resize(fyne.NewSize(windowWidth, windowHeight))
 	background.Move(fyne.NewPos(0, 0))
@@ -637,7 +638,7 @@ func openMiningwelt2(a fyne.App, inv *Inventory, mines []*Mine) {
 	runter.FillMode = canvas.ImageFillContain
 
 	// Hintergrund
-	background := canvas.NewImageFromFile("bild/Steinboden1.png")
+	background := canvas.NewImageFromFile("bild/Steinboden.png")
 	background.FillMode = canvas.ImageFillStretch
 	background.Resize(fyne.NewSize(windowWidth, windowHeight))
 	background.Move(fyne.NewPos(0, 0))
@@ -758,7 +759,7 @@ func openMiningwelt3(a fyne.App, inv *Inventory, mines []*Mine) {
 	runter.FillMode = canvas.ImageFillContain
 
 	// Hintergrund
-	background := canvas.NewImageFromFile("bild/Steinboden1.png")
+	background := canvas.NewImageFromFile("bild/Steinboden.png")
 	background.FillMode = canvas.ImageFillStretch
 	background.Resize(fyne.NewSize(windowWidth, windowHeight))
 	background.Move(fyne.NewPos(0, 0))
@@ -856,6 +857,7 @@ func openMiningwelt3(a fyne.App, inv *Inventory, mines []*Mine) {
 	objects = append(objects, player, healthBar)
 	w.SetContent(container.NewWithoutLayout(objects...))
 	w.Show()
+
 }
 
 func openMiningwelt4(a fyne.App, inv *Inventory, mines []*Mine) {
@@ -874,7 +876,7 @@ func openMiningwelt4(a fyne.App, inv *Inventory, mines []*Mine) {
 	hoch.FillMode = canvas.ImageFillContain
 
 	// Hintergrund
-	background := canvas.NewImageFromFile("bild/Steinboden1.png")
+	background := canvas.NewImageFromFile("bild/Steinboden.png")
 	background.FillMode = canvas.ImageFillStretch
 	background.Resize(fyne.NewSize(windowWidth, windowHeight))
 	background.Move(fyne.NewPos(0, 0))
@@ -2077,9 +2079,14 @@ func openInventory(a fyne.App, inv *Inventory) {
 	}
 	inv.Unlock()
 
-	karte := canvas.NewImageFromFile("bild/Karte.png")
-	karte.FillMode = canvas.ImageFillContain
-	karte.SetMinSize(fyne.NewSize(350, 250)) // Größe anpassen wie du willst
+	ButtonFürKarte := widget.NewButton("Zur Karte", func() {
+		öffneKarte(a, inv, w)
+	})
+
+	ButtonContainer := container.NewGridWrap(
+		fyne.NewSize(180, 40),
+		ButtonFürKarte,
+	)
 
 	// Layout: Oben Geld + Ausrüstung
 	topBox := container.NewVBox(
@@ -2095,7 +2102,7 @@ func openInventory(a fyne.App, inv *Inventory) {
 	topRow := container.NewHBox(
 		topBox,
 		layout.NewSpacer(), // schiebt die Karte nach rechts
-		karte,
+		ButtonContainer,
 	)
 
 	resourceColumns := container.NewHBox(
@@ -2147,6 +2154,28 @@ func openInventory(a fyne.App, inv *Inventory) {
 			inv.Unlock()
 		}
 	}()
+}
+
+func öffneKarte(a fyne.App, inv *Inventory, invWindow fyne.Window) {
+	// Inventar schließen
+	invWindow.Close()
+
+	// Kartenfenster
+	karteWindow := a.NewWindow("Karte")
+	karteWindow.Resize(fyne.NewSize(800, 600))
+	karteWindow.CenterOnScreen()
+
+	// Wenn Karte geschlossen wird → Inventar wieder öffnen
+	karteWindow.SetOnClosed(func() {
+		openInventory(a, inv)
+	})
+
+	// Karte als Hintergrund
+	karte := canvas.NewImageFromFile("bild/Karte.png")
+	karte.FillMode = canvas.ImageFillStretch
+
+	karteWindow.SetContent(container.NewMax(karte))
+	karteWindow.Show()
 }
 
 /* ===================== DUNGEON ===================== */
@@ -2201,7 +2230,7 @@ func createLevel(a fyne.App, inv *Inventory, w fyne.Window, mainWindow fyne.Wind
 		w.Hide()
 		w2 := a.NewWindow(levelName)
 		w2.Resize(fyne.NewSize(400, 300))
-		w.CenterOnScreen()
+		w2.CenterOnScreen()
 
 		// Spieler erstellen
 		player := canvas.NewImageFromFile("bild/player_down.png")
@@ -2226,7 +2255,7 @@ func createLevel(a fyne.App, inv *Inventory, w fyne.Window, mainWindow fyne.Wind
 
 		// Gegner erstellen
 		type Enemy struct {
-			Rect      *canvas.Rectangle
+			Rect      *canvas.Image
 			Health    int
 			HealthBar *canvas.Rectangle
 			Name      string
@@ -2239,7 +2268,7 @@ func createLevel(a fyne.App, inv *Inventory, w fyne.Window, mainWindow fyne.Wind
 		enemies := []*Enemy{}
 		for i := 0; i < numEnemies; i++ {
 			e := &Enemy{
-				Rect:   canvas.NewRectangle(color.RGBA{255, 0, 0, 255}),
+				Rect:   canvas.NewImageFromFile("bild/Gegner.png"),
 				Name:   "Magmamonster",
 				X:      float32(50 + i*60),
 				Y:      float32(50 + i*40),
@@ -2247,13 +2276,14 @@ func createLevel(a fyne.App, inv *Inventory, w fyne.Window, mainWindow fyne.Wind
 				Health: 50 + level*10,
 			}
 
-			e.Rect.Resize(fyne.NewSize(20, 20))
+			e.Rect.Resize(fyne.NewSize(50, 50))
 			e.Rect.Move(fyne.NewPos(e.X, e.Y))
 			e.NameLabel = widget.NewLabel(e.Name)
 			e.NameLabel.Move(fyne.NewPos(
 				e.X-5,
 				e.Y-healthBarHeight-18, // über HealthBar
 			))
+			e.NameLabel.Resize(e.NameLabel.MinSize())
 			e.HealthBar = canvas.NewRectangle(color.RGBA{255, 0, 0, 255})
 			e.HealthBar.Resize(fyne.NewSize(float32(e.Health)/10, healthBarHeight))
 			e.HealthBar.Move(fyne.NewPos(e.X-5, e.Y-e.HealthBar.Size().Height-2))
@@ -2347,7 +2377,6 @@ func createLevel(a fyne.App, inv *Inventory, w fyne.Window, mainWindow fyne.Wind
 					if e.Health > 0 {
 						allEnemiesDead = false
 					} else {
-						e.Rect.FillColor = color.Gray{Y: 200}
 						e.Rect.Refresh()
 						e.NameLabel.SetText("☠")
 					}

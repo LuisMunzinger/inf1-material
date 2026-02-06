@@ -514,7 +514,7 @@ func openMiningwelt1(a fyne.App, inv *Inventory, mines []*Mine) {
 	runter.FillMode = canvas.ImageFillContain
 
 	// Hintergrund
-	background := canvas.NewImageFromFile("bild/Steinboden1.png")
+	background := canvas.NewImageFromFile("bild/Steinboden.png")
 	background.FillMode = canvas.ImageFillStretch
 	background.Resize(fyne.NewSize(windowWidth, windowHeight))
 	background.Move(fyne.NewPos(0, 0))
@@ -638,7 +638,7 @@ func openMiningwelt2(a fyne.App, inv *Inventory, mines []*Mine) {
 	runter.FillMode = canvas.ImageFillContain
 
 	// Hintergrund
-	background := canvas.NewImageFromFile("bild/Steinboden1.png")
+	background := canvas.NewImageFromFile("bild/Steinboden.png")
 	background.FillMode = canvas.ImageFillStretch
 	background.Resize(fyne.NewSize(windowWidth, windowHeight))
 	background.Move(fyne.NewPos(0, 0))
@@ -759,7 +759,7 @@ func openMiningwelt3(a fyne.App, inv *Inventory, mines []*Mine) {
 	runter.FillMode = canvas.ImageFillContain
 
 	// Hintergrund
-	background := canvas.NewImageFromFile("bild/Steinboden1.png")
+	background := canvas.NewImageFromFile("bild/Steinboden.png")
 	background.FillMode = canvas.ImageFillStretch
 	background.Resize(fyne.NewSize(windowWidth, windowHeight))
 	background.Move(fyne.NewPos(0, 0))
@@ -876,7 +876,7 @@ func openMiningwelt4(a fyne.App, inv *Inventory, mines []*Mine) {
 	hoch.FillMode = canvas.ImageFillContain
 
 	// Hintergrund
-	background := canvas.NewImageFromFile("bild/Steinboden1.png")
+	background := canvas.NewImageFromFile("bild/Steinboden.png")
 	background.FillMode = canvas.ImageFillStretch
 	background.Resize(fyne.NewSize(windowWidth, windowHeight))
 	background.Move(fyne.NewPos(0, 0))
@@ -2079,9 +2079,14 @@ func openInventory(a fyne.App, inv *Inventory) {
 	}
 	inv.Unlock()
 
-	karte := canvas.NewImageFromFile("bild/Karte.png")
-	karte.FillMode = canvas.ImageFillContain
-	karte.SetMinSize(fyne.NewSize(350, 250)) // Größe anpassen wie du willst
+	ButtonFürKarte := widget.NewButton("Zur Karte", func() {
+		öffneKarte(a, inv, w)
+	})
+
+	ButtonContainer := container.NewGridWrap(
+		fyne.NewSize(180, 40),
+		ButtonFürKarte,
+	)
 
 	// Layout: Oben Geld + Ausrüstung
 	topBox := container.NewVBox(
@@ -2097,7 +2102,7 @@ func openInventory(a fyne.App, inv *Inventory) {
 	topRow := container.NewHBox(
 		topBox,
 		layout.NewSpacer(), // schiebt die Karte nach rechts
-		karte,
+		ButtonContainer,
 	)
 
 	resourceColumns := container.NewHBox(
@@ -2149,6 +2154,28 @@ func openInventory(a fyne.App, inv *Inventory) {
 			inv.Unlock()
 		}
 	}()
+}
+
+func öffneKarte(a fyne.App, inv *Inventory, invWindow fyne.Window) {
+	// Inventar schließen
+	invWindow.Close()
+
+	// Kartenfenster
+	karteWindow := a.NewWindow("Karte")
+	karteWindow.Resize(fyne.NewSize(800, 600))
+	karteWindow.CenterOnScreen()
+
+	// Wenn Karte geschlossen wird → Inventar wieder öffnen
+	karteWindow.SetOnClosed(func() {
+		openInventory(a, inv)
+	})
+
+	// Karte als Hintergrund
+	karte := canvas.NewImageFromFile("bild/Karte.png")
+	karte.FillMode = canvas.ImageFillStretch
+
+	karteWindow.SetContent(container.NewMax(karte))
+	karteWindow.Show()
 }
 
 /* ===================== DUNGEON ===================== */
@@ -2249,7 +2276,7 @@ func createLevel(a fyne.App, inv *Inventory, w fyne.Window, mainWindow fyne.Wind
 				Health: 50 + level*10,
 			}
 
-			e.Rect.Resize(fyne.NewSize(20, 20))
+			e.Rect.Resize(fyne.NewSize(50, 50))
 			e.Rect.Move(fyne.NewPos(e.X, e.Y))
 			e.NameLabel = widget.NewLabel(e.Name)
 			e.NameLabel.Move(fyne.NewPos(
