@@ -1,5 +1,6 @@
 package suit
 
+// Suit definiert die Farben der Karten.
 type Suit int
 
 const (
@@ -9,17 +10,19 @@ const (
 	Diamonds
 )
 
-func (s Suit) string() string {
+// String gibt die Farbe als String zurück
+// und verwendet dabei die üblichen Symbole für die Farben.
+func (s Suit) String() string {
 	switch s {
 	case Clubs:
-		return "Peak"
+		return "♣"
 	case Spades:
-		return "Schipe"
+		return "♠"
 	case Hearts:
-		return "Herz"
+		return "♥"
 	case Diamonds:
-		return "Karo"
+		return "♦"
 	default:
-		return "Unkown Suit"
+		return "Unknown Suit"
 	}
 }

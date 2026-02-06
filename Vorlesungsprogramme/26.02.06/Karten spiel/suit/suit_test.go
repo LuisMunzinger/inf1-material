@@ -1,8 +1,9 @@
 package suit
 
-func ExampleSuit_string() {
-	fmt.println(Clubs, Spades, Hearts, Diamonds)
+import "fmt"
 
-	//Output:
-	// 0 1 2 3 5 6
+func ExampleSuit() {
+	fmt.Println(Clubs, Spades, Hearts, Diamonds)
+
+	// Output: ♣ ♠ ♥ ♦
 }
