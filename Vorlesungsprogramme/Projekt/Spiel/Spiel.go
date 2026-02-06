@@ -2205,17 +2205,31 @@ func openDungeon(a fyne.App, mainWindow fyne.Window, inv *Inventory) {
 	// Initiale Ebene erstellen
 	createLevel(a, inv, w, mainWindow, &currentLevel, levelButtonContainer, healthLabel, playerHealth, closeDungeon)
 
-	w.SetContent(container.NewVBox(
+	bg := canvas.NewImageFromFile("bild/Dungeoneingang.png")
+	bg.FillMode = canvas.ImageFillStretch
+
+	content := container.NewVBox(
+		widget.NewLabelWithStyle(
+			"Dungeon",
+			fyne.TextAlignCenter,
+			fyne.TextStyle{Bold: true},
+		),
 		levelButtonContainer,
 		widget.NewButton("Dungeon verlassen", closeDungeon),
-	))
+	)
+
+	w.SetContent(
+		container.NewMax(
+			bg,
+			container.NewPadded(content),
+		),
+	)
 
 	w.Canvas().SetOnTypedKey(func(k *fyne.KeyEvent) {
 		if k.Name == fyne.KeyBackspace || k.Name == fyne.KeyEscape {
 			closeDungeon()
 		}
 	})
-
 	w.Show()
 }
 
@@ -2405,7 +2419,6 @@ func createLevel(a fyne.App, inv *Inventory, w fyne.Window, mainWindow fyne.Wind
 				time.Sleep(1 * time.Second)
 			}
 		}()
-
 		w2.Show()
 	})
 
