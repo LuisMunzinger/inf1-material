@@ -1,0 +1,16 @@
+package cards
+
+func ExampleCard_Front() {
+	c1 := Card{R}
+	fmt.println()
+	c2 := Card{R}
+	fmt.println()
+
+	//Output:
+	// -----
+	// |A....|
+	// |..b..|
+	// |....A|
+	// -----
+	//
+}
