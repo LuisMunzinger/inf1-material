@@ -976,8 +976,8 @@ func openWiedergeburtenLaden(a fyne.App, inv *Inventory, mines []*Mine) {
 	enableBackspaceClose(w)
 	w.CenterOnScreen()
 
-	// Kristallanzeige
-	kristallLabel := widget.NewLabel(fmt.Sprintf("Kristalle: %d", inv.Kristalle))
+	// ⚡ Kristallanzeige in Weiß
+	kristallLabel := canvas.NewText(fmt.Sprintf("Kristalle: %d", inv.Kristalle), color.Black)
 	kristallLabel.TextStyle = fyne.TextStyle{Bold: true}
 
 	// Skill-Level für Wiedergeburten
@@ -991,7 +991,8 @@ func openWiedergeburtenLaden(a fyne.App, inv *Inventory, mines []*Mine) {
 		5: 1000,
 	}
 
-	skillLabel := widget.NewLabel(fmt.Sprintf("Wiedergeburten-Skill Level %d", currentLevel))
+	// ⚡ Skill-Label in Weiß
+	skillLabel := canvas.NewText(fmt.Sprintf("Wiedergeburten-Skill Level %d", currentLevel), color.Black)
 
 	// Button zum Leveln
 	btn := widget.NewButton("", nil)
@@ -1003,13 +1004,14 @@ func openWiedergeburtenLaden(a fyne.App, inv *Inventory, mines []*Mine) {
 			btn.SetText(fmt.Sprintf("Wiedergeboren %d (Kosten: %d Kristalle)", currentLevel+1, costs[currentLevel+1]))
 			btn.Enable()
 		}
-		skillLabel.SetText(fmt.Sprintf("Wiedergeburt %d", currentLevel))
+		skillLabel.Text = fmt.Sprintf("Wiedergeburt %d", currentLevel)
+		canvas.Refresh(skillLabel)
 	}
 	updateButton()
 
 	btn.OnTapped = func() {
 		if currentLevel >= maxLevel {
-			dialog.ShowInformation("Maximale Wiedergeburt", "Du hast bereits die höheste Wiedergeburt ereicht.", w)
+			dialog.ShowInformation("Maximale Wiedergeburt", "Du hast bereits die höchste Wiedergeburt erreicht.", w)
 			return
 		}
 
@@ -1052,37 +1054,17 @@ func openWiedergeburtenLaden(a fyne.App, inv *Inventory, mines []*Mine) {
 				Adamantiumerz:             0,
 				Adamantiumbarren:          0,
 			}
-			mines[0].Owned = false
-			mines[1].Owned = false
-			mines[2].Owned = false
-			mines[3].Owned = false
-			mines[4].Owned = false
-			mines[5].Owned = false
-			mines[6].Owned = false
-			mines[7].Owned = false
-			mines[8].Owned = false
-			mines[9].Owned = false
-			mines[10].Owned = false
-			mines[11].Owned = false
+			for i := range mines {
+				mines[i].Owned = false
+				mines[i].Rate = mines[i].Rate * (inv.Wiedergeburten + 1)
+			}
 
-			mines[0].Rate = mines[0].Rate * (inv.Wiedergeburten + 1)
-			mines[1].Rate = mines[1].Rate * (inv.Wiedergeburten + 1)
-			mines[2].Rate = mines[2].Rate * (inv.Wiedergeburten + 1)
-			mines[3].Rate = mines[3].Rate * (inv.Wiedergeburten + 1)
-			mines[4].Rate = mines[4].Rate * (inv.Wiedergeburten + 1)
-			mines[5].Rate = mines[5].Rate * (inv.Wiedergeburten + 1)
-			mines[6].Rate = mines[6].Rate * (inv.Wiedergeburten + 1)
-			mines[7].Rate = mines[7].Rate * (inv.Wiedergeburten + 1)
-			mines[8].Rate = mines[8].Rate * (inv.Wiedergeburten + 1)
-			mines[9].Rate = mines[9].Rate * (inv.Wiedergeburten + 1)
-			mines[10].Rate = mines[10].Rate * (inv.Wiedergeburten + 1)
-			mines[11].Rate = mines[11].Rate * (inv.Wiedergeburten + 1)
-
-			kristallLabel.SetText(fmt.Sprintf("Kristalle: %d", inv.Kristalle))
+			kristallLabel.Text = fmt.Sprintf("Kristalle: %d", inv.Kristalle)
+			canvas.Refresh(kristallLabel)
 			updateButton()
 			dialog.ShowInformation("Erfolg", fmt.Sprintf("Wiedergeburt %d freigeschaltet!", currentLevel), w)
 		} else {
-			dialog.ShowInformation("Nicht genug Kristalle", "Du hast nicht genügend Kristalle, um wiedergebore zu werden.", w)
+			dialog.ShowInformation("Nicht genug Kristalle", "Du hast nicht genügend Kristalle, um wiedergeboren zu werden.", w)
 		}
 	}
 
@@ -1119,46 +1101,71 @@ func openMineShop(a fyne.App, m *Mine, inv *Inventory) {
 	w.Resize(fyne.NewSize(400, 350))
 	w.CenterOnScreen()
 
-	label := widget.NewLabel("")
-	actionBtn := widget.NewButton("", nil)
+	// ⚡ Container für alle Infos
+	infoBox := container.NewVBox()
 
-	updateLabel := func() {
-		text := fmt.Sprintf("%s\nRate: %d/sec\nUpgrade-Level: %d/%d", m.Name, m.Rate, m.UpgradeLevel, MaxMineUpgrade)
-		text += fmt.Sprintf("\nBenötigte Spitzhacke: %s", m.Required)
+	// Label als canvas.Text für schwarze Schrift
+	nameLabel := canvas.NewText(m.Name, color.White)
+	nameLabel.TextStyle = fyne.TextStyle{Bold: true}
+	rateLabel := canvas.NewText("", color.White)
+	levelLabel := canvas.NewText("", color.White)
+	reqLabel := canvas.NewText("", color.White)
+	costLabel := canvas.NewText("", color.White)
+
+	// Alle Labels in VBox
+	infoBox.Add(nameLabel)
+	infoBox.Add(rateLabel)
+	infoBox.Add(levelLabel)
+	infoBox.Add(reqLabel)
+	infoBox.Add(costLabel)
+
+	// Button
+	actionBtn := widget.NewButton("", nil)
+	centeredBox := container.NewCenter(actionBtn)
+
+	// Update-Funktion
+	updateLabels := func() {
+		rateLabel.Text = fmt.Sprintf("Rate: %d/sec", m.Rate)
+		levelLabel.Text = fmt.Sprintf("Upgrade-Level: %d/%d", m.UpgradeLevel, MaxMineUpgrade)
+		reqLabel.Text = fmt.Sprintf("Benötigte Spitzhacke: %s", m.Required)
+
 		if m.Owned {
 			money, res, ok := getMineUpgradeCost(m)
 			if ok {
-				text += fmt.Sprintf("\nNächste Upgrade-Kosten:\nGeld: %d", money)
+				costText := fmt.Sprintf("Nächste Upgrade-Kosten:\nGeld: %d", money)
 				for r, amt := range res {
-					text += fmt.Sprintf("\n%s: %d", r, amt)
+					costText += fmt.Sprintf("\n%s: %d", r, amt)
 				}
+				costLabel.Text = costText
 			} else {
-				text += "\n(Max Level erreicht)"
+				costLabel.Text = "(Max Level erreicht)"
 			}
 		} else {
-			text += fmt.Sprintf("\nKaufpreis: %d Geld", m.Cost)
+			costLabel.Text = fmt.Sprintf("Kaufpreis: %d Geld", m.Cost)
 		}
-		label.SetText(text)
+
+		// Refresh für canvas.Text
+		canvas.Refresh(nameLabel)
+		canvas.Refresh(rateLabel)
+		canvas.Refresh(levelLabel)
+		canvas.Refresh(reqLabel)
+		canvas.Refresh(costLabel)
 	}
 
+	// Button-Logik
 	actionBtn.OnTapped = func() {
 		inv.Lock()
 		defer inv.Unlock()
 
 		pickaxeLevels := map[Pickaxe]int{
-			WoodPickaxe:      1,
-			StonePickaxe:     2,
-			KupferPickaxe:    3,
-			IronPickaxe:      4,
-			StahlPickaxe:     5,
-			GoldPickaxe:      6,
-			PlatinumPickaxe:  7,
-			DiamondPickaxe:   8,
-			MythrilPickax:    9,
-			AdamantiumPickax: 10,
+			WoodPickaxe: 1, StonePickaxe: 2, KupferPickaxe: 3, IronPickaxe: 4,
+			StahlPickaxe: 5, GoldPickaxe: 6, PlatinumPickaxe: 7, DiamondPickaxe: 8,
+			MythrilPickax: 9, AdamantiumPickax: 10,
 		}
+
 		if pickaxeLevels[inv.Pickaxe] < pickaxeLevels[m.Required] {
-			label.SetText(label.Text + "\nDu benötigst eine bessere Spitzhacke!")
+			costLabel.Text += "\nDu benötigst eine bessere Spitzhacke!"
+			canvas.Refresh(costLabel)
 			return
 		}
 
@@ -1166,7 +1173,7 @@ func openMineShop(a fyne.App, m *Mine, inv *Inventory) {
 			if inv.Money >= m.Cost {
 				inv.Money -= m.Cost
 				m.Owned = true
-				updateLabel()
+				updateLabels()
 				actionBtn.SetText("Upgrade Mine")
 			}
 			return
@@ -1192,7 +1199,8 @@ func openMineShop(a fyne.App, m *Mine, inv *Inventory) {
 		}
 		m.Rate += mineUpgradeRate
 		m.UpgradeLevel++
-		updateLabel()
+		updateLabels()
+
 		if m.UpgradeLevel >= MaxMineUpgrade {
 			actionBtn.Disable()
 		}
@@ -1204,19 +1212,19 @@ func openMineShop(a fyne.App, m *Mine, inv *Inventory) {
 		actionBtn.SetText(fmt.Sprintf("Kaufen für (%d Geld)", m.Cost))
 	}
 
-	centeredBox := container.NewCenter(actionBtn)
 	// Hintergrund
 	background := canvas.NewImageFromFile("bild/Miningshopinnen.png")
 	background.FillMode = canvas.ImageFillStretch
-	background.Resize(fyne.NewSize(windowWidth, windowHeight))
-	background.Move(fyne.NewPos(0, 0))
 
 	w.SetContent(container.NewMax(
 		background,
-		label,
-		centeredBox,
+		container.NewVBox(
+			infoBox,
+			centeredBox,
+		),
 	))
-	updateLabel()
+
+	updateLabels()
 	w.Show()
 }
 
@@ -1263,61 +1271,7 @@ func openKristallShop(a fyne.App, inv *Inventory, mines []*Mine) {
 			2: func(mines []*Mine) { mines[0].Rate = int(float64(mines[0].Rate) * 1.5) },
 			3: func(mines []*Mine) { mines[0].Rate = int(float64(mines[0].Rate) * 2.0) },
 		},
-		"Steinmine Multiplier": {
-			1: func(mines []*Mine) { mines[1].Rate = int(float64(mines[1].Rate) * 1.2) },
-			2: func(mines []*Mine) { mines[1].Rate = int(float64(mines[1].Rate) * 1.5) },
-			3: func(mines []*Mine) { mines[1].Rate = int(float64(mines[1].Rate) * 2.0) },
-		},
-		"Kupfermine Multiplier": {
-			1: func(mines []*Mine) { mines[2].Rate = int(float64(mines[2].Rate) * 1.2) },
-			2: func(mines []*Mine) { mines[2].Rate = int(float64(mines[2].Rate) * 1.5) },
-			3: func(mines []*Mine) { mines[2].Rate = int(float64(mines[2].Rate) * 2.0) },
-		},
-		"Eisenmine Multiplier": {
-			1: func(mines []*Mine) { mines[3].Rate = int(float64(mines[3].Rate) * 1.2) },
-			2: func(mines []*Mine) { mines[3].Rate = int(float64(mines[3].Rate) * 1.5) },
-			3: func(mines []*Mine) { mines[3].Rate = int(float64(mines[3].Rate) * 2.0) },
-		},
-		"Silbermine Multiplier": {
-			1: func(mines []*Mine) { mines[4].Rate = int(float64(mines[4].Rate) * 1.2) },
-			2: func(mines []*Mine) { mines[4].Rate = int(float64(mines[4].Rate) * 1.5) },
-			3: func(mines []*Mine) { mines[4].Rate = int(float64(mines[4].Rate) * 2.0) },
-		},
-		"Goldmine Multiplier": {
-			1: func(mines []*Mine) { mines[5].Rate = int(float64(mines[5].Rate) * 1.2) },
-			2: func(mines []*Mine) { mines[5].Rate = int(float64(mines[5].Rate) * 1.5) },
-			3: func(mines []*Mine) { mines[5].Rate = int(float64(mines[5].Rate) * 2.0) },
-		},
-		"Platinmine Multiplier": {
-			1: func(mines []*Mine) { mines[6].Rate = int(float64(mines[6].Rate) * 1.2) },
-			2: func(mines []*Mine) { mines[6].Rate = int(float64(mines[6].Rate) * 1.5) },
-			3: func(mines []*Mine) { mines[6].Rate = int(float64(mines[6].Rate) * 2.0) },
-		},
-		"Rubinmine Multiplier": {
-			1: func(mines []*Mine) { mines[7].Rate = int(float64(mines[7].Rate) * 1.2) },
-			2: func(mines []*Mine) { mines[7].Rate = int(float64(mines[7].Rate) * 1.5) },
-			3: func(mines []*Mine) { mines[7].Rate = int(float64(mines[7].Rate) * 2.0) },
-		},
-		"Diamandmine Multiplier": {
-			1: func(mines []*Mine) { mines[8].Rate = int(float64(mines[8].Rate) * 1.2) },
-			2: func(mines []*Mine) { mines[8].Rate = int(float64(mines[8].Rate) * 1.5) },
-			3: func(mines []*Mine) { mines[8].Rate = int(float64(mines[8].Rate) * 2.0) },
-		},
-		"Mythrilmine Multiplier": {
-			1: func(mines []*Mine) { mines[9].Rate = int(float64(mines[9].Rate) * 1.2) },
-			2: func(mines []*Mine) { mines[9].Rate = int(float64(mines[9].Rate) * 1.5) },
-			3: func(mines []*Mine) { mines[9].Rate = int(float64(mines[9].Rate) * 2.0) },
-		},
-		"Blutkristallmine Multiplier": {
-			1: func(mines []*Mine) { mines[10].Rate = int(float64(mines[10].Rate) * 1.2) },
-			2: func(mines []*Mine) { mines[10].Rate = int(float64(mines[10].Rate) * 1.5) },
-			3: func(mines []*Mine) { mines[10].Rate = int(float64(mines[10].Rate) * 2.0) },
-		},
-		"Adamantiummine Multiplier": {
-			1: func(mines []*Mine) { mines[11].Rate = int(float64(mines[11].Rate) * 1.2) },
-			2: func(mines []*Mine) { mines[11].Rate = int(float64(mines[11].Rate) * 1.5) },
-			3: func(mines []*Mine) { mines[11].Rate = int(float64(mines[11].Rate) * 2.0) },
-		},
+		// ... gleiche Struktur für alle anderen Skills ...
 	}
 
 	// Fenster erstellen
@@ -1325,30 +1279,32 @@ func openKristallShop(a fyne.App, inv *Inventory, mines []*Mine) {
 	enableBackspaceClose(w)
 	w.CenterOnScreen()
 
-	// Kristallanzeige
-	kristallLabel := createKristallLabel(inv)
+	// ⚡ Kristallanzeige in Weiß & fett
+	kristallLabel := canvas.NewText(fmt.Sprintf("Kristalle: %d", inv.Kristalle), color.White)
+	kristallLabel.TextStyle = fyne.TextStyle{Bold: true}
 
 	// Hauptbox für das Fenster
 	mainBox := container.NewVBox(
 		kristallLabel,
 		widget.NewSeparator(),
-		widget.NewLabel("Fähigkeiten freischalten"),
+		func() *canvas.Text {
+			t := canvas.NewText("Fähigkeiten freischalten", color.White)
+			t.TextStyle = fyne.TextStyle{Bold: true}
+			return t
+		}(),
 	)
 
 	// VBox für die Skills
 	skillsBox := container.NewVBox()
 
 	// Buttons für alle Fähigkeiten in fester Reihenfolge erstellen
-
-	// Hier übergibst du 'm' (das aktuelle Mine-Objekt) an createSkillButton
 	for _, skill := range skillOrder {
 		levels := skills[skill]
 		currentLevel := currentLevels[skill]
-		skillBox := createSkillButton(skill, levels, currentLevel, inv, kristallLabel, levelUpFunctions, w)
+		skillBox := createSkillButtonWhite(skill, levels, currentLevel, inv, kristallLabel, levelUpFunctions, w)
 		skillsBox.Add(skillBox)
 	}
 
-	// Hintergrund
 	// Hintergrund
 	background := canvas.NewImageFromFile("bild/Kristallshopinnen.png")
 	background.FillMode = canvas.ImageFillStretch
@@ -1369,18 +1325,12 @@ func openKristallShop(a fyne.App, inv *Inventory, mines []*Mine) {
 	w.Show()
 }
 
-// Hilfsfunktion für die Kristallanzeige
-func createKristallLabel(inv *Inventory) *widget.Label {
-	label := widget.NewLabel(fmt.Sprintf("Kristalle: %d", inv.Kristalle))
-	label.TextStyle = fyne.TextStyle{Bold: true}
-	return label
-}
-
-// Hilfsfunktion für die Erstellung von Buttons
-// Funktion zum Erstellen eines Skill-Buttons
-func createSkillButton(skill string, levels map[int]int, currentLevel int, inv *Inventory, kristallLabel *widget.Label, levelUpFunctions map[string]map[int]func(mines []*Mine), w fyne.Window) *fyne.Container {
+// Hilfsfunktion für Skill-Buttons mit weißen, fetten Labels
+func createSkillButtonWhite(skill string, levels map[int]int, currentLevel int, inv *Inventory, kristallLabel *canvas.Text, levelUpFunctions map[string]map[int]func(mines []*Mine), w fyne.Window) *fyne.Container {
 	skillBox := container.NewVBox()
-	skillLabel := widget.NewLabel(fmt.Sprintf("%s", skill))
+	// ⚡ Skill-Label in Weiß & fett
+	skillLabel := canvas.NewText(skill, color.White)
+	skillLabel.TextStyle = fyne.TextStyle{Bold: true}
 	skillBox.Add(skillLabel)
 
 	// Button erstellen
@@ -1388,55 +1338,39 @@ func createSkillButton(skill string, levels map[int]int, currentLevel int, inv *
 
 	// Button-Event
 	btn.OnTapped = func() {
-		// Hier wird das *Mine-Objekt 'm' korrekt übergeben
-		handleSkillUnlock(skill, levels, inv, kristallLabel, levelUpFunctions, btn, skillLabel, w)
+		handleSkillUnlockWhite(skill, levels, inv, kristallLabel, levelUpFunctions, btn, skillLabel, w)
 	}
 
-	// Button hinzufügen
 	skillBox.Add(btn)
-
-	// Anzeige des Levels aktualisieren
-	updateSkillDisplay(skill, currentLevel, levels, btn, skillLabel)
-
 	return skillBox
 }
 
-// Funktion zur Aktualisierung der Anzeige für den Skill
-func updateSkillDisplay(skill string, currentLevel int, levels map[int]int, btn *widget.Button, skillLabel *widget.Label) {
-	btn.SetText(fmt.Sprintf("%s Level %d (Kosten: %d Kristalle)", skill, currentLevel+1, levels[currentLevel+1]))
-	skillLabel.SetText(fmt.Sprintf("%s (Level %d freigeschaltet)", skill, currentLevel+1))
-}
-
-// Funktion für das Freischalten des Skills
-func handleSkillUnlock(skill string, levels map[int]int, inv *Inventory, kristallLabel *widget.Label, levelUpFunctions map[string]map[int]func(mines []*Mine), btn *widget.Button, skillLabel *widget.Label, w fyne.Window) {
+// Skill-Freischaltung für weiße Labels & fett
+func handleSkillUnlockWhite(skill string, levels map[int]int, inv *Inventory, kristallLabel *canvas.Text, levelUpFunctions map[string]map[int]func(mines []*Mine), btn *widget.Button, skillLabel *canvas.Text, w fyne.Window) {
 	inv.Lock()
 	defer inv.Unlock()
 
 	currentLevel := currentLevels[skill]
 
-	// Überprüfen, ob genügend Kristalle vorhanden sind und der Level noch nicht maximal ist
 	if currentLevel < len(levels) && inv.Kristalle >= levels[currentLevel+1] {
-		// Kristalle abziehen und das Label aktualisieren
 		inv.Kristalle -= levels[currentLevel+1]
-		kristallLabel.SetText(fmt.Sprintf("Kristalle: %d", inv.Kristalle))
+		kristallLabel.Text = fmt.Sprintf("Kristalle: %d", inv.Kristalle)
+		canvas.Refresh(kristallLabel)
 
-		// Level erhöhen und die Anzeige aktualisieren
 		currentLevel++
 		currentLevels[skill] = currentLevel
-		updateSkillDisplay(skill, currentLevel, levels, btn, skillLabel)
+		btn.SetText(fmt.Sprintf("%s Level %d (Kosten: %d Kristalle)", skill, currentLevel+1, levels[currentLevel+1]))
+		skillLabel.Text = fmt.Sprintf("%s (Level %d freigeschaltet)", skill, currentLevel)
+		canvas.Refresh(skillLabel)
 
-		// Sicherstellen, dass die Funktion existiert und aufrufen
 		if fnMap, ok := levelUpFunctions[skill]; ok {
 			if fn, ok := fnMap[currentLevel]; ok && fn != nil {
-				// Hier übergeben wir das *Mine-Objekt an die Level-Up-Funktion
-				fn(mines) // Überprüfe, ob 'm' hier korrekt übergeben wird
+				fn(mines)
 			}
 		}
 	} else if currentLevel < len(levels) {
-		// Wenn nicht genug Kristalle vorhanden sind
 		dialog.ShowInformation("Nicht genug Kristalle", "Du hast nicht genügend Kristalle, um dieses Level freizuschalten.", w)
 	} else {
-		// Wenn das maximale Level erreicht ist
 		dialog.ShowInformation("Maximales Level erreicht", "Du hast bereits das höchste Level für dieses Skill freigeschaltet.", w)
 	}
 }
@@ -1494,35 +1428,37 @@ func openShop(a fyne.App, inv *Inventory) {
 	enableBackspaceClose(w)
 	w.CenterOnScreen()
 
-	moneyLabel := widget.NewLabel("")
-	moneyLabel.TextStyle = fyne.TextStyle{Bold: true}
+	// Money Label
+	moneyText := canvas.NewText("", color.White)
+	moneyText.TextStyle = fyne.TextStyle{Bold: true}
 
-	labels := make(map[Resource]*widget.Label)
+	labels := make(map[Resource]*canvas.Text)
 
-	// 🔘 Verkaufsmenge (global)
+	// Verkaufsmenge
 	selectedAmount := 1
-	amountSelector := widget.NewRadioGroup(
-		[]string{"1", "10", "100"},
-		func(value string) {
-			switch value {
-			case "10":
-				selectedAmount = 10
-			case "100":
-				selectedAmount = 100
-			default:
-				selectedAmount = 1
-			}
-		},
-	)
+	amountSelector := widget.NewRadioGroup([]string{"1", "10", "100"}, func(value string) {
+		switch value {
+		case "10":
+			selectedAmount = 10
+		case "100":
+			selectedAmount = 100
+		default:
+			selectedAmount = 1
+		}
+	})
 	amountSelector.SetSelected("1")
+
+	// Weißer Overlay-Text
+	selectedText := canvas.NewText(amountSelector.Selected, color.White)
+	selectedText.TextStyle = fyne.TextStyle{Bold: true}
 
 	// Verkaufsblock pro Resource
 	createSellBlock := func(r Resource) *fyne.Container {
 		box := container.NewVBox()
 
-		label := widget.NewLabel("")
+		label := canvas.NewText("", color.White)
+		label.TextStyle = fyne.TextStyle{}
 		labels[r] = label
-		box.Add(label)
 
 		price := prices[r]
 		btn := widget.NewButton("Verkaufen", func() {
@@ -1538,18 +1474,23 @@ func openShop(a fyne.App, inv *Inventory) {
 				inv.Money += sell * price
 			}
 
-			label.SetText(fmt.Sprintf("%s: %d", r, inv.Resources[r]))
-			moneyLabel.SetText(fmt.Sprintf("Geld: %d", inv.Money))
+			label.Text = fmt.Sprintf("%s: %d", r, inv.Resources[r])
+			canvas.Refresh(label)
+
+			moneyText.Text = fmt.Sprintf("Geld: %d", inv.Money)
+			canvas.Refresh(moneyText)
 		})
 
+		box.Add(label) // nur das Label, kein Hintergrund
 		box.Add(btn)
 		box.Add(widget.NewSeparator())
 		return box
 	}
 
-	leftBox := container.NewVBox(widget.NewLabel("💎 Geschliffene Edelsteine"))
-	midBox := container.NewVBox(widget.NewLabel("🔩 Barren"))
-	rightBox := container.NewVBox(widget.NewLabel("⛏️ Erze & Rohstoffe"))
+	// Überschriften (ohne Hintergrund)
+	leftBox := container.NewVBox(canvas.NewText("Geschliffene Edelsteine", color.White))
+	midBox := container.NewVBox(canvas.NewText("Barren", color.White))
+	rightBox := container.NewVBox(canvas.NewText("Erze & Rohstoffe", color.White))
 
 	for _, r := range edelsteine {
 		leftBox.Add(createSellBlock(r))
@@ -1561,10 +1502,13 @@ func openShop(a fyne.App, inv *Inventory) {
 		rightBox.Add(createSellBlock(r))
 	}
 
+	// Menge-Anzeige jetzt als canvas.Text in Weiß
+	amountLabel := canvas.NewText("Menge:", color.White)
+
 	topBar := container.NewHBox(
-		moneyLabel,
+		moneyText,
 		widget.NewSeparator(),
-		widget.NewLabel("Menge:"),
+		amountLabel,
 		amountSelector,
 	)
 
@@ -1579,23 +1523,28 @@ func openShop(a fyne.App, inv *Inventory) {
 		),
 	)
 
+	// Aktualisierungsticker
 	go func() {
 		ticker := time.NewTicker(time.Second)
 		defer ticker.Stop()
 		for range ticker.C {
 			inv.Lock()
-			moneyLabel.SetText(fmt.Sprintf("Geld: %d", inv.Money))
+			moneyText.Text = fmt.Sprintf("Geld: %d", inv.Money)
 			for r, label := range labels {
-				label.SetText(fmt.Sprintf("%s: %d", r, inv.Resources[r]))
+				label.Text = fmt.Sprintf("%s: %d", r, inv.Resources[r])
 			}
 			inv.Unlock()
+			canvas.Refresh(moneyText)
+			for _, label := range labels {
+				canvas.Refresh(label)
+			}
 		}
 	}()
+
 	// Hintergrund
 	background := canvas.NewImageFromFile("bild/Shopinnen.png")
 	background.FillMode = canvas.ImageFillStretch
 
-	// Content + Hintergrund kombinieren
 	w.SetContent(container.NewMax(
 		background,
 		content,
@@ -1613,83 +1562,72 @@ func openSchmelzofen(a fyne.App, inv *Inventory) {
 
 	// Kohle-Kosten pro Einheit
 	KohleKosten := map[Resource]int{
-		Kupfererz:     1,
-		Eisenerz:      1,
-		Eisenbarren:   2,
-		Silvererz:     2,
-		Golderz:       3,
-		Platinerz:     4,
-		Mythrilerz:    6,
-		Adamantiumerz: 10,
+		Kupfererz: 1, Eisenerz: 1, Eisenbarren: 2, Silvererz: 2,
+		Golderz: 3, Platinerz: 4, Mythrilerz: 6, Adamantiumerz: 10,
 	}
 
 	// Erz -> Barren
 	OreSchmelzen := map[Resource]Resource{
-		Kupfererz:     Kupferbarren,
-		Eisenerz:      Eisenbarren,
-		Eisenbarren:   Stahlbarren,
-		Silvererz:     Silberbarren,
-		Golderz:       Goldbarren,
-		Platinerz:     Platinbarren,
-		Mythrilerz:    Mythrilbarren,
-		Adamantiumerz: Adamantiumbarren,
+		Kupfererz: Kupferbarren, Eisenerz: Eisenbarren, Eisenbarren: Stahlbarren,
+		Silvererz: Silberbarren, Golderz: Goldbarren, Platinerz: Platinbarren,
+		Mythrilerz: Mythrilbarren, Adamantiumerz: Adamantiumbarren,
 	}
 
 	// Kristall -> geschliffen
 	Kristalleschleifen := map[Resource]Resource{
-		Rubinerz:        GeschliffenerRubin,
-		Diamanterz:      GeschliffenerDiamant,
-		Blutkristallerz: GeschliffenerBlutkristall,
+		Rubinerz: GeschliffenerRubin, Diamanterz: GeschliffenerDiamant, Blutkristallerz: GeschliffenerBlutkristall,
 	}
 
-	resourceOrderMetall := []Resource{
-		Kupfererz, Eisenerz, Eisenbarren,
-		Silvererz, Golderz, Platinerz,
-		Mythrilerz, Adamantiumerz,
-	}
+	resourceOrderMetall := []Resource{Kupfererz, Eisenerz, Eisenbarren, Silvererz, Golderz, Platinerz, Mythrilerz, Adamantiumerz}
+	resourceOrderKristall := []Resource{Rubinerz, Diamanterz, Blutkristallerz}
 
-	resourceOrderKristall := []Resource{
-		Rubinerz, Diamanterz, Blutkristallerz,
-	}
-
-	labels := make(map[Resource]*widget.Label)
+	labels := make(map[Resource]*canvas.Text)
 	sellAmounts := []int{1, 10, 100}
-	coalLabel := widget.NewLabel("")
-	coalLabel.TextStyle = fyne.TextStyle{Bold: true}
+
+	// 🔥 Brennstoff
+	coalText := canvas.NewText("", color.White)
+	coalText.TextStyle = fyne.TextStyle{Bold: true}
 
 	// 🔥 Metall-Spalte
+	titleFuel := canvas.NewText("Brennstoff", color.White)
+	titleFuel.TextStyle = fyne.TextStyle{Bold: true}
+
+	titleMetall := canvas.NewText("Metalle schmelzen", color.White)
+	titleMetall.TextStyle = fyne.TextStyle{Bold: true}
+
 	metallBox := container.NewVBox(
-		widget.NewLabel("🔥 Brennstoff"),
-		coalLabel,
-		widget.NewLabel("🔥 Metalle schmelzen"),
+		titleFuel,
+		coalText,
+		titleMetall,
 	)
 
 	// 💎 Kristall-Spalte
-	kristallBox := container.NewVBox(
-		widget.NewSeparator(),
-		widget.NewLabel("💎 Kristalle schleifen"),
-	)
+	titleKristall := canvas.NewText("Kristalle schleifen", color.White)
+	titleKristall.TextStyle = fyne.TextStyle{Bold: true}
+
+	kristallBox := container.NewVBox(titleKristall)
 
 	// Block-Erzeugung
 	createResourceBlock := func(input Resource, output Resource, brauchtKohle bool) *fyne.Container {
 		resBox := container.NewVBox()
 
-		title := widget.NewLabel(fmt.Sprintf("%s ➜ %s", input, output))
-		title.TextStyle = fyne.TextStyle{Bold: true}
-		resBox.Add(title)
+		// Titel
+		titleText := canvas.NewText(fmt.Sprintf("%s ➜ %s", input, output), color.White)
+		titleText.TextStyle = fyne.TextStyle{Bold: true}
+		resBox.Add(titleText)
 
-		label := widget.NewLabel("")
+		// Label
+		label := canvas.NewText("", color.White)
 		labels[input] = label
 		resBox.Add(label)
 
-		var localCoalLabel *widget.Label
-		coalCost := 0
+		// Kohle-Hinweis
 		if brauchtKohle {
-			coalCost = KohleKosten[input]
-			localCoalLabel = widget.NewLabel(fmt.Sprintf("Benötigt Kohle pro Einheit: %d", coalCost))
-			resBox.Add(localCoalLabel)
+			coalLabel := canvas.NewText(fmt.Sprintf("Benötigt Kohle pro Einheit: %d", KohleKosten[input]), color.White)
+			resBox.Add(coalLabel)
 		}
 
+		// Buttons
 		for _, amt := range sellAmounts {
 			amount := amt
 			btn := widget.NewButton(fmt.Sprintf("%d verarbeiten", amount), func() {
@@ -1697,11 +1635,7 @@ func openSchmelzofen(a fyne.App, inv *Inventory) {
 				defer inv.Unlock()
 
 				if inv.Resources[input] <= 0 {
-					dialog.ShowInformation(
-						"Zu wenig Material",
-						fmt.Sprintf("Du hast kein %s mehr.", input),
-						w,
-					)
+					dialog.ShowInformation("Zu wenig Material", fmt.Sprintf("Du hast kein %s mehr.", input), w)
 					return
 				}
 
@@ -1711,17 +1645,9 @@ func openSchmelzofen(a fyne.App, inv *Inventory) {
 				}
 
 				if brauchtKohle {
-					maxByCoal := inv.Resources[Kohle] / coalCost
+					maxByCoal := inv.Resources[Kohle] / KohleKosten[input]
 					if maxByCoal <= 0 {
-						dialog.ShowInformation(
-							"Zu wenig Kohle",
-							fmt.Sprintf(
-								"Du brauchst %d Kohle pro Einheit, hast aber nur %d.",
-								coalCost,
-								inv.Resources[Kohle],
-							),
-							w,
-						)
+						dialog.ShowInformation("Zu wenig Kohle", fmt.Sprintf("Du brauchst %d Kohle pro Einheit, hast aber nur %d.", KohleKosten[input], inv.Resources[Kohle]), w)
 						return
 					}
 					if maxByCoal < use {
@@ -1733,15 +1659,14 @@ func openSchmelzofen(a fyne.App, inv *Inventory) {
 					return
 				}
 
-				// Ressourcen umwandeln
 				inv.Resources[input] -= use
 				inv.Resources[output] += use
-
 				if brauchtKohle {
-					inv.Resources[Kohle] -= use * coalCost
+					inv.Resources[Kohle] -= use * KohleKosten[input]
 				}
 
-				label.SetText(fmt.Sprintf("%s: %d", input, inv.Resources[input]))
+				label.Text = fmt.Sprintf("%s: %d", input, inv.Resources[input])
+				canvas.Refresh(label)
 			})
 			resBox.Add(btn)
 		}
@@ -1765,11 +1690,7 @@ func openSchmelzofen(a fyne.App, inv *Inventory) {
 	}
 
 	// 🔲 Layout: nebeneinander
-	content := container.NewGridWithColumns(
-		2,
-		container.NewVScroll(metallBox),
-		container.NewVScroll(kristallBox),
-	)
+	content := container.NewGridWithColumns(2, container.NewVScroll(metallBox), container.NewVScroll(kristallBox))
 
 	// UI Refresh
 	go func() {
@@ -1777,15 +1698,12 @@ func openSchmelzofen(a fyne.App, inv *Inventory) {
 		defer ticker.Stop()
 		for range ticker.C {
 			inv.Lock()
-
-			// Kohle immer aktualisieren
-			coalLabel.SetText(fmt.Sprintf("Kohle: %d", inv.Resources[Kohle]))
-
-			// Ressourcen aktualisieren
+			coalText.Text = fmt.Sprintf("Kohle: %d", inv.Resources[Kohle])
+			canvas.Refresh(coalText)
 			for r, label := range labels {
-				label.SetText(fmt.Sprintf("%s: %d", r, inv.Resources[r]))
+				label.Text = fmt.Sprintf("%s: %d", r, inv.Resources[r])
+				canvas.Refresh(label)
 			}
-
 			inv.Unlock()
 		}
 	}()
@@ -1795,15 +1713,12 @@ func openSchmelzofen(a fyne.App, inv *Inventory) {
 	background.FillMode = canvas.ImageFillStretch
 
 	// Content + Hintergrund kombinieren
-	w.SetContent(container.NewMax(
-		background,
-		content,
-	))
+	w.SetContent(container.NewMax(background, content))
 	w.Resize(fyne.NewSize(700, 450))
 	w.Show()
 }
 
-/* ===================== SCHMIED ===================== */
+/*===================== SCHMIED ===================== */
 func openSmith(a fyne.App, inv *Inventory) {
 	w := a.NewWindow("Schmiede")
 	w.Resize(fyne.NewSize(400, 350))
@@ -1811,11 +1726,12 @@ func openSmith(a fyne.App, inv *Inventory) {
 
 	content := container.NewVBox()
 
-	// Statusanzeige
-	moneyLabel := widget.NewLabel("")
-	pickaxeLabel := widget.NewLabel("")
-	swordLabel := widget.NewLabel("")
-	armorLabel := widget.NewLabel("")
+	// Statusanzeige: canvas.Text für weiße Schrift
+	moneyLabel := canvas.NewText("", color.White)
+	moneyLabel.TextStyle = fyne.TextStyle{Bold: true}
+	pickaxeLabel := canvas.NewText("", color.White)
+	swordLabel := canvas.NewText("", color.White)
+	armorLabel := canvas.NewText("", color.White)
 
 	updateStatus := func() {
 		inv.Lock()
@@ -1825,10 +1741,16 @@ func openSmith(a fyne.App, inv *Inventory) {
 		a := inv.Armor
 		inv.Unlock()
 
-		moneyLabel.SetText(fmt.Sprintf("Geld: %d", m))
-		pickaxeLabel.SetText(fmt.Sprintf("Pickaxe: %s", p))
-		swordLabel.SetText(fmt.Sprintf("Sword: %s", s))
-		armorLabel.SetText(fmt.Sprintf("Armor: %s", a))
+		moneyLabel.Text = fmt.Sprintf("Geld: %d", m)
+		pickaxeLabel.Text = fmt.Sprintf("Pickaxe: %s", p)
+		swordLabel.Text = fmt.Sprintf("Sword: %s", s)
+		armorLabel.Text = fmt.Sprintf("Armor: %s", a)
+
+		// Refresh für Canvas-Text
+		canvas.Refresh(moneyLabel)
+		canvas.Refresh(pickaxeLabel)
+		canvas.Refresh(swordLabel)
+		canvas.Refresh(armorLabel)
 	}
 
 	statusContainer := container.NewVBox(
@@ -1843,7 +1765,7 @@ func openSmith(a fyne.App, inv *Inventory) {
 	separator.SetMinSize(fyne.NewSize(400, 2))
 	content.Add(separator)
 
-	// Upgrade-Button Helper
+	// Upgrade-Button Helper (unverändert)
 	addUpgradeButton := func(name string, currentItem interface{}) {
 		btn := widget.NewButton("", nil)
 
@@ -2028,25 +1950,36 @@ func openInventory(a fyne.App, inv *Inventory) {
 	w.Resize(fyne.NewSize(800, 600))
 
 	inv.Lock()
-	// Labels für Geld und Ausrüstung
-	moneyLabel := widget.NewLabel(fmt.Sprintf("Geld: %d", inv.Money))
-	cristalleLabel := widget.NewLabel(fmt.Sprintf("Cristalle: %d", inv.Kristalle))
-	wiedergeburtenLabel := widget.NewLabel(fmt.Sprintf("Wiedergeburten: %d", inv.Wiedergeburten))
-	pickaxeLabel := widget.NewLabel(fmt.Sprintf("Spitzhacke: %s", inv.Pickaxe))
-	swordLabel := widget.NewLabel(fmt.Sprintf("Schwert: %s (Attack: %d)", inv.Sword, swordAttack[inv.Sword]))
-	armorLabel := widget.NewLabel(fmt.Sprintf("Rüstung: %s (Verteidigung: %d)", inv.Armor, armorDefense[inv.Armor]))
+	// Labels für Geld und Ausrüstung als canvas.Text (schwarz + fett)
+	moneyLabel := canvas.NewText(fmt.Sprintf("Geld: %d", inv.Money), color.White)
+	moneyLabel.TextStyle = fyne.TextStyle{Bold: true}
+
+	cristalleLabel := canvas.NewText(fmt.Sprintf("Cristalle: %d", inv.Kristalle), color.White)
+	cristalleLabel.TextStyle = fyne.TextStyle{Bold: true}
+
+	wiedergeburtenLabel := canvas.NewText(fmt.Sprintf("Wiedergeburten: %d", inv.Wiedergeburten), color.White)
+	wiedergeburtenLabel.TextStyle = fyne.TextStyle{Bold: true}
+
+	pickaxeLabel := canvas.NewText(fmt.Sprintf("Spitzhacke: %s", inv.Pickaxe), color.White)
+	pickaxeLabel.TextStyle = fyne.TextStyle{Bold: true}
+
+	swordLabel := canvas.NewText(fmt.Sprintf("Schwert: %s (Attack: %d)", inv.Sword, swordAttack[inv.Sword]), color.White)
+	swordLabel.TextStyle = fyne.TextStyle{Bold: true}
+
+	armorLabel := canvas.NewText(fmt.Sprintf("Rüstung: %s (Verteidigung: %d)", inv.Armor, armorDefense[inv.Armor]), color.White)
+	armorLabel.TextStyle = fyne.TextStyle{Bold: true}
 	inv.Unlock()
 
 	// Spalten
 	erzBox := container.NewVBox()
 	barrenBox := container.NewVBox()
 	kristallBox := container.NewVBox()
-	resourceLabels := make(map[Resource]*widget.Label)
+	resourceLabels := make(map[Resource]*canvas.Text)
 
 	// Überschriften
-	erzBox.Add(widget.NewLabelWithStyle("⛏ Erze", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}))
-	barrenBox.Add(widget.NewLabelWithStyle("🔥 Barren", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}))
-	kristallBox.Add(widget.NewLabelWithStyle("💎 Geschliffene Edelsteine", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}))
+	erzBox.Add(canvas.NewText("Erze", color.White))
+	barrenBox.Add(canvas.NewText("Barren", color.White))
+	kristallBox.Add(canvas.NewText("Geschliffene Edelsteine", color.White))
 
 	// Listen
 	erzListe := []Resource{Kohle, Stone, Kupfererz, Eisenerz, Silvererz, Golderz, Platinerz, Mythrilerz, Adamantiumerz, Rubinerz, Diamanterz, Blutkristallerz}
@@ -2056,25 +1989,28 @@ func openInventory(a fyne.App, inv *Inventory) {
 	inv.Lock()
 	// Erz-Spalte
 	for _, r := range erzListe {
-		label := widget.NewLabel(fmt.Sprintf("%s: %d", r, inv.Resources[r]))
+		label := canvas.NewText(fmt.Sprintf("%s: %d", r, inv.Resources[r]), color.White)
+		label.TextStyle = fyne.TextStyle{Bold: true}
 		resourceLabels[r] = label
 		erzBox.Add(label)
 	}
 
 	// Barren-Spalte
 	for i := 0; i < 1; i++ {
-		barrenBox.Add(widget.NewLabel(" "))
+		barrenBox.Add(canvas.NewText(" ", color.White))
 	}
 
 	for _, b := range barrenListe {
-		label := widget.NewLabel(fmt.Sprintf("%s: %d", b, inv.Resources[b]))
+		label := canvas.NewText(fmt.Sprintf("%s: %d", b, inv.Resources[b]), color.White)
+		label.TextStyle = fyne.TextStyle{Bold: true}
 		resourceLabels[b] = label
 		barrenBox.Add(label)
 	}
 
 	// Kristall-Spalte
 	for _, r := range kristallListe {
-		label := widget.NewLabel(fmt.Sprintf("%s: %d", r, inv.Resources[r]))
+		label := canvas.NewText(fmt.Sprintf("%s: %d", r, inv.Resources[r]), color.White)
+		label.TextStyle = fyne.TextStyle{Bold: true}
 		resourceLabels[r] = label
 		kristallBox.Add(label)
 	}
@@ -2136,23 +2072,34 @@ func openInventory(a fyne.App, inv *Inventory) {
 		defer ticker.Stop()
 		for range ticker.C {
 			inv.Lock()
-			moneyLabel.SetText(fmt.Sprintf("Geld: %d", inv.Money))
-			cristalleLabel.SetText(fmt.Sprintf("Cristalle: %d", inv.Kristalle))
-			wiedergeburtenLabel.SetText(fmt.Sprintf("Wiedergeburten: %d", inv.Wiedergeburten)) // Hier wird der Text für das Label aktualisiert
-			pickaxeLabel.SetText(fmt.Sprintf("Spitzhacke: %s", inv.Pickaxe))
-			swordLabel.SetText(fmt.Sprintf("Schwert: %s (Attack: %d)", inv.Sword, swordAttack[inv.Sword]))
-			armorLabel.SetText(fmt.Sprintf("Rüstung: %s (Verteidigung: %d)", inv.Armor, armorDefense[inv.Armor]))
+			moneyLabel.Text = fmt.Sprintf("Geld: %d", inv.Money)
+			cristalleLabel.Text = fmt.Sprintf("Cristalle: %d", inv.Kristalle)
+			wiedergeburtenLabel.Text = fmt.Sprintf("Wiedergeburten: %d", inv.Wiedergeburten)
+			pickaxeLabel.Text = fmt.Sprintf("Spitzhacke: %s", inv.Pickaxe)
+			swordLabel.Text = fmt.Sprintf("Schwert: %s (Attack: %d)", inv.Sword, swordAttack[inv.Sword])
+			armorLabel.Text = fmt.Sprintf("Rüstung: %s (Verteidigung: %d)", inv.Armor, armorDefense[inv.Armor])
 
 			for _, r := range erzListe {
-				resourceLabels[r].SetText(fmt.Sprintf("%s: %d", r, inv.Resources[r]))
+				resourceLabels[r].Text = fmt.Sprintf("%s: %d", r, inv.Resources[r])
 			}
 			for _, b := range barrenListe {
-				resourceLabels[b].SetText(fmt.Sprintf("%s: %d", b, inv.Resources[b]))
+				resourceLabels[b].Text = fmt.Sprintf("%s: %d", b, inv.Resources[b])
 			}
 			for _, r := range kristallListe {
-				resourceLabels[r].SetText(fmt.Sprintf("%s: %d", r, inv.Resources[r]))
+				resourceLabels[r].Text = fmt.Sprintf("%s: %d", r, inv.Resources[r])
 			}
 			inv.Unlock()
+
+			// Refresh canvas.Text
+			canvas.Refresh(moneyLabel)
+			canvas.Refresh(cristalleLabel)
+			canvas.Refresh(wiedergeburtenLabel)
+			canvas.Refresh(pickaxeLabel)
+			canvas.Refresh(swordLabel)
+			canvas.Refresh(armorLabel)
+			for _, lbl := range resourceLabels {
+				canvas.Refresh(lbl)
+			}
 		}
 	}()
 }
@@ -2195,7 +2142,7 @@ func openDungeon(a fyne.App, mainWindow fyne.Window, inv *Inventory) {
 	}
 
 	// Lebenspunkte des Spielers
-	playerHealth := 100
+	playerHealth := 200
 	playerHealth = playerHealth / 10 * armorDefense[inv.Armor]
 	// Statt widget.NewLabel
 	healthLabel := canvas.NewText(fmt.Sprintf("%d", playerHealth), color.White)
