@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image/color"
 	"math"
+	"math/rand"
 	"sync"
 	"time"
 
@@ -494,23 +495,23 @@ func showGameWindow(a fyne.App) {
 /* =================Miningwelt ========================*/
 func openMiningwelt1(a fyne.App, inv *Inventory, mines []*Mine) {
 	w := a.NewWindow("Miningwelt 1")
-	w.Resize(fyne.NewSize(600, 400))
+	w.Resize(fyne.NewSize(1470, 765))
 	w.CenterOnScreen()
 
 	var objects []fyne.CanvasObject
-	xPositions := []float32{100, 250, 400}
-	y := float32(150)
+	xPositions := []float32{350, 650, 950}
+	y := float32(350)
 
-	hochPos := fyne.NewPos(225, 20)
+	hochPos := fyne.NewPos(700, 20)
 	hoch := canvas.NewImageFromFile("bild/LeiterHoch.png")
 	hoch.Move(hochPos)
-	hoch.Resize(fyne.NewSize(64, 64))
+	hoch.Resize(fyne.NewSize(100, 100))
 	hoch.FillMode = canvas.ImageFillContain
 
-	runterPos := fyne.NewPos(225, 300)
+	runterPos := fyne.NewPos(700, 600)
 	runter := canvas.NewImageFromFile("bild/LeiterRunter.png")
 	runter.Move(runterPos)
-	runter.Resize(fyne.NewSize(64, 64))
+	runter.Resize(fyne.NewSize(100, 100))
 	runter.FillMode = canvas.ImageFillContain
 
 	// Hintergrund
@@ -542,7 +543,7 @@ func openMiningwelt1(a fyne.App, inv *Inventory, mines []*Mine) {
 
 	player := canvas.NewImageFromFile("bild/player_down.png")
 	player.FillMode = canvas.ImageFillContain
-	player.Resize(fyne.NewSize(playerW, playerH))
+	player.Resize(fyne.NewSize(50, 100))
 	x, y := float32(50), float32(50)
 	player.Move(fyne.NewPos(x, y))
 
@@ -618,23 +619,23 @@ func openMiningwelt1(a fyne.App, inv *Inventory, mines []*Mine) {
 
 func openMiningwelt2(a fyne.App, inv *Inventory, mines []*Mine) {
 	w := a.NewWindow("Miningwelt 2")
-	w.Resize(fyne.NewSize(600, 400))
+	w.Resize(fyne.NewSize(1470, 765))
 	w.CenterOnScreen()
 
 	var objects []fyne.CanvasObject
-	xPositions := []float32{100, 250, 400}
-	y := float32(150)
+	xPositions := []float32{350, 650, 950}
+	y := float32(350)
 
-	hochPos := fyne.NewPos(225, 20)
+	hochPos := fyne.NewPos(700, 20)
 	hoch := canvas.NewImageFromFile("bild/LeiterHoch.png")
 	hoch.Move(hochPos)
-	hoch.Resize(fyne.NewSize(64, 64))
+	hoch.Resize(fyne.NewSize(100, 100))
 	hoch.FillMode = canvas.ImageFillContain
 
-	runterPos := fyne.NewPos(225, 300)
+	runterPos := fyne.NewPos(700, 600)
 	runter := canvas.NewImageFromFile("bild/LeiterRunter.png")
 	runter.Move(runterPos)
-	runter.Resize(fyne.NewSize(64, 64))
+	runter.Resize(fyne.NewSize(100, 100))
 	runter.FillMode = canvas.ImageFillContain
 
 	// Hintergrund
@@ -665,7 +666,7 @@ func openMiningwelt2(a fyne.App, inv *Inventory, mines []*Mine) {
 
 	player := canvas.NewImageFromFile("bild/player_down.png")
 	player.FillMode = canvas.ImageFillContain
-	player.Resize(fyne.NewSize(playerW, playerH))
+	player.Resize(fyne.NewSize(50, 100))
 	x, y := float32(50), float32(50)
 	player.Move(fyne.NewPos(x, y))
 
@@ -739,23 +740,23 @@ func openMiningwelt2(a fyne.App, inv *Inventory, mines []*Mine) {
 
 func openMiningwelt3(a fyne.App, inv *Inventory, mines []*Mine) {
 	w := a.NewWindow("Miningwelt 3")
-	w.Resize(fyne.NewSize(600, 400))
+	w.Resize(fyne.NewSize(1470, 765))
 	w.CenterOnScreen()
 
 	var objects []fyne.CanvasObject
-	xPositions := []float32{100, 250, 400}
-	y := float32(150)
+	xPositions := []float32{350, 650, 950}
+	y := float32(350)
 
-	hochPos := fyne.NewPos(225, 20)
+	hochPos := fyne.NewPos(700, 20)
 	hoch := canvas.NewImageFromFile("bild/LeiterHoch.png")
 	hoch.Move(hochPos)
-	hoch.Resize(fyne.NewSize(64, 64))
+	hoch.Resize(fyne.NewSize(100, 100))
 	hoch.FillMode = canvas.ImageFillContain
 
-	runterPos := fyne.NewPos(225, 300)
+	runterPos := fyne.NewPos(700, 600)
 	runter := canvas.NewImageFromFile("bild/LeiterRunter.png")
 	runter.Move(runterPos)
-	runter.Resize(fyne.NewSize(64, 64))
+	runter.Resize(fyne.NewSize(100, 100))
 	runter.FillMode = canvas.ImageFillContain
 
 	// Hintergrund
@@ -786,7 +787,7 @@ func openMiningwelt3(a fyne.App, inv *Inventory, mines []*Mine) {
 
 	player := canvas.NewImageFromFile("bild/player_down.png")
 	player.FillMode = canvas.ImageFillContain
-	player.Resize(fyne.NewSize(playerW, playerH))
+	player.Resize(fyne.NewSize(50, 100))
 	x, y := float32(50), float32(50)
 	player.Move(fyne.NewPos(x, y))
 
@@ -862,17 +863,17 @@ func openMiningwelt3(a fyne.App, inv *Inventory, mines []*Mine) {
 
 func openMiningwelt4(a fyne.App, inv *Inventory, mines []*Mine) {
 	w := a.NewWindow("Miningwelt 4")
-	w.Resize(fyne.NewSize(600, 400))
+	w.Resize(fyne.NewSize(1470, 765))
 	w.CenterOnScreen()
 
 	var objects []fyne.CanvasObject
-	xPositions := []float32{100, 250, 400}
-	y := float32(150)
+	xPositions := []float32{350, 650, 950}
+	y := float32(350)
 
-	hochPos := fyne.NewPos(225, 20)
+	hochPos := fyne.NewPos(700, 20)
 	hoch := canvas.NewImageFromFile("bild/LeiterHoch.png")
 	hoch.Move(hochPos)
-	hoch.Resize(fyne.NewSize(64, 64))
+	hoch.Resize(fyne.NewSize(100, 100))
 	hoch.FillMode = canvas.ImageFillContain
 
 	// Hintergrund
@@ -902,7 +903,7 @@ func openMiningwelt4(a fyne.App, inv *Inventory, mines []*Mine) {
 
 	player := canvas.NewImageFromFile("bild/player_down.png")
 	player.FillMode = canvas.ImageFillContain
-	player.Resize(fyne.NewSize(playerW, playerH))
+	player.Resize(fyne.NewSize(50, 100))
 	x, y := float32(50), float32(50)
 	player.Move(fyne.NewPos(x, y))
 
@@ -1200,7 +1201,7 @@ func openMineShop(a fyne.App, m *Mine, inv *Inventory) {
 	if m.Owned {
 		actionBtn.SetText("Upgrade Mine")
 	} else {
-		actionBtn.SetText(fmt.Sprintf("Kaufen (%d Geld)", m.Cost))
+		actionBtn.SetText(fmt.Sprintf("Kaufen für (%d Geld)", m.Cost))
 	}
 
 	centeredBox := container.NewCenter(actionBtn)
@@ -2196,7 +2197,10 @@ func openDungeon(a fyne.App, mainWindow fyne.Window, inv *Inventory) {
 	// Lebenspunkte des Spielers
 	playerHealth := 100
 	playerHealth = playerHealth / 10 * armorDefense[inv.Armor]
-	healthLabel := widget.NewLabel(fmt.Sprintf("%d", playerHealth))
+	// Statt widget.NewLabel
+	healthLabel := canvas.NewText(fmt.Sprintf("%d", playerHealth), color.White)
+	healthLabel.TextStyle = fyne.TextStyle{Bold: true}
+	healthLabel.Move(fyne.NewPos(150, 10))
 
 	// Container für Dungeon-Level-Buttons
 	levelButtonContainer := container.NewVBox()
@@ -2208,12 +2212,13 @@ func openDungeon(a fyne.App, mainWindow fyne.Window, inv *Inventory) {
 	bg := canvas.NewImageFromFile("bild/Dungeoneingang.png")
 	bg.FillMode = canvas.ImageFillStretch
 
+	// Statt widget.NewLabelWithStyle
+	title := canvas.NewText("Dungeon", color.White)
+	title.TextStyle = fyne.TextStyle{Bold: true}
+	title.Alignment = fyne.TextAlignCenter
+
 	content := container.NewVBox(
-		widget.NewLabelWithStyle(
-			"Dungeon",
-			fyne.TextAlignCenter,
-			fyne.TextStyle{Bold: true},
-		),
+		title,
 		levelButtonContainer,
 		widget.NewButton("Dungeon verlassen", closeDungeon),
 	)
@@ -2232,10 +2237,8 @@ func openDungeon(a fyne.App, mainWindow fyne.Window, inv *Inventory) {
 	})
 	w.Show()
 }
-
-// Ausgelagerte Level-Erstellungsfunktion
 func createLevel(a fyne.App, inv *Inventory, w fyne.Window, mainWindow fyne.Window, currentLevel *int,
-	levelButtonContainer *fyne.Container, healthLabel *widget.Label, playerHealth int, closeDungeon func()) {
+	levelButtonContainer *fyne.Container, healthText *canvas.Text, playerHealth int, closeDungeon func()) {
 
 	level := *currentLevel
 	levelName := fmt.Sprintf("Ebene %d", level)
@@ -2243,13 +2246,13 @@ func createLevel(a fyne.App, inv *Inventory, w fyne.Window, mainWindow fyne.Wind
 	adventureBtn := widget.NewButton(levelName, func() {
 		w.Hide()
 		w2 := a.NewWindow(levelName)
-		w2.Resize(fyne.NewSize(400, 300))
+		w2.Resize(fyne.NewSize(1470, 765))
 		w2.CenterOnScreen()
 
 		// Spieler erstellen
 		player := canvas.NewImageFromFile("bild/player_down.png")
 		player.FillMode = canvas.ImageFillContain
-		player.Resize(fyne.NewSize(playerW, playerH))
+		player.Resize(fyne.NewSize(50, 100))
 		x, y := float32(50), float32(500)
 		player.Move(fyne.NewPos(x, y))
 
@@ -2265,48 +2268,50 @@ func createLevel(a fyne.App, inv *Inventory, w fyne.Window, mainWindow fyne.Wind
 		background.Resize(fyne.NewSize(windowWidth, windowHeight))
 		background.Move(fyne.NewPos(0, 0))
 
-		objects := []fyne.CanvasObject{background, player, healthLabel}
+		// Setze Position des Health Texts
+		healthText.Move(fyne.NewPos(725, 10))
 
-		// Gegner erstellen
+		objects := []fyne.CanvasObject{background, player, healthText}
+
+		// Gegner-Typ
 		type Enemy struct {
 			Rect      *canvas.Image
 			Health    int
 			HealthBar *canvas.Rectangle
 			Name      string
-			NameLabel *widget.Label
+			NameLabel *canvas.Text
 			X, Y      float32
 			Speed     float32
 		}
 
+		// Gegner erstellen
 		numEnemies := level + 1
 		enemies := []*Enemy{}
 		for i := 0; i < numEnemies; i++ {
 			e := &Enemy{
 				Rect:   canvas.NewImageFromFile("bild/Gegner.png"),
 				Name:   "Magmamonster",
-				X:      float32(50 + i*60),
-				Y:      float32(50 + i*40),
+				X:      float32(rand.Intn(1420) + 50),
+				Y:      float32(rand.Intn(715) + 50),
 				Speed:  1 + float32(level)*0.5,
 				Health: 50 + level*10,
 			}
 
-			e.Rect.Resize(fyne.NewSize(50, 50))
+			e.Rect.Resize(fyne.NewSize(100, 100))
 			e.Rect.Move(fyne.NewPos(e.X, e.Y))
-			e.NameLabel = widget.NewLabel(e.Name)
-			e.NameLabel.Move(fyne.NewPos(
-				e.X-5,
-				e.Y-healthBarHeight-18, // über HealthBar
-			))
+			e.NameLabel = canvas.NewText(e.Name, color.White)
+			e.NameLabel.TextStyle = fyne.TextStyle{Bold: true}
+			e.NameLabel.Move(fyne.NewPos(e.X-5, e.Y-healthBarHeight-18))
 			e.NameLabel.Resize(e.NameLabel.MinSize())
+
 			e.HealthBar = canvas.NewRectangle(color.RGBA{255, 0, 0, 255})
 			e.HealthBar.Resize(fyne.NewSize(float32(e.Health)/10, healthBarHeight))
 			e.HealthBar.Move(fyne.NewPos(e.X-5, e.Y-e.HealthBar.Size().Height-2))
-			objects = append(objects, e.Rect, e.NameLabel, e.HealthBar)
+
+			objects = append(objects, e.Rect, e.HealthBar, e.NameLabel) // NameLabel zuletzt
 			enemies = append(enemies, e)
 		}
 
-		// Health Label oben positionieren
-		healthLabel.Move(fyne.NewPos(150, 10))
 		w2.SetContent(container.NewWithoutLayout(objects...))
 
 		// Spielerbewegung
@@ -2316,7 +2321,6 @@ func createLevel(a fyne.App, inv *Inventory, w fyne.Window, mainWindow fyne.Wind
 			"left":  "bild/LaufenLinks.png",
 			"right": "bild/LaufenRechts.png",
 		}
-
 		currentDir := "down"
 
 		w2.Canvas().SetOnTypedKey(func(k *fyne.KeyEvent) {
@@ -2324,15 +2328,12 @@ func createLevel(a fyne.App, inv *Inventory, w fyne.Window, mainWindow fyne.Wind
 			case fyne.KeyUp:
 				y -= speed
 				currentDir = "up"
-
 			case fyne.KeyDown:
 				y += speed
 				currentDir = "down"
-
 			case fyne.KeyLeft:
 				x -= speed
 				currentDir = "left"
-
 			case fyne.KeyRight:
 				x += speed
 				currentDir = "right"
@@ -2342,8 +2343,10 @@ func createLevel(a fyne.App, inv *Inventory, w fyne.Window, mainWindow fyne.Wind
 				return
 			}
 
-			x = clamp(x, 0, 400-playerW)
-			y = clamp(y, 0, 300-playerH)
+			x = clamp(x, 0, 1470-playerW)
+			y = clamp(y, 0, 765-playerH)
+
+			// Main Thread: UI-Update mit canvas.Refresh
 			player.Move(fyne.NewPos(x, y))
 			player.File = playerSprites[currentDir]
 			player.Refresh()
@@ -2351,29 +2354,35 @@ func createLevel(a fyne.App, inv *Inventory, w fyne.Window, mainWindow fyne.Wind
 			healthBar.Move(fyne.NewPos(x-5, y-healthBarHeight-2))
 			healthBar.Resize(fyne.NewSize(healthBarWidth, healthBarHeight))
 			healthBar.Refresh()
-			healthLabel.SetText(fmt.Sprintf("%d", int(healthBarWidth)))
+
+			healthText.Text = fmt.Sprintf("%d", int(healthBarWidth))
+			canvas.Refresh(healthText)
 		})
 
-		// Spieler-Health Ticker
+		// Spieler-Health-Ticker
 		ticker := time.NewTicker(1 * time.Second)
 		go func() {
 			for range ticker.C {
 				if healthBarWidth > 0 {
 					playerHealth -= 1
 					healthBarWidth = float32(playerHealth)
+
 					healthBar.Resize(fyne.NewSize(healthBarWidth, healthBarHeight))
 					healthBar.Refresh()
-					healthLabel.SetText(fmt.Sprintf("%d", int(healthBarWidth)))
-				}
-				if healthBarWidth <= 0 {
-					healthLabel.SetText("Du bist gestorben!")
+
+					healthText.Text = fmt.Sprintf("%d", int(healthBarWidth))
+					canvas.Refresh(healthText)
+				} else {
 					ticker.Stop()
-					time.Sleep(2 * time.Second)
-					w2.Close()
-					closeDungeon()
+					healthText.Text = "Du bist gestorben!"
+					canvas.Refresh(healthText)
+
+					time.AfterFunc(2*time.Second, func() {
+						w2.Close()
+						closeDungeon()
+					})
 					return
 				}
-				time.Sleep(2 * time.Second)
 			}
 		}()
 
@@ -2381,48 +2390,50 @@ func createLevel(a fyne.App, inv *Inventory, w fyne.Window, mainWindow fyne.Wind
 		go func() {
 			for {
 				allEnemiesDead := true
-				for _, e := range enemies {
+				for _, enemy := range enemies {
+					e := enemy
 					distance := math.Sqrt(float64((x-e.X)*(x-e.X) + (y-e.Y)*(y-e.Y)))
+
 					if distance < 50 && e.Health > 0 {
 						e.Health -= 10 * swordAttack[inv.Sword]
 						e.HealthBar.Resize(fyne.NewSize(float32(e.Health)/10, healthBarHeight))
 						e.HealthBar.Refresh()
 					}
+
 					if e.Health > 0 {
 						allEnemiesDead = false
-					} else {
-						e.Rect.Refresh()
-						e.NameLabel.SetText("☠")
+					} else if e.NameLabel.Text != "☠" {
+						e.NameLabel.Text = "☠"
+						e.NameLabel.TextSize = 24
+						canvas.Refresh(e.NameLabel)
+						e.Rect.Hide()
+						e.HealthBar.Hide()
 					}
 				}
 
 				if allEnemiesDead {
-					// Spieler hat gewonnen
 					ticker.Stop()
 					inv.Kristalle += 1 * (inv.Wiedergeburten + 1) * level
 
-					// Spielerleben zurücksetzen
 					playerHealth = 100 / 10 * armorDefense[inv.Armor]
-					healthLabel.SetText(fmt.Sprintf("%d", playerHealth))
-					healthLabel.SetText("Du hast Gewonnen!")
+					healthText.Text = "Du hast Gewonnen!"
+					canvas.Refresh(healthText)
 
-					time.Sleep(2 * time.Second)
-					w2.Close()
-					w.Show() // zurück zum Dungeon-Hauptfenster
-
-					// Nächste Ebene als Button hinzufügen, aber nicht direkt starten
-					*currentLevel++
-					createLevel(a, inv, w, mainWindow, currentLevel, levelButtonContainer, healthLabel, playerHealth, closeDungeon)
+					time.AfterFunc(2*time.Second, func() {
+						w2.Close()
+						w.Show()
+						*currentLevel++
+						createLevel(a, inv, w, mainWindow, currentLevel, levelButtonContainer, healthText, playerHealth, closeDungeon)
+					})
 					return
 				}
-
 				time.Sleep(1 * time.Second)
 			}
 		}()
+
 		w2.Show()
 	})
 
-	// Button zum Dungeon-Fenster hinzufügen
 	levelButtonContainer.Add(adventureBtn)
 	levelButtonContainer.Refresh()
 }
