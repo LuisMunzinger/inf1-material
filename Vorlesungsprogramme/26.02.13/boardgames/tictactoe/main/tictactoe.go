@@ -1,8 +1,8 @@
 package main
 
 import (
-	"boardgames/tictactoe"
 	"fmt"
+	"inf1-material/Vorlesungsprogramme/26.02.13/boardgames/tictactoe"
 )
 
 func main() {
