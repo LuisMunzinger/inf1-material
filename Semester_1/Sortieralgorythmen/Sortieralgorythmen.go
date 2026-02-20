@@ -109,7 +109,7 @@ func partition(arr []int, low, high int) int {
 
 //--------------------------------------------------------------------------------------------
 func main() {
-	arr := []int{64, 25, 12, 22, 11}
+	arr := []int{80, 25, 12, 22, 11}
 	selectionSort(arr)
 	fmt.Println("Selectionsort:", arr)
 	insertionSort(arr)
