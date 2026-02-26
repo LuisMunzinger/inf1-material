@@ -16,15 +16,16 @@ MAX. PUNKTE: 10
 // Die Elemente aus l1 kommen vor denen aus l2 in der Ergebnisliste vor.
 func SymmetricDifference(l1, l2 []int) []int {
 	ergebnis := []int{}
-	
-	for i := 0, i < len(l1), i++{
-		if slices.Contains(l2,l1[i]) == false{
-			ergebnis = append(ergebnis,l1[i])
+
+	for i := 0; i < len(l1); i++ {
+		if slices.Contains(l2, l1[i]) == false {
+			ergebnis = append(ergebnis, l1[i])
 		}
 	}
-	for i := 0, i < len(l2), i++{
-		if slices.Contains(l1,l2[i]) == false{
-			ergebnis = append(ergebnis,l2[i])
+
+	for i := 0; i < len(l2); i++ {
+		if slices.Contains(l1, l2[i]) == false {
+			ergebnis = append(ergebnis, l2[i])
 		}
 	}
 	return ergebnis
