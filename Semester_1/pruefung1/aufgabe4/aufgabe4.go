@@ -16,11 +16,11 @@ func MaxElements(l1, l2 []int) []int {
 	}
 	if len(l1) == 0 {
 		ergebnis = append(ergebnis, l2[0])
-		MaxElements(l1[1:], l2[1:])
+		MaxElements(l1, l2[:1])
 	}
 	if len(l2) == 0 {
 		ergebnis = append(ergebnis, l1[0])
-		MaxElements(l1[1:], l2[1:])
+		MaxElements(l1[:1], l2)
 	}
 	if l1[0] > l2[0] {
 		ergebnis = append(ergebnis, l1[0])
