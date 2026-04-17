@@ -2,25 +2,41 @@ package element
 
 // Append fügt ein neues Element mit dem gegebenen Wert am Ende der Liste ein.
 func (e *Element) Append(value int) {
-	// TODO
+	if e.IsEmpty() {
+		e.SetValue(value)
+	} else {
+		e.next.Append(value)
+	}
 }
 
 // Length gibt die Anzahl der Elemente in der Liste zurück.
 func (e *Element) Length() int {
-	// TODO
-	return 0
+	if e.IsEmpty() {
+		return 0
+	}
+	return e.Next().Length() + 1
 }
 
 // Contains gibt an, ob ein Element mit dem gegebenen Wert in der Liste enthalten ist.
 func (e *Element) Contains(value int) bool {
-	// TODO
-	return false
+	if e.IsEmpty() {
+		return false
+	}
+	if e.value == value {
+		return true
+	}
+	return e.Next().Contains(value)
 }
 
 // Count gibt die Anzahl der Elemente in der Liste zurück, die den gegebenen Wert enthalten.
 func (e *Element) Count(value int) int {
-	// TODO
-	return 0
+	if e.IsEmpty() {
+		return 0
+	}
+	if e.value != value {
+		e.Next().Count(value)
+	}
+	return e.Next().Count(value) + 1
 }
 
 // Sum berechnet die Summe der Werte aller Elemente in der Liste.
