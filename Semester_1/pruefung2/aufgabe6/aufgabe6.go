@@ -12,6 +12,22 @@ package aufgabe6
 // ins Ergebnis übertragen werden.
 func DuplicateSinglets(list []int) []int {
 	result := []int{}
-	// TODO
+
+	for i := 0; i < len(list); i++ {
+		count := 0
+		// Häufigkeit von list[i] bestimmen
+		for j := 0; j < len(list); j++ {
+			if list[j] == list[i] {
+				count++
+			}
+		}
+		if count == 1 {
+			// einmaliges Element → doppelt anhängen
+			result = append(result, list[i], list[i])
+		} else {
+			// mehrfaches Element → normal übernehmen
+			result = append(result, list[i])
+		}
+	}
 	return result
 }

@@ -1,5 +1,7 @@
 package aufgabe2
 
+import "unicode"
+
 /* AUFGABENSTELLUNG: Vervollständigen Sie unten stehende Funktion.
  * ERREICHBARE PUNKTE: 10
  */
@@ -9,6 +11,10 @@ package aufgabe2
 // Alle anderen Zeichen sollen unverändert bleiben.
 func FilterDigits(s string) string {
 	result := ""
-	// TODO
+	for _, r := range s {
+		if !unicode.IsDigit(r) {
+			result += string(r)
+		}
+	}
 	return result
 }
