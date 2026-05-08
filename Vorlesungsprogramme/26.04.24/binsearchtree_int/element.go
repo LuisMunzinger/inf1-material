@@ -1,8 +1,6 @@
-package bintree_int
+package binsearchtree_int
 
-import (
-	"bintree_int"
-)
+import "inf1-material/Vorlesungsprogramme/26.04.24/bintree_int"
 
 // Diese Datei definiert die Element-Struktur für einen binären Suchbaum,
 // der Integer-Werte speichert. Sie erweitert die grundlegende Element-Struktur

@@ -1,4 +1,4 @@
-package bintree_int
+package binsearchtree_int
 
 import "testing"
 

@@ -2,27 +2,6 @@ package bintree_int
 
 import "testing"
 
-func TestElement_IsComplete(t *testing.T) {
-	root := New(1)
-	root.left = New(2)
-	root.right = New(3)
-	root.left.left = New(4)
-
-	if !root.IsComplete() {
-		t.Errorf("Expected root to be complete.")
-	}
-
-	root.left.right = New(5)
-	if !root.IsComplete() {
-		t.Errorf("Expected root to still be complete after adding root.left.right.")
-	}
-
-	root.right.right = New(7)
-	if root.IsComplete() {
-		t.Errorf("Expected root not to be complete after adding root.right.right.")
-	}
-}
-
 func TestElement_IsPerfect(t *testing.T) {
 	root := New(1)
 	root.left = New(2)
@@ -42,6 +21,27 @@ func TestElement_IsPerfect(t *testing.T) {
 	root.right.right = New(7)
 	if !root.IsPerfect() {
 		t.Errorf("Expected root to be perfect after adding all children.")
+	}
+}
+
+func TestElement_IsComplete(t *testing.T) {
+	root := New(1)
+	root.left = New(2)
+	root.right = New(3)
+	root.left.left = New(4)
+
+	if !root.IsComplete() {
+		t.Errorf("Expected root to be complete.")
+	}
+
+	root.left.right = New(5)
+	if !root.IsComplete() {
+		t.Errorf("Expected root to still be complete after adding root.left.right.")
+	}
+
+	root.right.right = New(7)
+	if root.IsComplete() {
+		t.Errorf("Expected root not to be complete after adding root.right.right.")
 	}
 }
 
