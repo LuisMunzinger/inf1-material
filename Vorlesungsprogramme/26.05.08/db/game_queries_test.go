@@ -15,7 +15,7 @@ func TestGameDb_GetPlayedGames(t *testing.T) {
 
 	expectedTitles := map[string]bool{
 		"The Legend of Zelda": true,
-		"Tomb Raider":         true,
+		"Minecraft":           true,
 	}
 
 	for _, g := range games {

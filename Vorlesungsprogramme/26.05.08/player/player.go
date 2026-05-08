@@ -23,11 +23,8 @@ func (p *Player) PlayGame(g *game.Game, hours int) {
 
 // HasPlayed prüft, ob der Spieler ein bestimmtes Spiel gespielt hat.
 func (p *Player) HasPlayed(g *game.Game) bool {
-	player := p.playedGames
-	titel := p.playedGames["Titel"]
-
-	for _, i := range player {
-		if player[] == titel {
+	for titel := range p.playedGames {
+		if titel == g.Title {
 			return true
 		}
 	}
@@ -36,7 +33,11 @@ func (p *Player) HasPlayed(g *game.Game) bool {
 
 // HasPlayedMore prüft, ob der Spieler ein bestimmtes Spiel mindestens `hours` Stunden gespielt hat.
 func (p *Player) HasPlayedMore(g *game.Game, hours int) bool {
-	// TODO
+	for stunden := range p.playedGames[g.Title] {
+		if stunden == hours {
+			return true
+		}
+	}
 	return false
 }
 
@@ -44,6 +45,10 @@ func (p *Player) HasPlayedMore(g *game.Game, hours int) bool {
 // Spieler mehr als `hours` Stunden gespielt hat.
 func (p *Player) PlayedGames(hours int) []string {
 	games := []string{}
-	// TODO
+	for Name, game := range p.playedGames {
+		if game >= hours {
+			games = append(games, Name)
+		}
+	}
 	return games
 }
