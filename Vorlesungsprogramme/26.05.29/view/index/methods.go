@@ -7,19 +7,18 @@ import (
 
 // Insert fügt einen neuen Benutzer in den Index ein.
 func (idx *Index) Insert(u *user.User) {
-	// TODO
+	//TODO
 }
 
 // Find sucht einen Benutzer im Index anhand eines Schlüssels.
 func (idx *Index) Find(key string) *element.Element {
 	// TODO
-
 	return nil
 }
 
 // List liefert alle Benutzer im Index in sortierter Reihenfolge.
 func (idx *Index) List() []*user.User {
-	// TODO
+	//TODO
 	return nil
 }
 

@@ -23,5 +23,5 @@ func New(id string, nickname string, name string, surname string) *User {
 
 // AddContact fügt einen Kontakt zur Kontaktliste des Benutzers hinzu.
 func (u *User) AddContact(contactID string) {
-	// TODO
+	u.Contacts = append(u.Contacts, contactID)
 }

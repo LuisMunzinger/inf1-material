@@ -18,5 +18,5 @@ func New() *Database {
 
 // AddUser fügt einen neuen Benutzer zur Datenbank hinzu.
 func (db *Database) AddUser(u *user.User) {
-	// TODO
+	db.Users = append(db.Users, u)
 }

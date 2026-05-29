@@ -10,7 +10,7 @@ import (
 func (db *Database) GetDirectContacts(id string) []user.User {
 	result := []user.User{}
 
-	// TODO
+	//TODO
 
 	return result
 }

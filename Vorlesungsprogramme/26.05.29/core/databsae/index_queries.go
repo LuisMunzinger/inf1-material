@@ -35,12 +35,24 @@ func (db *Database) UsersByNickname() *index.Index {
 
 // UsersByName Gibt einen Index zurück, der Benutzer anhand ihrer Namen sortiert.
 func (db *Database) UsersByName() *index.Index {
-	// TODO
-	return nil
+
+	idx := index.ByName()
+
+	for _, u := range db.Users {
+		idx.Insert(u)
+	}
+
+	return idx
 }
 
 // UsersBySurname Gibt einen Index zurück, der Benutzer anhand ihrer Nachnamen sortiert.
 func (db *Database) UsersBySurname() *index.Index {
-	// TODO
-	return nil
+
+	idx := index.BySurname()
+
+	for _, u := range db.Users {
+		idx.Insert(u)
+	}
+
+	return idx
 }
