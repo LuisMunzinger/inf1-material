@@ -13,11 +13,12 @@ func CheckAddEdge[G GraphRepr](emptyGraph func() G, t *testing.T) {
 
 	// Füge zwei Kanten hinzu.
 	g.AddEdge(0, 1, 5)
+	g.AddEdge(0, 2, 3)
 	g.AddEdge(1, 2, 3)
 
 	// Überprüfe, ob die Kantenliste die hinzugefügten Kanten enthält.
 	edges := g.GetEdges()
-	expected := [][3]int{{0, 1, 5}, {1, 2, 3}}
+	expected := [][3]int{{0, 1, 5}, {0, 2, 3}, {1, 2, 3}}
 
 	AssertEdgesEqual(edges, expected, t)
 }
